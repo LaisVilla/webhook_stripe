@@ -1,0 +1,41 @@
+/* Importe o Tailwind */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* Adicione estas classes ao seu arquivo CSS */
+.profile-image-transition {
+    transition: all 0.3s ease-in-out;
+}
+
+.profile-image-hover:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4);
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

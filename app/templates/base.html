@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    
+    <!-- Tailwind CSS e outros estilos -->
+    <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .nav-link {
+            @apply border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-3 pt-1 border-b-2 text-sm font-medium transition-colors duration-200;
+        }
+        
+        .nav-link.active {
+            @apply border-indigo-500 text-gray-900;
+        }
+        
+        .btn {
+            @apply px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200;
+        }
+        
+        .btn-primary {
+            @apply bg-indigo-600 text-white hover:bg-indigo-700;
+        }
+        
+        .btn-secondary {
+            @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <!-- Left side -->
+                <div class="flex items-center">
+                    <!-- Menu Icon -->
+                    <button class="p-2 rounded-md hover:bg-gray-100 lg:hidden">
+                        <i class="lucide lucide-menu h-6 w-6 text-gray-600"></i>
+                    </button>
+                    
+                    <!-- Logo/Brand -->
+                    <a href="{{ url_for('main.index') }}" class="flex items-center space-x-2 ml-2 lg:ml-0">
+                        <i class="lucide lucide-brain-circuit h-8 w-8 text-indigo-600"></i>
+                        <span class="font-bold text-gray-900">AI Assistant</span>
+                    </a>
+                </div>
+
+                <!-- Right side -->
+                <div class="flex items-center justify-end flex-1">
+                    {% if session.get('user_id') %}
+                        <!-- User Profile -->
+                        <div class="flex items-center space-x-4">
+                            <!-- Data/Hora UTC -->
+                            <div class="hidden lg:block text-sm text-gray-500">
+                                <i class="lucide lucide-clock h-4 w-4 inline-block"></i>
+                                <span>{{ '2025-02-10 21:02:39' }}</span>
+                            </div>
+
+                            <!-- User Info -->
+                            <div class="text-sm">
+                                <p class="text-gray-900 font-medium flex items-center">
+                                    <i class="lucide lucide-user h-4 w-4 mr-1"></i>
+                                    {{ session.get('user_name', 'LaisVilla') }}
+                                </p>
+                                <p class="text-gray-500 text-xs">
+                                    Requests remaining: {{ session.get('requests_remaining', '...') }}
+                                </p>
+                            </div>
+
+                            <!-- Profile Dropdown -->
+                            <div class="relative ml-4">
+                                <button class="flex items-center space-x-2 p-2 rounded-full hover:bg-gray-100">
+                                    <div class="relative">
+                                        <img class="h-10 w-10 rounded-full object-cover border-2 border-indigo-200"
+                                             src="{% if session.get('profile_image') %}{{ url_for('static', filename=session.get('profile_image')) }}{% else %}https://ui-avatars.com/api/?name=LaisVilla&background=random{% endif %}"
+                                             alt="Profile">
+                                        <span class="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-green-400 border-2 border-white"></span>
+                                    </div>
+                                    <i class="lucide lucide-chevron-down h-4 w-4 text-gray-500"></i>
+                                </button>
+
+                                <!-- Dropdown Menu -->
+                                <div class="hidden absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg py-1 ring-1 ring-black ring-opacity-5">
+                                    <!-- User Profile Header -->
+                                    <div class="px-4 py-3 border-b border-gray-100">
+                                        <div class="flex items-center space-x-3">
+                                            <img class="h-12 w-12 rounded-full object-cover"
+                                                 src="{% if session.get('profile_image') %}{{ url_for('static', filename=session.get('profile_image')) }}{% else %}https://ui-avatars.com/api/?name=LaisVilla&background=random{% endif %}"
+                                                 alt="Profile">
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-900">{{ session.get('user_name', 'LaisVilla') }}</p>
+                                                <p class="text-xs text-gray-500">{{ session.get('user_email', '') }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Menu Items -->
+                                    <div class="py-1">
+                                        <!-- Profile Settings -->
+                                        {# <a href="{{ url_for('main.profile_settings') }}"  #}
+                                        <a href="#" 
+                                           class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                            <i class="lucide lucide-user-cog h-4 w-4 mr-3 text-gray-400"></i>
+                                            Configurações de Perfil
+                                        </a>
+
+                                        <!-- Account Settings -->
+                                        {# <a href="{{ url_for('main.profile_settings') }}#account"  #}
+                                        <a href="#" 
+                                           class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                            <i class="lucide lucide-settings h-4 w-4 mr-3 text-gray-400"></i>
+                                            Configurações da Conta
+                                        </a>
+
+                                        <!-- Usage Statistics -->
+                                        {# <a href="{{ url_for('main.profile_settings') }}#usage"  #}
+                                        <a href="#" 
+                                           class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                            <i class="lucide lucide-activity h-4 w-4 mr-3 text-gray-400"></i>
+                                            Estatísticas de Uso
+                                        </a>
+                                    </div>
+
+                                    <!-- Separator -->
+                                    <div class="border-t border-gray-100 my-1"></div>
+
+                                    <!-- Help & Logout -->
+                                    <div class="py-1">
+                                        <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                            <i class="lucide lucide-help-circle h-4 w-4 mr-3 text-gray-400"></i>
+                                            Ajuda e Suporte
+                                        </a>
+                                        <a href="{{ url_for('main.logout') }}" 
+                                           class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                            <i class="lucide lucide-log-out h-4 w-4 mr-3 text-red-500"></i>
+                                            Sair
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="flex items-center space-x-4">
+                            <a href="{{ url_for('main.login') }}" class="btn btn-secondary">
+                                <i class="lucide lucide-log-in h-4 w-4 mr-1"></i>
+                                Login
+                            </a>
+                            <a href="{{ url_for('main.register') }}" class="btn btn-primary">
+                                <i class="lucide lucide-user-plus h-4 w-4 mr-1"></i>
+                                Register
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-4 p-4 rounded-lg flex items-center {% if category == 'success' %}bg-green-50 text-green-700{% elif category == 'danger' %}bg-red-50 text-red-700{% else %}bg-blue-50 text-blue-700{% endif %}">
+                        <i class="lucide {% if category == 'success' %}lucide-check-circle{% elif category == 'danger' %}lucide-alert-circle{% else %}lucide-info{% endif %} h-5 w-5 mr-2"></i>
+                        {{ message }}
+                        <button class="ml-auto" onclick="this.parentElement.remove()">
+                            <i class="lucide lucide-x h-4 w-4"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t mt-auto">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center">
+                <p class="text-gray-500 text-sm">
+                    © 2025 AI Assistant. All rights reserved.
+                </p>
+                <div class="text-gray-400 text-sm">
+                    <span>{{ '2025-02-10 20:53:50' }}</span>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-gray-500">
+                        <i class="lucide lucide-github h-5 w-5"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-gray-500">
+                        <i class="lucide lucide-twitter h-5 w-5"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Inicializar ícones Lucide
+        lucide.createIcons();
+
+        // Toggle do menu dropdown melhorado
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileButton = document.querySelector('.rounded-full');
+            const dropdown = profileButton?.nextElementSibling;
+            
+            if (profileButton && dropdown) {
+                // Toggle do dropdown ao clicar no botão
+                profileButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdown.classList.toggle('hidden');
+                });
+
+                // Fechar dropdown ao clicar em qualquer lugar fora
+                document.addEventListener('click', function(e) {
+                    if (!dropdown.contains(e.target) && !profileButton.contains(e.target)) {
+                        dropdown.classList.add('hidden');
+                    }
+                });
+
+                // Fechar dropdown ao pressionar ESC
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        dropdown.classList.add('hidden');
+                    }
+                });
+            }
+        });
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

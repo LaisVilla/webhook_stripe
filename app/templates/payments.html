@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payments</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .container {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        .plan {
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .plan input {
+            margin-right: 10px;
+        }
+        .card-test {
+            margin-top: 20px;
+        }
+        .card-test p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Assinatura</h1>
+        <p>Tenha acesso a todos os recursos</p>
+
+        <form action="{{ url_for('main.payments') }}" method="post">
+            <label for="email">Endereço de Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            {% for plan_id, plan in plans.items() %}
+            <div class="plan">
+                <input type="radio" id="{{ plan_id }}" name="plan_id" value="{{ plan_id }}">
+                <label for="{{ plan_id }}">{{ plan.name }} - ${{ plan.price / 100 }}</label>
+                <p>{{ plan.description }}</p>
+            </div>
+            {% endfor %}
+            
+            <button type="submit">Assinar Agora</button>
+        </form>
+    </div>
+</body>
+</html>

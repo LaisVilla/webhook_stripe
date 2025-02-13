@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}Configurações de Perfil{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <!-- Cabeçalho -->
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-gray-900">Configurações de Perfil</h1>
+        <p class="mt-1 text-sm text-gray-500">
+            Atualize suas informações e foto de perfil
+        </p>
+    </div>
+
+    <!-- Card Principal -->
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <!-- Seção da Foto -->
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex items-center space-x-6">
+                <div class="relative">
+                    <img id="profile-image" 
+                         class="h-24 w-24 rounded-full object-cover border-2 border-indigo-200"
+                         src="{% if user_data.profile_image %}{{ user_data.profile_image }}{% else %}https://ui-avatars.com/api/?name={{ user_data.name|urlencode }}&background=random{% endif %}"
+                         alt="Profile">
+                    <button id="change-photo" 
+                            class="absolute bottom-0 right-0 bg-indigo-600 text-white p-2 rounded-full shadow-lg hover:bg-indigo-700 transition-colors">
+                        <i class="lucide lucide-camera h-4 w-4"></i>
+                    </button>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900">Foto de Perfil</h3>
+                    <p class="text-sm text-gray-500">PNG, JPG até 5MB</p>
+                    <!-- Status do usuário -->
+                    <span class="inline-flex items-center mt-2 px-2.5 py-0.5 rounded-full text-xs font-medium {% if user_data.subscription_status == 'active' %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                        {{ user_data.subscription_status|title }}
+                    </span>
+                </div>
+            </div>
+            <!-- Input file oculto -->
+            <input type="file" 
+                   id="profile-image-input" 
+                   accept="image/*" 
+                   class="hidden">
+        </div>
+
+        <!-- Formulário -->
+        <form method="POST" class="p-6 space-y-6">
+            <!-- Nome -->
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700">Nome</label>
+                <input type="text" 
+                       name="name" 
+                       id="name" 
+                       value="{{ user_data.name }}"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            </div>
+
+            <!-- Email (readonly) -->
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" 
+                       id="email" 
+                       value="{{ user_data.email }}"
+                       class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm" 
+                       readonly>
+            </div>
+
+            <!-- Telefone -->
+            <div>
+                <label for="phone" class="block text-sm font-medium text-gray-700">Telefone</label>
+                <input type="tel" 
+                       name="phone" 
+                       id="phone" 
+                       value="{{ user_data.phone }}"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            </div>
+
+            <!-- Informações adicionais -->
+            <div class="bg-gray-50 rounded-lg p-4">
+                <div class="flex items-center justify-between text-sm text-gray-500">
+                    <div>Último acesso: {{ user_data.last_login|default('N/A') }}</div>
+                    <div>Requests disponíveis: {{ user_data.requests_remaining|default('0') }}</div>
+                </div>
+            </div>
+
+            <!-- Botões -->
+            <div class="flex justify-end space-x-3 pt-4">
+                <a href="{{ url_for('main.index') }}" 
+                   class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Cancelar
+                </a>
+                <button type="submit" 
+                        class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Salvar Alterações
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+    <div class="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const changePhotoBtn = document.getElementById('change-photo');
+    const fileInput = document.getElementById('profile-image-input');
+    const profileImage = document.getElementById('profile-image');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const form = document.querySelector('form');
+
+    // Handler para o formulário
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        loadingOverlay.classList.remove('hidden');
+
+        try {
+            const formData = new FormData(form);
+            const response = await fetch(window.location.href, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                throw new Error('Erro ao salvar alterações');
+            }
+        } catch (error) {
+            alert(error.message);
+        } finally {
+            loadingOverlay.classList.add('hidden');
+        }
+    });
+
+    // Handler para upload de imagem
+    changePhotoBtn.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', async function() {
+        const file = this.files[0];
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Arquivo muito grande. Máximo 5MB.');
+            return;
+        }
+
+        if (!file.type.match('image.*')) {
+            alert('Por favor, selecione apenas imagens.');
+            return;
+        }
+
+        try {
+            loadingOverlay.classList.remove('hidden');
+
+            const formData = new FormData();
+            formData.append('profile_image', file);
+
+            const response = await fetch('{{ url_for("main.upload_profile_image") }}', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Atualizar imagem na página
+                profileImage.src = data.image_url;
+                
+                // Atualizar imagem no header
+                const headerProfileImage = document.querySelector('nav img.rounded-full');
+                if (headerProfileImage) {
+                    headerProfileImage.src = data.image_url;
+                }
+
+                // Mostrar mensagem de sucesso
+                const toast = document.createElement('div');
+                toast.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transition-opacity duration-500';
+                toast.textContent = 'Imagem atualizada com sucesso!';
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 500);
+                }, 3000);
+            } else {
+                throw new Error(data.error);
+            }
+        } catch (error) {
+            alert('Erro ao fazer upload: ' + error.message);
+        } finally {
+            loadingOverlay.classList.add('hidden');
+        }
+    });
+});
+</script>
+{% endblock %}

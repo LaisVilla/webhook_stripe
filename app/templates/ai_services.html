@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}AI Services{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <!-- Verificação de autenticação e assinatura -->
+    {% if not session.get('user_id') %}
+        <div class="text-center p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Please login to access AI Services</h2>
+            <a href="{{ url_for('main.login') }}" 
+               class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Login
+            </a>
+        </div>
+    {% elif session.get('subscription_status') != 'active' %}
+        <div class="text-center p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Active subscription required</h2>
+            <p class="text-gray-600 mb-4">Please subscribe to access AI Services</p>
+            <a href="{{ url_for('main.payments') }}" 
+               class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Subscribe Now
+            </a>
+        </div>
+    {% else %}
+        <!-- Header -->
+        <div class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">AI Assistant</h1>
+            <p class="text-gray-600">Como posso ajudar você hoje?</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <!-- Input Form -->
+            <form id="aiForm" action="{{ url_for('main.ai_services') }}" method="post" class="mb-6">
+                <div class="mb-4">
+                    <label for="user_input" class="block text-sm font-medium text-gray-700 mb-2">
+                        Digite sua mensagem:
+                    </label>
+                    <textarea 
+                        id="user_input" 
+                        name="user_input" 
+                        rows="4" 
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="Digite sua pergunta aqui..."
+                    ></textarea>
+                </div>
+
+                <div class="flex justify-end">
+                    <button 
+                        type="submit" 
+                        id="submitButton"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                        <span id="buttonText">Enviar</span>
+                        <i id="loadingIcon" class="fas fa-spinner fa-spin ml-2 hidden"></i>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Loading State -->
+            <div id="loadingState" class="hidden mb-6">
+                <div class="animate-pulse space-y-4">
+                    <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div class="space-y-2">
+                        <div class="h-4 bg-gray-200 rounded"></div>
+                        <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            {% if error %}
+            <div class="mb-6 bg-red-50 border-l-4 border-red-400 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-circle text-red-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-700">{{ error }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- AI Response -->
+            {% if response %}
+            <div id="responseSection" class="mt-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-3">Resposta:</h2>
+                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <p class="text-gray-700 whitespace-pre-wrap typing-animation">{{ response }}</p>
+                </div>
+                <div class="mt-4 flex justify-end space-x-2">
+                    <button 
+                        onclick="copyToClipboard()"
+                        class="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                        <i class="fas fa-copy mr-2"></i>
+                        Copiar
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Form submission handling
+    document.getElementById('aiForm')?.addEventListener('submit', function(e) {
+        const submitButton = document.getElementById('submitButton');
+        const buttonText = document.getElementById('buttonText');
+        const loadingIcon = document.getElementById('loadingIcon');
+        const loadingState = document.getElementById('loadingState');
+        
+        // Show loading state
+        submitButton.disabled = true;
+        buttonText.textContent = 'Processando...';
+        loadingIcon.classList.remove('hidden');
+        loadingState.classList.remove('hidden');
+    });
+
+    // Copy to clipboard function
+    function copyToClipboard() {
+        const response = document.querySelector('#responseSection p').textContent;
+        navigator.clipboard.writeText(response).then(() => {
+            alert('Resposta copiada para a área de transferência!');
+        }).catch(err => {
+            console.error('Erro ao copiar texto: ', err);
+            alert('Erro ao copiar texto. Por favor, tente novamente.');
+        });
+    }
+
+    // Auto-resize textarea
+    const textarea = document.getElementById('user_input');
+    textarea?.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+</script>
+{% endblock %}

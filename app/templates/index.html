@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistente de IA - Plataforma</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #6366F1;
+            --primary-hover: #4F46E5;
+            --background: #F9FAFB;
+            --card-background: #FFFFFF;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --success-color: #10B981;
+            --warning-color: #F59E0B;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: var(--card-background);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            color: var(--text-primary);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #6366F1, #4F46E5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .ai-assistant-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .user-section {
+            padding: 2rem;
+            background: #F8FAFC;
+            border-radius: 16px;
+        }
+
+        .features-section {
+            padding: 2rem;
+            background: #F0F7FF;
+            border-radius: 16px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin: 1rem 0;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .feature-icon {
+            margin-right: 1rem;
+            color: var(--primary-color);
+            font-size: 1.25rem;
+        }
+
+        .subscription-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            margin-top: 1rem;
+        }
+
+        .status-active {
+            background-color: #DCFCE7;
+            color: #166534;
+        }
+
+        .status-inactive {
+            background-color: #FFF1F2;
+            color: #BE123C;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #6366F1, #4F46E5);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            margin-top: 1.5rem;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .user-info {
+            margin: 1.5rem 0;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            margin: 0.75rem 0;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+            min-width: 120px;
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .welcome-message {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .content-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <i class="fas fa-robot ai-assistant-icon"></i>
+            <h1>Assistente de IA</h1>
+            <p>Seu assistente pessoal de inteligência artificial</p>
+        </div>
+
+        {% if user_data %}
+            <div class="content-wrapper">
+                <div class="user-section">
+                    <h2>Sua Conta</h2>
+                    <div class="user-info">
+                        <div class="info-item">
+                            <span class="info-label">Nome</span>
+                            <span class="info-value">{{ user_data.name }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">E-mail</span>
+                            <span class="info-value">{{ user_data.email }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Telefone</span>
+                            <span class="info-value">{{ user_data.phone }}</span>
+                        </div>
+                    </div>
+                    <div class="subscription-status {% if user_data.subscription_status == 'Ativo' %}status-active{% else %}status-inactive{% endif %}">
+                        <i class="fas {% if user_data.subscription_status == 'Ativo' %}fa-check-circle{% else %}fa-clock{% endif %} mr-2"></i>
+                        Status da Assinatura: {{ user_data.subscription_status }}
+                    </div>
+                    {% if user_data.subscription_status != 'Ativo' %}
+                        <a href="{{ url_for('subscription.upgrade') }}" class="cta-button">
+                            <i class="fas fa-crown mr-2"></i>
+                            Assinar Agora
+                        </a>
+                    {% endif %}
+                </div>
+                <div class="features-section">
+                    <h2>Recursos do Assistente</h2>
+                    <div class="feature-item">
+                        <i class="feature-icon fas fa-brain"></i>
+                        <div>IA Avançada e Inteligente</div>
+                    </div>
+                    <div class="feature-item">
+                        <i class="feature-icon fas fa-bolt"></i>
+                        <div>Respostas em Tempo Real</div>
+                    </div>
+                    <div class="feature-item">
+                        <i class="feature-icon fas fa-lock"></i>
+                        <div>Conversas Seguras</div>
+                    </div>
+                    <div class="feature-item">
+                        <i class="feature-icon fas fa-history"></i>
+                        <div>Disponível 24/7</div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="welcome-message">
+                Acesse seu assistente de IA pessoal e descubra possibilidades ilimitadas
+            </div>
+            <div style="text-align: center;">
+                <a href="{{ url_for('main.login') }}" class="cta-button">
+                    <i class="fas fa-sign-in-alt mr-2"></i>
+                    Começar Agora
+                </a>
+                <p style="margin-top: 1rem; color: var(--text-secondary);">
+                    Novo por aqui? <a href="{{ url_for('main.register') }}" style="color: var(--primary-color); text-decoration: none;">Criar uma conta</a>
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
