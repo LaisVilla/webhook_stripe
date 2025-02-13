@@ -32,7 +32,7 @@
         <!-- Main Content -->
         <div class="bg-white rounded-lg shadow-lg p-6">
             <!-- Input Form -->
-            <form id="aiForm" action="{{ url_for('main.ai_services') }}" method="post" class="mb-6">
+            <form id="aiForm" class="mb-6">
                 <div class="mb-4">
                     <label for="user_input" class="block text-sm font-medium text-gray-700 mb-2">
                         Digite sua mensagem:
@@ -71,25 +71,25 @@
             </div>
 
             <!-- Error Message -->
-            {% if error %}
-            <div class="mb-6 bg-red-50 border-l-4 border-red-400 p-4">
+            <div id="errorMessage" class="mb-6 bg-red-50 border-l-4 border-red-400 p-4 hidden">
                 <div class="flex">
                     <div class="flex-shrink-0">
                         <i class="fas fa-exclamation-circle text-red-400"></i>
                     </div>
                     <div class="ml-3">
-                        <p class="text-sm text-red-700">{{ error }}</p>
+                        <p class="text-sm text-red-700" id="errorText"></p>
                     </div>
                 </div>
             </div>
-            {% endif %}
 
             <!-- AI Response -->
-            {% if response %}
-            <div id="responseSection" class="mt-6">
+            <div id="responseSection" class="mt-6 hidden">
                 <h2 class="text-lg font-semibold text-gray-800 mb-3">Resposta:</h2>
                 <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <p class="text-gray-700 whitespace-pre-wrap typing-animation">{{ response }}</p>
+                    <p id="aiResponse" class="text-gray-700 whitespace-pre-wrap typing-animation"></p>
+                    <div class="mt-2 text-sm text-gray-500">
+                        <span id="timestamp"></span>
+                    </div>
                 </div>
                 <div class="mt-4 flex justify-end space-x-2">
                     <button 
@@ -101,32 +101,80 @@
                     </button>
                 </div>
             </div>
-            {% endif %}
         </div>
     {% endif %}
 </div>
-
 {% endblock %}
 
 {% block scripts %}
 <script>
-    // Form submission handling
-    document.getElementById('aiForm')?.addEventListener('submit', function(e) {
+    document.getElementById('aiForm')?.addEventListener('submit', async function(e) {
+        e.preventDefault(); // Impede o envio padrão do formulário
+        
         const submitButton = document.getElementById('submitButton');
         const buttonText = document.getElementById('buttonText');
         const loadingIcon = document.getElementById('loadingIcon');
         const loadingState = document.getElementById('loadingState');
+        const errorMessage = document.getElementById('errorMessage');
+        const responseSection = document.getElementById('responseSection');
+        const aiResponse = document.getElementById('aiResponse');
+        const timestamp = document.getElementById('timestamp');
         
-        // Show loading state
+        // Esconde mensagens anteriores
+        errorMessage.classList.add('hidden');
+        responseSection.classList.add('hidden');
+        
+        // Mostra estado de carregamento
         submitButton.disabled = true;
         buttonText.textContent = 'Processando...';
         loadingIcon.classList.remove('hidden');
         loadingState.classList.remove('hidden');
+        
+        try {
+            const userInput = document.getElementById('user_input').value;
+            
+            const response = await fetch('{{ url_for("main.ai_services") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    input: userInput
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                // Mostrar erro
+                errorMessage.classList.remove('hidden');
+                document.getElementById('errorText').textContent = data.error;
+            } else {
+                // Mostrar resposta
+                responseSection.classList.remove('hidden');
+                aiResponse.textContent = data.response;
+                
+                // Atualizar timestamp
+                if (data.timestamp) {
+                    timestamp.textContent = `Respondido em: ${data.timestamp} UTC`;
+                }
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            errorMessage.classList.remove('hidden');
+            document.getElementById('errorText').textContent = 'Erro ao processar sua requisição. Por favor, tente novamente.';
+        } finally {
+            // Restaurar estado do botão
+            submitButton.disabled = false;
+            buttonText.textContent = 'Enviar';
+            loadingIcon.classList.add('hidden');
+            loadingState.classList.add('hidden');
+        }
     });
 
-    // Copy to clipboard function
+    // Função para copiar resposta
     function copyToClipboard() {
-        const response = document.querySelector('#responseSection p').textContent;
+        const response = document.getElementById('aiResponse').textContent;
         navigator.clipboard.writeText(response).then(() => {
             alert('Resposta copiada para a área de transferência!');
         }).catch(err => {

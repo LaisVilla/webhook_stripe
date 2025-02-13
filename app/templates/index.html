@@ -4,19 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assistente de IA - Plataforma</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #6366F1;
-            --primary-hover: #4F46E5;
-            --background: #F9FAFB;
-            --card-background: #FFFFFF;
-            --text-primary: #111827;
-            --text-secondary: #6B7280;
+            --primary-color: #A855F7;
+            --primary-hover: #9333EA;
+            --background: #0F172A;
+            --card-bg: #1E293B;
+            --surface: #334155;
+            --text-primary: #F8FAFC;
+            --text-secondary: #CBD5E1;
             --success-color: #10B981;
             --warning-color: #F59E0B;
-            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --danger-color: #EF4444;
+            --accent: #06B6D4;
         }
 
         * {
@@ -26,24 +28,25 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--background);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            color: var(--text-primary);
             line-height: 1.6;
         }
 
         .container {
             max-width: 900px;
             width: 100%;
-            background: var(--card-background);
+            background-color: var(--card-bg);
             padding: 2.5rem;
             border-radius: 20px;
-            box-shadow: var(--shadow);
-            animation: fadeIn 0.6s ease-out;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .header {
@@ -51,20 +54,18 @@
             margin-bottom: 2rem;
         }
 
+        .ai-assistant-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.3));
+        }
+
         h1 {
             color: var(--text-primary);
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 1rem;
-            background: linear-gradient(135deg, #6366F1, #4F46E5);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .ai-assistant-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: var(--primary-color);
         }
 
         .content-wrapper {
@@ -74,74 +75,18 @@
             margin-top: 2rem;
         }
 
-        .user-section {
+        .user-section, .features-section {
+            background: var(--surface);
             padding: 2rem;
-            background: #F8FAFC;
             border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .features-section {
-            padding: 2rem;
-            background: #F0F7FF;
-            border-radius: 16px;
-        }
-
-        .feature-item {
-            display: flex;
-            align-items: center;
-            margin: 1rem 0;
-            padding: 0.75rem;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .feature-icon {
-            margin-right: 1rem;
-            color: var(--primary-color);
-            font-size: 1.25rem;
-        }
-
-        .subscription-status {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.5rem 1rem;
-            border-radius: 9999px;
-            font-weight: 500;
-            font-size: 0.875rem;
-            margin-top: 1rem;
-        }
-
-        .status-active {
-            background-color: #DCFCE7;
-            color: #166534;
-        }
-
-        .status-inactive {
-            background-color: #FFF1F2;
-            color: #BE123C;
-        }
-
-        .cta-button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, #6366F1, #4F46E5);
-            color: white;
-            text-decoration: none;
-            border-radius: 12px;
+        h2 {
+            color: var(--text-primary);
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
             font-weight: 600;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            margin-top: 1.5rem;
-            border: none;
-            cursor: pointer;
-        }
-
-        .cta-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
         }
 
         .user-info {
@@ -152,9 +97,10 @@
             display: flex;
             align-items: center;
             margin: 0.75rem 0;
-            padding: 0.75rem;
-            background: white;
-            border-radius: 8px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .info-label {
@@ -168,11 +114,80 @@
             font-weight: 500;
         }
 
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .feature-item:hover {
+            transform: translateX(5px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .feature-icon {
+            color: var(--primary-color);
+            font-size: 1.25rem;
+            margin-right: 1rem;
+        }
+
+        .subscription-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 99px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-top: 1.5rem;
+        }
+
+        .status-active {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: #4ADE80;
+        }
+
+        .status-inactive {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #FCA5A5;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 2rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            margin-top: 1.5rem;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cta-button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+        }
+
         .welcome-message {
             font-size: 1.2rem;
             color: var(--text-secondary);
             margin: 1.5rem 0;
             text-align: center;
+        }
+
+        .mr-2 {
+            margin-right: 0.5rem;
         }
 
         @keyframes fadeIn {

@@ -7,6 +7,7 @@ import os
 import json
 import logging
 from datetime import datetime
+import pytz
 # Configuração do logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -222,18 +223,35 @@ def register():
 # Função para chamar a API da OpenAI
 def call_ai_api(user_input, max_tokens=150):
     try:
+        # Registro de data/hora UTC e usuário
+        current_utc = datetime.now(pytz.UTC)
+        formatted_date = current_utc.strftime('%Y-%m-%d %H:%M:%S')
+        user_login = session.get('user_email', 'Unknown')
+        
+        # Log inicial da requisição
+        logger.info(f"""
+        ============================
+        Nova Requisição AI
+        Timestamp (UTC): {formatted_date}
+        Usuário: {user_login}
+        ============================
+        """)
+
         # Verificação da API key
         api_key = os.getenv('ANTHROPIC_API_KEY')
         if not api_key:
-            logger.error("Anthropic API key not found in environment variables")
+            logger.error(f"API key não encontrada - Usuário: {user_login} - UTC: {formatted_date}")
             return "Error: Anthropic API key not configured. Please contact support."
         
         if not api_key.startswith('sk-ant-'):
-            logger.error("Invalid Anthropic API key format")
+            logger.error(f"Formato inválido da API key - Usuário: {user_login} - UTC: {formatted_date}")
             return "Error: Invalid API key format. Please check your configuration."
         
+        # Inicializar cliente Anthropic com a chave
+        client = Anthropic(api_key=api_key)
+        
         # Criar a mensagem usando a API da Anthropic
-        response = anthropic.messages.create(
+        response = client.messages.create(
             model="claude-3-opus-20240229",
             messages=[{
                 "role": "user",
@@ -242,82 +260,118 @@ def call_ai_api(user_input, max_tokens=150):
             max_tokens=max_tokens
         )
         
-        logger.info(f"AI request processed successfully for user: {session.get('user_email')}")
+        logger.info(f"Requisição processada com sucesso - Usuário: {user_login} - UTC: {formatted_date}")
         return response.content[0].text
         
     except Exception as e:
         error_msg = str(e)
-        logger.error(f"Anthropic API error: {str(e)}")
+        current_utc = datetime.now(pytz.UTC).strftime('%Y-%m-%d %H:%M:%S')
+        user_login = session.get('user_email', 'Unknown')
         
-        if "rate_limit" in error_msg.lower():
-            return "Too many requests. Please try again in a few seconds."
-        elif "invalid_api_key" in error_msg.lower():
-            return "API configuration error. Please contact support."
+        logger.error(f"""
+        ============================
+        Erro na API Anthropic
+        Timestamp (UTC): {current_utc}
+        Usuário: {user_login}
+        Erro: {error_msg}
+        ============================
+        """)
+        
+        if "401" in error_msg or "authentication_error" in error_msg:
+            return "Erro de autenticação com a API. Por favor, contate o suporte técnico."
+        elif "rate_limit" in error_msg.lower():
+            return "Muitas requisições. Por favor, tente novamente em alguns segundos."
         else:
-            return f"Error processing your request: {error_msg}"
-        
+            return f"Erro ao processar sua requisição: {error_msg}"
+
 @main.route('/ai-services', methods=['GET', 'POST'])
 def ai_services():
     if request.method == 'POST':
         try:
-            data = request.get_json()
+            current_utc = datetime.now(pytz.UTC).strftime('%Y-%m-%d %H:%M:%S')
+            user_login = session.get('user_email', 'Unknown')
+            
+            # Verificar JSON
+            if not request.is_json:
+                logger.error(f"Requisição inválida - Usuário: {user_login} - UTC: {current_utc}")
+                return jsonify({
+                    'error': 'Request must be JSON',
+                    'message': 'Content-Type must be application/json',
+                    'timestamp': current_utc
+                }), 400
+
+            data = request.get_json(force=True, silent=True)
+            
+            if data is None:
+                logger.error(f"JSON inválido - Usuário: {user_login} - UTC: {current_utc}")
+                return jsonify({
+                    'error': 'Invalid JSON',
+                    'message': 'Could not parse JSON data',
+                    'timestamp': current_utc
+                }), 400
+
             user_input = data.get('input', '')
             
             if not user_input:
-                return jsonify({'error': 'Input vazio'}), 400
+                logger.error(f"Input vazio - Usuário: {user_login} - UTC: {current_utc}")
+                return jsonify({
+                    'error': 'Input vazio',
+                    'timestamp': current_utc
+                }), 400
 
             response = call_ai_api(user_input)
             
+            if response is None:
+                logger.error(f"Sem resposta da API - Usuário: {user_login} - UTC: {current_utc}")
+                return jsonify({
+                    'error': 'API Error',
+                    'message': 'AI service returned no response',
+                    'timestamp': current_utc
+                }), 500
+
             return jsonify({
                 'response': response,
-                'status': 'success'
+                'status': 'success',
+                'timestamp': current_utc
             })
 
         except Exception as e:
-            logger.error(f"Erro no endpoint ai-services: {str(e)}")
+            current_utc = datetime.now(pytz.UTC).strftime('%Y-%m-%d %H:%M:%S')
+            logger.error(f"Erro no endpoint ai-services: {str(e)} - UTC: {current_utc}")
             return jsonify({
                 'error': 'Erro ao processar requisição',
-                'message': str(e)
+                'message': str(e),
+                'timestamp': current_utc
             }), 500
     
-    return render_template('ai_service.html')
+    return render_template('ai_services.html')
 
-@main.route('/check-api-key')
-def check_api_key():
+@main.route('/check-api-config')
+def check_api_config():
+    if not session.get('user_id'):
+        return jsonify({'error': 'Unauthorized'}), 401
+        
     api_key = os.getenv('ANTHROPIC_API_KEY')
-    return {
-        'key_exists': bool(api_key),
-        'key_length': len(api_key) if api_key else 0,
-        'key_start': api_key[:10] + '...' if api_key else 'None',
-        'key_format_correct': api_key.startswith('sk-ant-') if api_key else False
-    }
-
-@main.route('/api/ai-generate', methods=['POST'])
-@require_active_subscription
-def api_ai_generate():
+    current_utc = datetime.now(pytz.UTC).strftime('%Y-%m-%d %H:%M:%S')
+    user_login = session.get('user_email', 'Unknown')
+    
+    # Testar a conexão com a API
+    test_client = None
     try:
-        data = request.get_json()
-        user_input = data.get('prompt')
-        
-        if not user_input:
-            return jsonify({'error': 'No prompt provided'}), 400
-            
-        response = call_ai_api(user_input)
-        
-        return jsonify({
-            'status': 'success',
-            'response': response
-        })
-        
+        test_client = Anthropic(api_key=api_key)
     except Exception as e:
-        logger.error(f"API Error: {str(e)}")
-        return jsonify({
-            'status': 'error',
-            'message': str(e)
-        }), 500
-
-
-
+        logger.error(f"Erro ao criar cliente Anthropic: {str(e)}")
+    
+    return jsonify({
+        'timestamp': current_utc,
+        'user': user_login,
+        'api_key_exists': bool(api_key),
+        'api_key_format_valid': api_key.startswith('sk-ant-') if api_key else False,
+        'api_key_length': len(api_key) if api_key else 0,
+        'api_key_prefix': api_key[:7] + '...' if api_key else None,
+        'client_creation_successful': test_client is not None
+    })
+    
 
 @main.route('/payments', methods=['GET', 'POST'])
 def payments():
@@ -556,26 +610,3 @@ def logout():
     session.clear()
     flash('Logged out successfully.', 'success')
     return redirect(url_for('main.index'))
-
-@main.route('/test-firebase')
-def test_firebase():
-    try:
-        # Testar Firestore
-        db = firestore.client()
-        test_ref = db.collection('_test').document('connection')
-        test_ref.set({
-            'timestamp': datetime.utcnow().isoformat(),
-            'test': True
-        })
-        
-        return jsonify({
-            'status': 'success',
-            'message': 'Firebase connection successful',
-            'timestamp': datetime.utcnow().isoformat()
-        })
-    except Exception as e:
-        return jsonify({
-            'status': 'error',
-            'error': str(e),
-            'type': type(e).__name__
-        }), 500
