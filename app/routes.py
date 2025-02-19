@@ -228,17 +228,44 @@ def call_ai_api(user_input, max_tokens=150):
         formatted_date = current_utc.strftime('%Y-%m-%d %H:%M:%S')
         user_login = session.get('user_email', 'Unknown')
         
-        # Log inicial da requisição
         logger.info(f"""
         ============================
         Nova Requisição AI
         Timestamp (UTC): {formatted_date}
         Usuário: {user_login}
+        Input: {user_input}
         ============================
         """)
 
+        # Buscar usuário no Firestore
+        db = firestore.client()
+        users_ref = db.collection('users')
+        query = users_ref.where('email', '==', user_login).limit(1)
+        user_docs = query.get()
+
+        if not user_docs:
+            logger.error(f"Usuário não encontrado para atualização de estatísticas - Email: {user_login}")
+            return "Erro: Usuário não encontrado"
+
+        user_doc = user_docs[0]
+        user_dict = user_doc.to_dict()
+        
+        # Verificar estatísticas antes da chamada
+        ai_stats = user_dict.get('ai_stats', {
+            'total_requests': 0,
+            'remaining_requests': 10,
+            'total_tokens': 0,
+            'last_reset': formatted_date
+        })
+            # Verificar se ainda tem requisições disponíveis
+        if ai_stats['remaining_requests'] <= 0:
+            logger.warning(f"Limite de requisições atingido - Usuário: {user_login}")
+            return "Você atingiu o limite de requisições para este mês. Aguarde o próximo mês para mais requisições."
+
         # Verificação da API key
         api_key = os.getenv('ANTHROPIC_API_KEY')
+        logger.debug(f"API Key presente: {'Sim' if api_key else 'Não'}")
+        
         if not api_key:
             logger.error(f"API key não encontrada - Usuário: {user_login} - UTC: {formatted_date}")
             return "Error: Anthropic API key not configured. Please contact support."
@@ -248,11 +275,13 @@ def call_ai_api(user_input, max_tokens=150):
             return "Error: Invalid API key format. Please check your configuration."
         
         # Inicializar cliente Anthropic com a chave
+        logger.debug("Inicializando cliente Anthropic")
         client = Anthropic(api_key=api_key)
         
         # Criar a mensagem usando a API da Anthropic
+        logger.debug("Enviando requisição para Anthropic API")
         response = client.messages.create(
-            model="claude-3-opus-20240229",
+            model="claude-3-haiku-20240307",
             messages=[{
                 "role": "user",
                 "content": user_input
@@ -260,8 +289,30 @@ def call_ai_api(user_input, max_tokens=150):
             max_tokens=max_tokens
         )
         
-        logger.info(f"Requisição processada com sucesso - Usuário: {user_login} - UTC: {formatted_date}")
-        return response.content[0].text
+        # Log da resposta
+        logger.debug(f"Resposta recebida da API: {response.content}")
+        
+        if not response.content:
+            logger.error("Resposta vazia da API")
+            return "Erro: Resposta vazia da API"
+        
+        # Após resposta bem-sucedida, atualizar estatísticas
+        if response.content:
+            # Verificar reset mensal
+            last_reset = datetime.strptime(ai_stats['last_reset'], '%Y-%m-%d %H:%M:%S')
+            if last_reset.month != current_utc.month:
+                ai_stats['remaining_requests'] = 1000
+                ai_stats['last_reset'] = formatted_date
+            
+            # Atualizar contadores
+            ai_stats['total_requests'] += 1
+            ai_stats['remaining_requests'] = max(0, ai_stats['remaining_requests'] - 1)
+            ai_stats['total_tokens'] += len(user_input.split())
+            
+            # Atualizar documento
+            user_doc.reference.update({'ai_stats': ai_stats})
+            
+            return response.content[0].text
         
     except Exception as e:
         error_msg = str(e)
@@ -274,6 +325,7 @@ def call_ai_api(user_input, max_tokens=150):
         Timestamp (UTC): {current_utc}
         Usuário: {user_login}
         Erro: {error_msg}
+        Stack Trace: {logging.traceback.format_exc()}
         ============================
         """)
         
@@ -283,95 +335,204 @@ def call_ai_api(user_input, max_tokens=150):
             return "Muitas requisições. Por favor, tente novamente em alguns segundos."
         else:
             return f"Erro ao processar sua requisição: {error_msg}"
+def update_user_ai_stats(user_login, tokens_used):
+    try:
+        current_utc = datetime.now(pytz.UTC)
+        formatted_date = current_utc.strftime('%Y-%m-%d %H:%M:%S')
+         
+         # Obter a instância do Firestore usando current_app
+        db = firestore.client()
+
+        # Buscar documento do usuário
+        user_doc = db.collection('users').document(user_login)
+        user_data = user_doc.get()
+        
+        if not user_data.exists:
+            logger.error(f"Documento não encontrado ao atualizar estatísticas - Usuário: {user_login}")
+            return
+        
+        # Obter ou criar estatísticas
+        ai_stats = user_data.to_dict().get('ai_stats', {
+            'total_requests': 0,
+            'remaining_requests': 1000,
+            'total_tokens': 0,
+            'last_reset': formatted_date
+        })
+        
+        # Atualizar estatísticas
+        ai_stats['total_requests'] += 1
+        ai_stats['remaining_requests'] = max(0, ai_stats['remaining_requests'] - 1)
+        ai_stats['total_tokens'] += tokens_used
+        
+        # Salvar atualizações
+        user_doc.update({
+            'ai_stats': ai_stats
+        })
+        
+        logger.info(f"Estatísticas atualizadas - Usuário: {user_login} - Tokens: {tokens_used}")
+        
+    except Exception as e:
+        logger.error(f"""
+        ============================
+        Erro ao Atualizar Estatísticas
+        Timestamp (UTC): {formatted_date}
+        Usuário: {user_login}
+        Erro: {str(e)}
+        Stack Trace: {logging.traceback.format_exc()}
+        ============================
+        """)        
 
 @main.route('/ai-services', methods=['GET', 'POST'])
 def ai_services():
+    print(f"[DEBUG] Método da requisição: {request.method}")
+    
     if request.method == 'POST':
         try:
-            current_utc = datetime.now(pytz.UTC).strftime('%Y-%m-%d %H:%M:%S')
-            user_login = session.get('user_email', 'Unknown')
+            print("[DEBUG] Processando POST request")
+            print(f"[DEBUG] Headers: {dict(request.headers)}")
+            print(f"[DEBUG] Dados brutos: {request.get_data(as_text=True)}")
             
-            # Verificar JSON
             if not request.is_json:
-                logger.error(f"Requisição inválida - Usuário: {user_login} - UTC: {current_utc}")
+                print("[DEBUG] Requisição não é JSON")
                 return jsonify({
                     'error': 'Request must be JSON',
-                    'message': 'Content-Type must be application/json',
-                    'timestamp': current_utc
+                    'message': 'Content-Type must be application/json'
                 }), 400
 
-            data = request.get_json(force=True, silent=True)
+            data = request.get_json()
+            print(f"[DEBUG] Dados JSON: {data}")
             
-            if data is None:
-                logger.error(f"JSON inválido - Usuário: {user_login} - UTC: {current_utc}")
-                return jsonify({
-                    'error': 'Invalid JSON',
-                    'message': 'Could not parse JSON data',
-                    'timestamp': current_utc
-                }), 400
-
-            user_input = data.get('input', '')
+            user_input = data.get('input', '').strip()
+            print(f"[DEBUG] Input do usuário: {user_input}")
             
-            if not user_input:
-                logger.error(f"Input vazio - Usuário: {user_login} - UTC: {current_utc}")
-                return jsonify({
-                    'error': 'Input vazio',
-                    'timestamp': current_utc
-                }), 400
-
+            # Chamar a API
             response = call_ai_api(user_input)
+            print(f"[DEBUG] Resposta da API: {response}")
             
-            if response is None:
-                logger.error(f"Sem resposta da API - Usuário: {user_login} - UTC: {current_utc}")
-                return jsonify({
-                    'error': 'API Error',
-                    'message': 'AI service returned no response',
-                    'timestamp': current_utc
-                }), 500
-
             return jsonify({
                 'response': response,
-                'status': 'success',
-                'timestamp': current_utc
+                'status': 'success'
             })
 
         except Exception as e:
-            current_utc = datetime.now(pytz.UTC).strftime('%Y-%m-%d %H:%M:%S')
-            logger.error(f"Erro no endpoint ai-services: {str(e)} - UTC: {current_utc}")
+            print(f"[ERROR] Erro no processamento: {str(e)}")
             return jsonify({
                 'error': 'Erro ao processar requisição',
-                'message': str(e),
-                'timestamp': current_utc
+                'message': str(e)
             }), 500
-    
+
     return render_template('ai_services.html')
 
-@main.route('/check-api-config')
-def check_api_config():
-    if not session.get('user_id'):
-        return jsonify({'error': 'Unauthorized'}), 401
-        
-    api_key = os.getenv('ANTHROPIC_API_KEY')
-    current_utc = datetime.now(pytz.UTC).strftime('%Y-%m-%d %H:%M:%S')
-    user_login = session.get('user_email', 'Unknown')
-    
-    # Testar a conexão com a API
-    test_client = None
+@main.route('/api/user/ai-stats', methods=['GET'])
+def get_user_ai_stats():
     try:
-        test_client = Anthropic(api_key=api_key)
+        current_utc = datetime.now(pytz.UTC)
+        formatted_date = current_utc.strftime('%Y-%m-%d %H:%M:%S')
+        user_login = session.get('user_email')  # Pegamos o email
+        user_name = session.get('user_name', 'Unknown')  # Pegamos o nome para log
+        
+        logger.info(f"""
+        ============================
+        Requisição de Estatísticas AI
+        Timestamp (UTC): {formatted_date}
+        Usuário: {user_name}
+        Email: {user_login}
+        ============================
+        """)
+
+        # Verificar autenticação
+        if not user_login or user_login == 'Unknown':
+            logger.error(f"Usuário não autenticado - UTC: {formatted_date}")
+            return jsonify({
+                'error': 'Usuário não autenticado',
+                'timestamp': formatted_date
+            }), 401
+    
+        # Fazer query para encontrar o usuário pelo email
+        db = firestore.client()
+        users_ref = db.collection('users')
+        # Buscar usuário pelo email
+        query = users_ref.where('email', '==', user_login).limit(1)
+        user_docs = query.get()
+        
+        if not user_docs:
+            logger.error(f"Usuário não encontrado - Email: {user_login} - UTC: {formatted_date}")
+            return jsonify({
+                'error': 'Usuário não encontrado',
+                'timestamp': formatted_date,
+            }), 404
+        
+        user_doc = user_docs[0]  # Pegar o primeiro documento encontrado
+        user_dict = user_doc.to_dict()
+        
+        # Se não existir ai_stats, criar com valores iniciais
+        if 'ai_stats' not in user_dict:
+            ai_stats = {
+                'total_requests': 0,
+                'remaining_requests': 1000,
+                'total_tokens': 0,
+                'last_reset': formatted_date
+            }
+            user_doc.reference.update({'ai_stats': ai_stats})
+        else:
+            ai_stats = user_dict['ai_stats']
+            
+            # Verificar reset mensal
+            last_reset = datetime.strptime(ai_stats['last_reset'], '%Y-%m-%d %H:%M:%S')
+            if last_reset.month != current_utc.month:
+                ai_stats.update({
+                    'remaining_requests': 1000,
+                    'last_reset': formatted_date
+                })
+                user_doc.reference.update({'ai_stats': ai_stats})
+
+        usage_percentage = ((1000 - ai_stats['remaining_requests']) / 1000) * 100
+
+        return jsonify({
+            'status': 'success',
+            'data': {
+                'total_requests': ai_stats['total_requests'],
+                'remaining_requests': ai_stats['remaining_requests'],
+                'total_tokens': ai_stats['total_tokens'],
+                'usage_percentage': usage_percentage,
+                'timestamp': formatted_date,
+                'user_name': user_dict.get('name', user_name),
+                'subscription_status': user_dict.get('subscription_status', 'inactive')
+            }
+        })
+
     except Exception as e:
-        logger.error(f"Erro ao criar cliente Anthropic: {str(e)}")
-    
+        error_msg = str(e)
+        logger.error(f"""
+        ============================
+        Erro ao Buscar Estatísticas
+        Timestamp (UTC): {formatted_date}
+        Usuário: {user_name}
+        Email: {user_login}
+        Erro: {error_msg}
+        Stack Trace: {logging.traceback.format_exc()}
+        ============================
+        """)
+        
+        return jsonify({
+            'error': 'Erro ao buscar estatísticas',
+            'message': error_msg,
+            'timestamp': formatted_date
+        }), 500
+
+@main.route('/debug-user/<email>')
+def debug_user(email):
+    db = firestore.client()
+    user_doc = db.collection('users').document(email).get()
+    if user_doc.exists:
+        return jsonify({
+            'exists': True,
+            'data': user_doc.to_dict()
+        })
     return jsonify({
-        'timestamp': current_utc,
-        'user': user_login,
-        'api_key_exists': bool(api_key),
-        'api_key_format_valid': api_key.startswith('sk-ant-') if api_key else False,
-        'api_key_length': len(api_key) if api_key else 0,
-        'api_key_prefix': api_key[:7] + '...' if api_key else None,
-        'client_creation_successful': test_client is not None
+        'exists': False,
+        'email_checked': email
     })
-    
 
 @main.route('/payments', methods=['GET', 'POST'])
 def payments():
@@ -466,34 +627,8 @@ def stripe_webhook():
             try:
                 db = firestore.client()
                 
-                # Dados do cliente e da compra
-                customer_data = {
-                    'name': customer_details.get('name'),
-                    'email': customer_details.get('email'),
-                    'phone': customer_details.get('phone'),
-                    'address': customer_details.get('address', {}),
-                    'stripe_customer_id': session.get('customer'),
-                    'subscription_status': 'active',
-                    'current_plan': session.get('metadata', {}).get('plan_name'),
-                    'last_payment': {
-                        'date': datetime.utcnow().isoformat(),
-                        'amount': session.get('amount_total'),
-                        'currency': session.get('currency'),
-                        'payment_method': session.get('payment_method_types', ['card'])[0],
-                        'status': session.get('payment_status'),
-                        'session_id': session.get('id')
-                    }
-                }
-
-                print("Dados do cliente atualizados:")
-                print(json.dumps(customer_data, indent=4))
-
-                # Atualizar ou criar documento do cliente
-                customers_ref = db.collection('customers').document(customer_details.get('email'))
-                customers_ref.set(customer_data, merge=True)
-
-                # Registrar histórico de pagamento
-                payment_history = {
+                # Preparar dados do pagamento
+                payment_data = {
                     'session_id': session.get('id'),
                     'date': datetime.utcnow().isoformat(),
                     'plan_name': session.get('metadata', {}).get('plan_name'),
@@ -503,23 +638,39 @@ def stripe_webhook():
                     'status': session.get('payment_status')
                 }
 
-                print("Novo registro de pagamento:")
-                print(json.dumps(payment_history, indent=4))
-
-                db.collection('payment_history').document(session.get('id')).set(payment_history)
-
-                # Atualizar status do usuário se existir
+                # Buscar usuário pelo email
                 users_ref = db.collection('users')
                 query = users_ref.where('email', '==', customer_details.get('email'))
                 user_docs = query.get()
                 
                 for user_doc in user_docs:
-                    user_doc.reference.update({
+                    user_data = user_doc.to_dict()
+                    
+                    # Atualizar ou criar array de histórico de pagamentos
+                    payment_history = user_data.get('payment_history', [])
+                    payment_history.append(payment_data)
+                    
+                    # Preparar dados atualizados do usuário
+                    update_data = {
                         'subscription_status': 'active',
                         'current_plan': session.get('metadata', {}).get('plan_name'),
-                        'last_payment': payment_history
-                    })
-                    print(f"Status do usuário atualizado: {customer_details.get('email')}")
+                        'stripe_customer_id': session.get('customer'),
+                        'payment_history': payment_history,
+                        'last_payment': payment_data,
+                        'subscription_updated_at': datetime.utcnow().isoformat(),
+                        'customer_details': {
+                            'name': customer_details.get('name'),
+                            'email': customer_details.get('email'),
+                            'phone': customer_details.get('phone'),
+                            'address': customer_details.get('address', {})
+                        }
+                    }
+
+                    # Atualizar documento do usuário
+                    user_doc.reference.update(update_data)
+                    
+                    print(f"Usuário atualizado com sucesso: {customer_details.get('email')}")
+                    print("Dados atualizados:", json.dumps(update_data, indent=2))
 
             except Exception as e:
                 print(f"Erro ao atualizar banco de dados: {str(e)}")
@@ -552,22 +703,44 @@ def success():
             user_query = users_ref.where('email', '==', customer_email).limit(1).get()
             
             for user in user_query:
+                user_data = user.to_dict()
+                
+                # Preparar dados do pagamento
+                payment_data = {
+                    'session_id': session_id,
+                    'date': datetime.utcnow().isoformat(),
+                    'plan_name': stripe_session.metadata.get('plan_name'),
+                    'amount': stripe_session.amount_total,
+                    'currency': stripe_session.currency,
+                    'payment_method': 'card',
+                    'status': stripe_session.payment_status
+                }
+
+                # Atualizar ou criar array de histórico de pagamentos
+                payment_history = user_data.get('payment_history', [])
+                payment_history.append(payment_data)
+
                 # Atualizar documento do usuário
-                user.reference.update({
+                update_data = {
                     'subscription_status': 'active',
-                    'last_payment_date': datetime.utcnow().isoformat()
-                })
+                    'current_plan': stripe_session.metadata.get('plan_name'),
+                    'payment_history': payment_history,
+                    'last_payment': payment_data,
+                    'subscription_updated_at': datetime.utcnow().isoformat()
+                }
+                
+                user.reference.update(update_data)
                 
                 # Atualizar sessão
                 session['subscription_status'] = 'active'
-                print(f"Subscription status updated for user: {customer_email}")  # Debug log
+                print(f"Status da assinatura atualizado para o usuário: {customer_email}")
                 
-                flash('Subscription activated successfully!', 'success')
+                flash('Assinatura ativada com sucesso!', 'success')
                 return redirect(url_for('main.ai_services'))
 
         except Exception as e:
-            print(f"Error in success route: {str(e)}")  # Debug log
-            flash('Error processing payment confirmation.', 'error')
+            print(f"Erro na rota success: {str(e)}")
+            flash('Erro ao processar confirmação de pagamento.', 'error')
             
     return render_template('success.html')
 

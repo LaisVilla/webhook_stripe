@@ -1,193 +1,457 @@
 {% extends "base.html" %}
 
-{% block title %}AI Services{% endblock %}
+{% block title %}AI Assistant{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8 max-w-4xl">
-    <!-- Verificação de autenticação e assinatura -->
+<div class="container mx-auto px-4 py-8">
     {% if not session.get('user_id') %}
-        <div class="text-center p-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Please login to access AI Services</h2>
+        <div class="glass p-8 rounded-2xl text-center max-w-md mx-auto animate-fade-in">
+            <i class="lucide lucide-lock h-12 w-12 mx-auto mb-4 text-primary animate-bounce"></i>
+            <h2 class="text-2xl font-bold gradient-text mb-4">Faça logo sua Assinatura para acessar os Serviços de IA</h2>
             <a href="{{ url_for('main.login') }}" 
-               class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                Login
+               class="btn-primary inline-flex items-center gap-2">
+                <i class="lucide lucide-log-in h-5 w-5"></i>
+                <span>Entrar</span>
             </a>
         </div>
     {% elif session.get('subscription_status') != 'active' %}
-        <div class="text-center p-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Active subscription required</h2>
-            <p class="text-gray-600 mb-4">Please subscribe to access AI Services</p>
+        <div class="glass p-8 rounded-2xl text-center max-w-md mx-auto animate-fade-in">
+            <i class="lucide lucide-crown h-12 w-12 mx-auto mb-4 text-primary animate-float"></i>
+            <h2 class="text-2xl font-bold gradient-text mb-4">Assinatura necessária</h2>
+            <p class="text-gray-400 mb-6">Assine agora para acessar todos os recursos de IA</p>
             <a href="{{ url_for('main.payments') }}" 
-               class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                Subscribe Now
+               class="btn-primary inline-flex items-center gap-2">
+                <i class="lucide lucide-credit-card h-5 w-5"></i>
+                <span>Assinar Agora</span>
             </a>
         </div>
     {% else %}
-        <!-- Header -->
-        <div class="mb-8 text-center">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">AI Assistant</h1>
-            <p class="text-gray-600">Como posso ajudar você hoje?</p>
-        </div>
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+            <!-- Sidebar -->
+            <div class="xl:col-span-3">
+                <div class="glass rounded-2xl sticky top-24 animate-fade-in">
+                    <!-- User Profile -->
+                    <div class="gradient-border">
+                        <div class="p-6">
+                            <div class="flex items-center space-x-4">
+                                <div class="avatar-glow">
+                                    <img class="h-14 w-14 rounded-xl object-cover border-2 border-primary/20"
+                                         src="https://ui-avatars.com/api/?name=LaisVilla&background=random"
+                                         alt="Profile">
+                                    <span class="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-400 border-2 border-gray-900"></span>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-bold gradient-text">{{ session.get('user_name') }}</h3>
+                                    <p class="text-sm text-gray-400">Premium Member</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-        <!-- Main Content -->
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <!-- Input Form -->
-            <form id="aiForm" class="mb-6">
-                <div class="mb-4">
-                    <label for="user_input" class="block text-sm font-medium text-gray-700 mb-2">
-                        Digite sua mensagem:
-                    </label>
-                    <textarea 
-                        id="user_input" 
-                        name="user_input" 
-                        rows="4" 
-                        required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="Digite sua pergunta aqui..."
-                    ></textarea>
-                </div>
+                    <!-- Stats -->
+                    <div class="p-6 space-y-4">
+                        <div class="stat-card">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm text-gray-400">Requisições Restantes</span>
+                                <span class="text-sm font-semibold gradient-text" id="remaining-requests">1000</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="usage-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
 
-                <div class="flex justify-end">
-                    <button 
-                        type="submit" 
-                        id="submitButton"
-                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                        <span id="buttonText">Enviar</span>
-                        <i id="loadingIcon" class="fas fa-spinner fa-spin ml-2 hidden"></i>
-                    </button>
-                </div>
-            </form>
+                        <div class="stat-card">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-400">Data/Hora (UTC)</span>
+                                <i class="lucide lucide-clock text-purple-400 animate-pulse-slow"></i>
+                            </div>
+                            <p class="text-sm font-semibold text-white mt-1 last-update">--</p>
+                        </div>
+                    </div>
 
-            <!-- Loading State -->
-            <div id="loadingState" class="hidden mb-6">
-                <div class="animate-pulse space-y-4">
-                    <div class="h-4 bg-gray-200 rounded w-3/4"></div>
-                    <div class="space-y-2">
-                        <div class="h-4 bg-gray-200 rounded"></div>
-                        <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+                    <!-- Quick Stats Grid -->
+                    <div class="grid grid-cols-2 gap-4 p-6">
+                        <div class="stat-card">
+                            <div class="flex flex-col items-center">
+                                <i class="lucide lucide-message-square text-purple-400 mb-2"></i>
+                                <span class="text-sm text-gray-400">Total Chats</span>
+                                <span class="text-lg font-bold gradient-text total-requests">0</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="flex flex-col items-center">
+                                <i class="lucide lucide-zap text-pink-400 mb-2"></i>
+                                <span class="text-sm text-gray-400">Tokens</span>
+                                <span class="text-lg font-bold gradient-text total-tokens">0k</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tips Section -->
+                    <div class="p-6">
+                        <div class="gradient-border">
+                            <div class="p-4">
+                                <h4 class="text-sm font-semibold gradient-text mb-3">💡 Dicas</h4>
+                                <ul class="text-sm text-gray-400 space-y-3">
+                                    <li class="flex items-start hover:transform hover:translate-x-2 transition-transform">
+                                        <i class="lucide lucide-check h-4 w-4 mr-2 mt-0.5 text-green-400"></i>
+                                        Seja específico em suas perguntas
+                                    </li>
+                                    <li class="flex items-start hover:transform hover:translate-x-2 transition-transform">
+                                        <i class="lucide lucide-check h-4 w-4 mr-2 mt-0.5 text-green-400"></i>
+                                        Use exemplos quando possível
+                                    </li>
+                                    <li class="flex items-start hover:transform hover:translate-x-2 transition-transform">
+                                        <i class="lucide lucide-check h-4 w-4 mr-2 mt-0.5 text-green-400"></i>
+                                        Divida problemas complexos
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Error Message -->
-            <div id="errorMessage" class="mb-6 bg-red-50 border-l-4 border-red-400 p-4 hidden">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-exclamation-circle text-red-400"></i>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-red-700" id="errorText"></p>
-                    </div>
+            <!-- Main Chat Area -->
+            <div class="xl:col-span-9 space-y-6">
+                <!-- Header -->
+                <div class="glass rounded-2xl p-6 animate-fade-in">
+                    <h1 class="text-3xl font-bold gradient-text mb-2">AI Assistant</h1>
+                    <p class="text-gray-400">Seu assistente pessoal potencializado por IA</p>
                 </div>
-            </div>
 
-            <!-- AI Response -->
-            <div id="responseSection" class="mt-6 hidden">
-                <h2 class="text-lg font-semibold text-gray-800 mb-3">Resposta:</h2>
-                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <p id="aiResponse" class="text-gray-700 whitespace-pre-wrap typing-animation"></p>
-                    <div class="mt-2 text-sm text-gray-500">
-                        <span id="timestamp"></span>
+                <!-- Chat Interface -->
+                <div class="glass rounded-2xl p-6">
+                    <!-- Chat History Container - Adicionado scroll -->
+                    <div id="chatHistory" class="space-y-6 mb-6 max-h-[600px] overflow-y-auto" style="scroll-behavior: smooth;">
+                        <!-- Mensagem inicial do bot -->
+                        <div class="chat-message">
+                            <div class="flex items-start space-x-3">
+                                <div class="flex-shrink-0">
+                                    <div class="h-8 w-8 rounded-lg bg-gradient-to-r from-primary to-secondary flex items-center justify-center">
+                                        <i class="lucide lucide-bot text-white h-5 w-5"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="bg-surface/30 rounded-xl p-4">
+                                        
+                                        <ul class="mt-2 space-y-1 text-gray-400">
+
+                                    </div>
+                                    <span class="text-xs text-gray-500 mt-1 block">{{ current_time }}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="mt-4 flex justify-end space-x-2">
-                    <button 
-                        onclick="copyToClipboard()"
-                        class="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                        <i class="fas fa-copy mr-2"></i>
-                        Copiar
-                    </button>
+
+                    <!-- Input Form -->
+                    <form id="aiForm" class="relative">
+                        <div class="gradient-border">
+                            <div class="relative">
+                                <textarea 
+                                    id="user_input" 
+                                    name="user_input" 
+                                    rows="4" 
+                                    required
+                                    class="form-input w-full resize-none pr-28"
+                                    placeholder="Digite sua mensagem aqui..."
+                                ></textarea>
+                                
+                                <div class="absolute bottom-4 right-4 flex items-center space-x-2">
+                                    <button type="button" class="text-gray-400 hover:text-gray-300 transition-colors p-2 hover:bg-white/5 rounded-lg">
+                                        <i class="lucide lucide-paperclip h-5 w-5"></i>
+                                    </button>
+                                    <button 
+                                        type="submit" 
+                                        id="submitButton"
+                                        class="btn-primary"
+                                    >
+                                        <span id="buttonText" class="flex items-center gap-2">
+                                            <span>Enviar</span>
+                                            <i class="lucide lucide-send h-4 w-4"></i>
+                                        </span>
+                                        <i id="loadingIcon" class="lucide lucide-loader-2 animate-spin ml-2 hidden"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Loading State -->
+                    <div id="loadingState" class="hidden mt-6">
+                        <div class="animate-pulse space-y-4">
+                            <div class="h-4 bg-surface rounded-full w-3/4"></div>
+                            <div class="space-y-2">
+                                <div class="h-4 bg-surface rounded-full"></div>
+                                <div class="h-4 bg-surface rounded-full w-5/6"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div id="errorMessage" class="mt-6 bg-red-900/20 border-l-4 border-red-500 p-4 hidden rounded-lg">
+                        <div class="flex items-center">
+                            <i class="lucide lucide-alert-circle text-red-400 mr-3"></i>
+                            <p class="text-sm text-red-300" id="errorText"></p>
+                        </div>
+                    </div>
+
+                    <!-- AI Response -->
+                    <div id="responseSection" class="mt-6 hidden">
+                        <div class="chat-message">
+                            <div class="flex items-start space-x-3">
+                                <div class="flex-shrink-0">
+                                    <div class="h-8 w-8 rounded-lg bg-gradient-to-r from-primary to-secondary flex items-center justify-center">
+                                        <i class="lucide lucide-bot text-white h-5 w-5"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="bg-surface/30 rounded-xl p-4">
+                                        <p id="aiResponse" class="text-gray-300 whitespace-pre-wrap typing-animation"></p>
+                                    </div>
+                                    <div class="mt-2 flex items-center justify-between">
+                                        <span id="timestamp" class="text-xs text-gray-500"></span>
+                                        <button 
+                                            onclick="copyToClipboard()"
+                                            class="btn-secondary inline-flex items-center gap-2 text-xs py-1 px-3"
+                                        >
+                                            <i class="lucide lucide-copy h-4 w-4"></i>
+                                            <span>Copiar</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     {% endif %}
 </div>
-{% endblock %}
 
-{% block scripts %}
-<script>
-    document.getElementById('aiForm')?.addEventListener('submit', async function(e) {
-        e.preventDefault(); // Impede o envio padrão do formulário
-        
-        const submitButton = document.getElementById('submitButton');
-        const buttonText = document.getElementById('buttonText');
-        const loadingIcon = document.getElementById('loadingIcon');
-        const loadingState = document.getElementById('loadingState');
-        const errorMessage = document.getElementById('errorMessage');
-        const responseSection = document.getElementById('responseSection');
-        const aiResponse = document.getElementById('aiResponse');
-        const timestamp = document.getElementById('timestamp');
-        
-        // Esconde mensagens anteriores
-        errorMessage.classList.add('hidden');
-        responseSection.classList.add('hidden');
-        
-        // Mostra estado de carregamento
-        submitButton.disabled = true;
-        buttonText.textContent = 'Processando...';
-        loadingIcon.classList.remove('hidden');
-        loadingState.classList.remove('hidden');
-        
-        try {
-            const userInput = document.getElementById('user_input').value;
-            
-            const response = await fetch('{{ url_for("main.ai_services") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    input: userInput
-                })
-            });
-            
-            const data = await response.json();
-            
-            if (data.error) {
-                // Mostrar erro
-                errorMessage.classList.remove('hidden');
-                document.getElementById('errorText').textContent = data.error;
-            } else {
-                // Mostrar resposta
-                responseSection.classList.remove('hidden');
-                aiResponse.textContent = data.response;
-                
-                // Atualizar timestamp
-                if (data.timestamp) {
-                    timestamp.textContent = `Respondido em: ${data.timestamp} UTC`;
-                }
-            }
-        } catch (error) {
-            console.error('Erro:', error);
-            errorMessage.classList.remove('hidden');
-            document.getElementById('errorText').textContent = 'Erro ao processar sua requisição. Por favor, tente novamente.';
-        } finally {
-            // Restaurar estado do botão
-            submitButton.disabled = false;
-            buttonText.textContent = 'Enviar';
-            loadingIcon.classList.add('hidden');
-            loadingState.classList.add('hidden');
-        }
-    });
-
-    // Função para copiar resposta
-    function copyToClipboard() {
-        const response = document.getElementById('aiResponse').textContent;
-        navigator.clipboard.writeText(response).then(() => {
-            alert('Resposta copiada para a área de transferência!');
-        }).catch(err => {
-            console.error('Erro ao copiar texto: ', err);
-            alert('Erro ao copiar texto. Por favor, tente novamente.');
-        });
+<style>
+    :root {
+        --primary: #8B5CF6;
+        --primary-dark: #7C3AED;
+        --secondary: #06B6D4;
+        --tertiary: #EC4899;
+        --bg-dark: #0F172A;
+        --bg-dark-2: #1E293B;
+        --surface: #1E293B;
+        --text: #F8FAFC;
+        --text-secondary: #94A3B8;
     }
 
-    // Auto-resize textarea
-    const textarea = document.getElementById('user_input');
-    textarea?.addEventListener('input', function() {
-        this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + 'px';
-    });
-</script>
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    .animate-float {
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .animate-pulse-slow {
+        animation: pulse 3s ease-in-out infinite;
+    }
+
+    .glass {
+        background: rgba(17, 24, 39, 0.8);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        transition: all 0.3s ease;
+    }
+
+    .glass:hover {
+        border-color: rgba(255, 255, 255, 0.2);
+        background: rgba(17, 24, 39, 0.9);
+    }
+
+    .gradient-border {
+        position: relative;
+        border-radius: 1rem;
+        background: linear-gradient(45deg, var(--primary), var(--secondary), var(--tertiary));
+        padding: 1px;
+    }
+
+    .gradient-border > * {
+        background: var(--bg-dark-2);
+        border-radius: 1rem;
+    }
+
+    .gradient-text {
+        background: linear-gradient(135deg, #8B5CF6, #EC4899, #06B6D4);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: gradientShift 8s ease infinite;
+    }
+
+.form-input {
+    background: rgba(30, 41, 59, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    color: var(--text);
+    padding: 1rem;
+    border-radius: 1rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    transition: all 0.3s ease;
+    min-height: 120px;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+    background: rgba(30, 41, 59, 0.8);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--tertiary));
+    background-size: 200% auto;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    animation: gradientShift 8s ease infinite;
+}
+
+.btn-primary:hover {
+    background-position: right center;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.stat-card {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(139, 92, 246, 0.3);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.progress-bar {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    overflow: hidden;
+    height: 0.5rem;
+}
+
+.progress-fill {
+    height: 100%;
+    transition: width 0.5s ease-out, background-color 0.3s ease;
+    border-radius: 1rem;
+}
+
+.progress-text {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* Animação para atualizações de estatísticas */
+.stat-card span.gradient-text {
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover .progress-fill {
+    filter: brightness(1.2);
+}
+
+.chat-message {
+    transition: all 0.3s ease;
+}
+
+.chat-message:hover {
+    transform: translateX(4px);
+}
+
+.avatar-glow {
+    position: relative;
+}
+
+.avatar-glow::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    background: linear-gradient(45deg, var(--primary), var(--secondary), var(--tertiary));
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#chatHistory {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) var(--bg-dark-2);
+}
+
+#chatHistory::-webkit-scrollbar {
+    width: 6px;
+}
+
+#chatHistory::-webkit-scrollbar-track {
+    background: var(--bg-dark-2);
+    border-radius: 3px;
+}
+
+#chatHistory::-webkit-scrollbar-thumb {
+    background-color: var(--primary);
+    border-radius: 3px;
+}
+
+.chat-message {
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+
+.avatar-glow:hover::after {
+    opacity: 1;
+}
+</style>
+<script src="{{ url_for('static', filename='js/ai_services.js') }}"></script>
 {% endblock %}

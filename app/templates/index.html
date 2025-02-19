@@ -1,292 +1,232 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Assistente de IA - Plataforma</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #A855F7;
-            --primary-hover: #9333EA;
-            --background: #0F172A;
-            --card-bg: #1E293B;
-            --surface: #334155;
-            --text-primary: #F8FAFC;
-            --text-secondary: #CBD5E1;
-            --success-color: #10B981;
-            --warning-color: #F59E0B;
-            --danger-color: #EF4444;
-            --accent: #06B6D4;
-        }
+{% extends "base.html" %}
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+{% block title %}NexusAI - Interface do Futuro{% endblock %}
 
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--background);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            color: var(--text-primary);
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 900px;
-            width: 100%;
-            background-color: var(--card-bg);
-            padding: 2.5rem;
-            border-radius: 20px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .ai-assistant-icon {
-            font-size: 3rem;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-            filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.3));
-        }
-
-        h1 {
-            color: var(--text-primary);
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-        }
-
-        .content-wrapper {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-
-        .user-section, .features-section {
-            background: var(--surface);
-            padding: 2rem;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        h2 {
-            color: var(--text-primary);
-            font-size: 1.75rem;
-            margin-bottom: 1.5rem;
-            font-weight: 600;
-        }
-
-        .user-info {
-            margin: 1.5rem 0;
-        }
-
-        .info-item {
-            display: flex;
-            align-items: center;
-            margin: 0.75rem 0;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .info-label {
-            color: var(--text-secondary);
-            font-weight: 500;
-            min-width: 120px;
-        }
-
-        .info-value {
-            color: var(--text-primary);
-            font-weight: 500;
-        }
-
-        .feature-item {
-            display: flex;
-            align-items: center;
-            margin: 1rem 0;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.2s ease;
-        }
-
-        .feature-item:hover {
-            transform: translateX(5px);
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .feature-icon {
-            color: var(--primary-color);
-            font-size: 1.25rem;
-            margin-right: 1rem;
-        }
-
-        .subscription-status {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.75rem 1.5rem;
-            border-radius: 99px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            margin-top: 1.5rem;
-        }
-
-        .status-active {
-            background-color: rgba(16, 185, 129, 0.2);
-            color: #4ADE80;
-        }
-
-        .status-inactive {
-            background-color: rgba(239, 68, 68, 0.2);
-            color: #FCA5A5;
-        }
-
-        .cta-button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem 2rem;
-            background: var(--primary-color);
-            color: white;
-            text-decoration: none;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            margin-top: 1.5rem;
-            border: none;
-            cursor: pointer;
-        }
-
-        .cta-button:hover {
-            background: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
-        }
-
-        .welcome-message {
-            font-size: 1.2rem;
-            color: var(--text-secondary);
-            margin: 1.5rem 0;
-            text-align: center;
-        }
-
-        .mr-2 {
-            margin-right: 0.5rem;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .content-wrapper {
-                grid-template-columns: 1fr;
-            }
-
-            .container {
-                padding: 1.5rem;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <i class="fas fa-robot ai-assistant-icon"></i>
-            <h1>Assistente de IA</h1>
-            <p>Seu assistente pessoal de inteligência artificial</p>
+{% block content %}
+<div class="min-h-screen">
+    <!-- Hero Section with Enhanced Logo -->
+    <div class="relative overflow-hidden py-20 sm:py-32">
+        <!-- Animated Background Elements -->
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute -inset-[10px] opacity-50">
+                <div class="absolute inset-0">
+                    <div class="absolute inset-0 bg-gradient-to-r from-purple-500 to-cyan-500 animate-gradient blur-3xl opacity-30"></div>
+                </div>
+            </div>
         </div>
 
-        {% if user_data %}
-            <div class="content-wrapper">
-                <div class="user-section">
-                    <h2>Sua Conta</h2>
-                    <div class="user-info">
-                        <div class="info-item">
-                            <span class="info-label">Nome</span>
-                            <span class="info-value">{{ user_data.name }}</span>
+        <!-- Main Content -->
+        <div class="container mx-auto px-4 relative">
+            <!-- Enhanced Logo Section -->
+            <div class="text-center mb-16 animate-float">
+                <div class="relative inline-block">
+                    <!-- Glowing Orb Behind Logo -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-purple-500 to-cyan-500 blur-2xl opacity-20 scale-150"></div>
+                    
+                    <!-- Logo Container -->
+                    <div class="relative flex flex-col items-center">
+                        <div class="h-24 w-24 mb-6 relative">
+                            <!-- Rotating Border -->
+                            <div class="absolute inset-0 bg-gradient-to-r from-purple-500 to-cyan-500 rounded-2xl animate-spin-slow"></div>
+                            <!-- Inner Logo -->
+                            <div class="absolute inset-0.5 bg-gray-900 rounded-2xl flex items-center justify-center">
+                                <i class="lucide lucide-brain-circuit text-white h-12 w-12"></i>
+                            </div>
                         </div>
-                        <div class="info-item">
-                            <span class="info-label">E-mail</span>
-                            <span class="info-value">{{ user_data.email }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Telefone</span>
-                            <span class="info-value">{{ user_data.phone }}</span>
-                        </div>
+                        <h1 class="text-5xl sm:text-6xl font-bold bg-gradient-to-r from-purple-500 to-cyan-500 bg-clip-text text-transparent mb-4">
+                            NexusAI
+                        </h1>
+                        <p class="text-gray-400 text-xl max-w-2xl mx-auto">
+                            A próxima evolução em inteligência artificial
+                        </p>
                     </div>
-                    <div class="subscription-status {% if user_data.subscription_status == 'Ativo' %}status-active{% else %}status-inactive{% endif %}">
-                        <i class="fas {% if user_data.subscription_status == 'Ativo' %}fa-check-circle{% else %}fa-clock{% endif %} mr-2"></i>
-                        Status da Assinatura: {{ user_data.subscription_status }}
-                    </div>
-                    {% if user_data.subscription_status != 'Ativo' %}
-                        <a href="{{ url_for('subscription.upgrade') }}" class="cta-button">
-                            <i class="fas fa-crown mr-2"></i>
-                            Assinar Agora
+                </div>
+            </div>
+
+            <!-- Feature Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+                <!-- Chat Card -->
+                <div class="feature-card group">
+                    <div class="absolute inset-0 bg-gradient-to-r from-purple-500 to-cyan-500 opacity-0 group-hover:opacity-10 transition-opacity rounded-2xl"></div>
+                    <div class="relative p-6">
+                        <div class="h-14 w-14 rounded-xl bg-gradient-to-r from-purple-500 to-cyan-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <i class="lucide lucide-message-square text-white h-7 w-7"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-white mb-2">Chat Avançado</h3>
+                        <p class="text-gray-400 mb-4">Experimente uma nova forma de interagir com IA.</p>
+                        <a href="{{ url_for('main.ai_services') }}" class="inline-flex items-center text-white hover:text-cyan-400 transition-colors">
+                            <span>Iniciar Chat</span>
+                            <i class="lucide lucide-arrow-right ml-2 h-4 w-4"></i>
                         </a>
-                    {% endif %}
+                    </div>
                 </div>
-                <div class="features-section">
-                    <h2>Recursos do Assistente</h2>
-                    <div class="feature-item">
-                        <i class="feature-icon fas fa-brain"></i>
-                        <div>IA Avançada e Inteligente</div>
+
+                <!-- Analysis Card -->
+                <div class="feature-card group">
+                    <div class="absolute inset-0 bg-gradient-to-r from-purple-500 to-cyan-500 opacity-0 group-hover:opacity-10 transition-opacity rounded-2xl"></div>
+                    <div class="relative p-6">
+                        <div class="h-14 w-14 rounded-xl bg-gradient-to-r from-purple-500 to-cyan-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <i class="lucide lucide-bar-chart text-white h-7 w-7"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-white mb-2">Análise Preditiva</h3>
+                        <p class="text-gray-400 mb-4">Insights poderosos através de análise avançada.</p>
+                        <button class="inline-flex items-center text-white hover:text-cyan-400 transition-colors">
+                            <span>Em Breve</span>
+                            <i class="lucide lucide-clock ml-2 h-4 w-4"></i>
+                        </button>
                     </div>
-                    <div class="feature-item">
-                        <i class="feature-icon fas fa-bolt"></i>
-                        <div>Respostas em Tempo Real</div>
-                    </div>
-                    <div class="feature-item">
-                        <i class="feature-icon fas fa-lock"></i>
-                        <div>Conversas Seguras</div>
-                    </div>
-                    <div class="feature-item">
-                        <i class="feature-icon fas fa-history"></i>
-                        <div>Disponível 24/7</div>
+                </div>
+
+                <!-- Integration Card -->
+                <div class="feature-card group">
+                    <div class="absolute inset-0 bg-gradient-to-r from-purple-500 to-cyan-500 opacity-0 group-hover:opacity-10 transition-opacity rounded-2xl"></div>
+                    <div class="relative p-6">
+                        <div class="h-14 w-14 rounded-xl bg-gradient-to-r from-purple-500 to-cyan-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <i class="lucide lucide-boxes text-white h-7 w-7"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-white mb-2">Integrações</h3>
+                        <p class="text-gray-400 mb-4">Conecte-se com suas ferramentas favoritas.</p>
+                        <button class="inline-flex items-center text-white hover:text-cyan-400 transition-colors">
+                            <span>Explorar</span>
+                            <i class="lucide lucide-external-link ml-2 h-4 w-4"></i>
+                        </button>
                     </div>
                 </div>
             </div>
-        {% else %}
-            <div class="welcome-message">
-                Acesse seu assistente de IA pessoal e descubra possibilidades ilimitadas
+
+            <!-- Stats Section -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                <div class="stat-card">
+                    <div class="flex flex-col items-center">
+                        <div class="text-4xl font-bold bg-gradient-to-r from-purple-500 to-cyan-500 bg-clip-text text-transparent mb-2">
+                            500K+
+                        </div>
+                        <p class="text-gray-400">Mensagens Processadas</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="flex flex-col items-center">
+                        <div class="text-4xl font-bold bg-gradient-to-r from-purple-500 to-cyan-500 bg-clip-text text-transparent mb-2">
+                            99.9%
+                        </div>
+                        <p class="text-gray-400">Precisão</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="flex flex-col items-center">
+                        <div class="text-4xl font-bold bg-gradient-to-r from-purple-500 to-cyan-500 bg-clip-text text-transparent mb-2">
+                            24/7
+                        </div>
+                        <p class="text-gray-400">Disponibilidade</p>
+                    </div>
+                </div>
             </div>
-            <div style="text-align: center;">
-                <a href="{{ url_for('main.login') }}" class="cta-button">
-                    <i class="fas fa-sign-in-alt mr-2"></i>
-                    Começar Agora
+
+            <!-- CTA Section -->
+            <div class="text-center">
+                <a href="{{ url_for('main.ai_services') }}" class="cta-button">
+                    <span class="relative z-10">Começar Agora</span>
                 </a>
-                <p style="margin-top: 1rem; color: var(--text-secondary);">
-                    Novo por aqui? <a href="{{ url_for('main.register') }}" style="color: var(--primary-color); text-decoration: none;">Criar uma conta</a>
-                </p>
             </div>
-        {% endif %}
+        </div>
     </div>
-</body>
-</html>
+</div>
+
+<style>
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-20px); }
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 1; }
+    }
+
+    @keyframes spin-slow {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes gradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .animate-float {
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .animate-spin-slow {
+        animation: spin-slow 10s linear infinite;
+    }
+
+    .animate-gradient {
+        animation: gradient 15s ease infinite;
+        background-size: 400% 400%;
+    }
+
+    .feature-card {
+        position: relative;
+        background: rgba(17, 24, 39, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(139, 92, 246, 0.3);
+    }
+
+    .stat-card {
+        background: rgba(17, 24, 39, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        padding: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(139, 92, 246, 0.3);
+    }
+
+    .cta-button {
+        display: inline-block;
+        padding: 1rem 2.5rem;
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: white;
+        background: linear-gradient(to right, #A855F7, #06B6D4);
+        border-radius: 1rem;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .cta-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to right, #8B5CF6, #06B6D4);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .cta-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(139, 92, 246, 0.2);
+    }
+
+    .cta-button:hover::before {
+        opacity: 1;
+    }
+</style>
+{% endblock %}

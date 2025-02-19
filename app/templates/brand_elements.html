@@ -1,0 +1,133 @@
+<!-- Adicione estes elementos ao início do seu CSS -->
+<style>
+    /* Brand Colors */
+    :root {
+        /* Primary Brand Colors */
+        --nexus-primary: #8B5CF6;
+        --nexus-secondary: #06B6D4;
+        --nexus-tertiary: #EC4899;
+        
+        /* UI Colors */
+        --nexus-bg: #0F172A;
+        --nexus-surface: #1E293B;
+        --nexus-text: #F8FAFC;
+        --nexus-text-secondary: #94A3B8;
+        
+        /* Accent Colors */
+        --nexus-success: #10B981;
+        --nexus-warning: #F59E0B;
+        --nexus-error: #EF4444;
+        
+        /* Gradient Presets */
+        --nexus-gradient: linear-gradient(135deg, var(--nexus-primary), var(--nexus-secondary), var(--nexus-tertiary));
+        --nexus-gradient-soft: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(6, 182, 212, 0.1), rgba(236, 72, 153, 0.1));
+    }
+
+    /* Brand Logo Animation */
+    @keyframes nexusGlow {
+        0% { filter: drop-shadow(0 0 2px rgba(139, 92, 246, 0.3)); }
+        50% { filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.5)); }
+        100% { filter: drop-shadow(0 0 2px rgba(139, 92, 246, 0.3)); }
+    }
+
+    /* Logo Component */
+    .nexus-logo {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .nexus-logo-icon {
+        position: relative;
+        width: 2.5rem;
+        height: 2.5rem;
+        animation: nexusGlow 3s ease-in-out infinite;
+    }
+
+    .nexus-logo-icon::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: var(--nexus-gradient);
+        border-radius: 0.75rem;
+        transform: rotate(45deg);
+    }
+
+    .nexus-logo-icon::after {
+        content: '';
+        position: absolute;
+        inset: 2px;
+        background: var(--nexus-bg);
+        border-radius: 0.65rem;
+        transform: rotate(45deg);
+    }
+
+    .nexus-logo-text {
+        font-size: 1.5rem;
+        font-weight: 700;
+        background: var(--nexus-gradient);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.025em;
+    }
+
+    /* Brand Typography */
+    .nexus-title {
+        font-size: 2rem;
+        font-weight: 700;
+        background: var(--nexus-gradient);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.025em;
+    }
+
+    .nexus-subtitle {
+        color: var(--nexus-text-secondary);
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    /* UI Components */
+    .nexus-card {
+        background: rgba(17, 24, 39, 0.8);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .nexus-card:hover {
+        border-color: rgba(139, 92, 246, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .nexus-button {
+        background: var(--nexus-gradient);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .nexus-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(139, 92, 246, 0.2);
+    }
+</style>
+
+<!-- Exemplo de uso do logo -->
+<div class="nexus-logo">
+    <div class="nexus-logo-icon">
+        <i class="lucide lucide-brain-circuit absolute inset-0 z-10 m-auto text-white h-5 w-5"></i>
+    </div>
+    <span class="nexus-logo-text">NexusAI</span>
+</div>
+
+<!-- Exemplo de título de seção -->
+<div class="text-center">
+    <h1 class="nexus-title">Bem-vindo ao NexusAI</h1>
+    <p class="nexus-subtitle">Sua interface inteligente para interação com IA</p>
+</div>

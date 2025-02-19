@@ -5,149 +5,264 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock %}</title>
     
-    <!-- Tailwind CSS e outros estilos -->
-    <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
     <style>
+        :root {
+            --primary: #A855F7;
+            --primary-dark: #9333EA;
+            --secondary: #06B6D4;
+            --bg-dark: #0F172A;
+            --bg-dark-2: #1E293B;
+            --surface: #334155;
+            --text: #F8FAFC;
+            --text-secondary: #94A3B8;
+            --success: #10B981;
+            --error: #EF4444;
+            --warning: #F59E0B;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark), var(--bg-dark-2));
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text);
+            letter-spacing: -0.025em;
         }
-        
+
+        .navbar {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-brand {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.025em;
+        }
+
         .nav-link {
-            @apply border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-3 pt-1 border-b-2 text-sm font-medium transition-colors duration-200;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.2s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
         }
-        
-        .nav-link.active {
-            @apply border-indigo-500 text-gray-900;
+
+        .nav-link:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.05);
         }
-        
+
         .btn {
-            @apply px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200;
+            padding: 0.75rem 1.75rem;
+            border-radius: 1rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            letter-spacing: -0.01em;
         }
-        
+
         .btn-primary {
-            @apply bg-indigo-600 text-white hover:bg-indigo-700;
+            background: linear-gradient(to right, #A855F7, #06B6D4);
+            color: white;
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.25);
         }
-        
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(168, 85, 247, 0.35);
+            opacity: 0.9;
+        }
+
         .btn-secondary {
-            @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.18);
+        }
+
+        .user-info {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .profile-dropdown {
+            background: var(--bg-dark-2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            padding: 0.5rem;
+            width: 280px;
+        }
+
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-radius: 0.75rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+        }
+
+        .dropdown-item.danger {
+            color: var(--error);
+        }
+
+        .dropdown-item.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .profile-header {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 0.5rem;
+        }
+
+        .flash-message {
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .flash-success {
+            border-color: rgba(16, 185, 129, 0.2);
+            color: #34D399;
+        }
+
+        .flash-error {
+            border-color: rgba(239, 68, 68, 0.2);
+            color: #F87171;
+        }
+
+        .footer {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 2rem 0;
+            margin-top: auto;
+        }
+
+        .avatar {
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--surface);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
         }
     </style>
 </head>
 
-<body class="min-h-screen bg-gray-50">
+<body class="antialiased">
     <!-- Navigation -->
-    <nav class="bg-white shadow-sm sticky top-0 z-50">
+    <nav class="navbar sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <!-- Left side -->
-                <div class="flex items-center">
-                    <!-- Menu Icon -->
-                    <button class="p-2 rounded-md hover:bg-gray-100 lg:hidden">
-                        <i class="lucide lucide-menu h-6 w-6 text-gray-600"></i>
-                    </button>
-                    
-                    <!-- Logo/Brand -->
-                    <a href="{{ url_for('main.index') }}" class="flex items-center space-x-2 ml-2 lg:ml-0">
-                        <i class="lucide lucide-brain-circuit h-8 w-8 text-indigo-600"></i>
-                        <span class="font-bold text-gray-900">AI Assistant</span>
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('main.index') }}" class="nav-brand flex items-center space-x-2">
+                        <i class="lucide lucide-brain-circuit h-8 w-8"></i>
+                        <span>NexusAI</span>
                     </a>
                 </div>
 
-                <!-- Right side -->
-                <div class="flex items-center justify-end flex-1">
+                <div class="flex items-center space-x-6">
                     {% if session.get('user_id') %}
-                        <!-- User Profile -->
                         <div class="flex items-center space-x-4">
-                            <!-- Data/Hora UTC -->
-                            <div class="hidden lg:block text-sm text-gray-500">
-                                <i class="lucide lucide-clock h-4 w-4 inline-block"></i>
-                                <span>{{ '2025-02-10 21:02:39' }}</span>
-                            </div>
-
-                            <!-- User Info -->
-                            <div class="text-sm">
-                                <p class="text-gray-900 font-medium flex items-center">
-                                    <i class="lucide lucide-user h-4 w-4 mr-1"></i>
-                                    {{ session.get('user_name', 'LaisVilla') }}
-                                </p>
-                                <p class="text-gray-500 text-xs">
-                                    Requests remaining: {{ session.get('requests_remaining', '...') }}
-                                </p>
-                            </div>
-
-                            <!-- Profile Dropdown -->
-                            <div class="relative ml-4">
-                                <button class="flex items-center space-x-2 p-2 rounded-full hover:bg-gray-100">
-                                    <div class="relative">
-                                        <img class="h-10 w-10 rounded-full object-cover border-2 border-indigo-200"
-                                             src="{% if session.get('profile_image') %}{{ url_for('static', filename=session.get('profile_image')) }}{% else %}https://ui-avatars.com/api/?name=LaisVilla&background=random{% endif %}"
+                            <div class="user-info hidden lg:flex items-center space-x-3">
+                                <div class="text-right">
+                                    <p class="text-sm font-semibold">{{ session.get('user_name', 'LaisVilla') }}</p>
+                                    <p class="text-xs text-gray-400">2025-02-13 20:29:42</p>
+                                </div>
+                                <div class="relative">
+                                    <button class="rounded-full p-1 hover:bg-white/5 transition-colors">
+                                        <img class="h-10 w-10 rounded-full object-cover avatar"
+                                             src="https://ui-avatars.com/api/?name=LaisVilla&background=random"
                                              alt="Profile">
-                                        <span class="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-green-400 border-2 border-white"></span>
-                                    </div>
-                                    <i class="lucide lucide-chevron-down h-4 w-4 text-gray-500"></i>
-                                </button>
+                                        <span class="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-400 border-2 border-bg-dark-2"></span>
+                                    </button>
 
-                                <!-- Dropdown Menu -->
-                                <div class="hidden absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg py-1 ring-1 ring-black ring-opacity-5">
-                                    <!-- User Profile Header -->
-                                    <div class="px-4 py-3 border-b border-gray-100">
-                                        <div class="flex items-center space-x-3">
-                                            <img class="h-12 w-12 rounded-full object-cover"
-                                                 src="{% if session.get('profile_image') %}{{ url_for('static', filename=session.get('profile_image')) }}{% else %}https://ui-avatars.com/api/?name=LaisVilla&background=random{% endif %}"
-                                                 alt="Profile">
-                                            <div>
-                                                <p class="text-sm font-medium text-gray-900">{{ session.get('user_name', 'LaisVilla') }}</p>
-                                                <p class="text-xs text-gray-500">{{ session.get('user_email', '') }}</p>
+                                    <!-- Dropdown -->
+                                    <div class="hidden profile-dropdown absolute right-0 mt-2">
+                                        <div class="profile-header">
+                                            <div class="flex items-center space-x-3">
+                                                <img class="h-12 w-12 rounded-full object-cover avatar"
+                                                     src="https://ui-avatars.com/api/?name=LaisVilla&background=random"
+                                                     alt="Profile">
+                                                <div>
+                                                    <p class="font-medium">LaisVilla</p>
+                                                    <p class="text-sm text-gray-400">Premium Member</p>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <!-- Menu Items -->
-                                    <div class="py-1">
-                                        <!-- Profile Settings -->
-                                        {# <a href="{{ url_for('main.profile_settings') }}"  #}
-                                        <a href="#" 
-                                           class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                            <i class="lucide lucide-user-cog h-4 w-4 mr-3 text-gray-400"></i>
-                                            Configurações de Perfil
+                                        <a href="#" class="dropdown-item">
+                                            <i class="lucide lucide-user-cog h-5 w-5"></i>
+                                            <span>Perfil</span>
                                         </a>
-
-                                        <!-- Account Settings -->
-                                        {# <a href="{{ url_for('main.profile_settings') }}#account"  #}
-                                        <a href="#" 
-                                           class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                            <i class="lucide lucide-settings h-4 w-4 mr-3 text-gray-400"></i>
-                                            Configurações da Conta
+                                        <a href="#" class="dropdown-item">
+                                            <i class="lucide lucide-settings h-5 w-5"></i>
+                                            <span>Configurações</span>
                                         </a>
-
-                                        <!-- Usage Statistics -->
-                                        {# <a href="{{ url_for('main.profile_settings') }}#usage"  #}
-                                        <a href="#" 
-                                           class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                            <i class="lucide lucide-activity h-4 w-4 mr-3 text-gray-400"></i>
-                                            Estatísticas de Uso
+                                        <a href="#" class="dropdown-item">
+                                            <i class="lucide lucide-help-circle h-5 w-5"></i>
+                                            <span>Ajuda</span>
                                         </a>
-                                    </div>
-
-                                    <!-- Separator -->
-                                    <div class="border-t border-gray-100 my-1"></div>
-
-                                    <!-- Help & Logout -->
-                                    <div class="py-1">
-                                        <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                            <i class="lucide lucide-help-circle h-4 w-4 mr-3 text-gray-400"></i>
-                                            Ajuda e Suporte
-                                        </a>
-                                        <a href="{{ url_for('main.logout') }}" 
-                                           class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-                                            <i class="lucide lucide-log-out h-4 w-4 mr-3 text-red-500"></i>
-                                            Sair
+                                        <div class="border-t border-white/5 my-1"></div>
+                                        <a href="{{ url_for('main.logout') }}" class="dropdown-item danger">
+                                            <i class="lucide lucide-log-out h-5 w-5"></i>
+                                            <span>Sair</span>
                                         </a>
                                     </div>
                                 </div>
@@ -156,12 +271,12 @@
                     {% else %}
                         <div class="flex items-center space-x-4">
                             <a href="{{ url_for('main.login') }}" class="btn btn-secondary">
-                                <i class="lucide lucide-log-in h-4 w-4 mr-1"></i>
-                                Login
+                                <i class="lucide lucide-log-in h-4 w-4"></i>
+                                <span>Entrar</span>
                             </a>
-                            <a href="{{ url_for('main.register') }}" class="btn btn-primary">
-                                <i class="lucide lucide-user-plus h-4 w-4 mr-1"></i>
-                                Register
+                            <a href="{{ url_for('main.register') }}" class="bg-gradient-to-r from-purple-500 to-cyan-500 btn">
+                                <i class="lucide lucide-user-plus h-4 w-4"></i>
+                                <span>Criar conta</span>
                             </a>
                         </div>
                     {% endif %}
@@ -171,14 +286,14 @@
     </nav>
 
     <!-- Flash Messages -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="mb-4 p-4 rounded-lg flex items-center {% if category == 'success' %}bg-green-50 text-green-700{% elif category == 'danger' %}bg-red-50 text-red-700{% else %}bg-blue-50 text-blue-700{% endif %}">
-                        <i class="lucide {% if category == 'success' %}lucide-check-circle{% elif category == 'danger' %}lucide-alert-circle{% else %}lucide-info{% endif %} h-5 w-5 mr-2"></i>
-                        {{ message }}
-                        <button class="ml-auto" onclick="this.parentElement.remove()">
+                    <div class="flash-message {% if category == 'success' %}flash-success{% elif category == 'error' %}flash-error{% endif %}">
+                        <i class="lucide {% if category == 'success' %}lucide-check-circle{% else %}lucide-alert-circle{% endif %} h-5 w-5"></i>
+                        <span>{{ message }}</span>
+                        <button class="ml-auto hover:opacity-75" onclick="this.parentElement.remove()">
                             <i class="lucide lucide-x h-4 w-4"></i>
                         </button>
                     </div>
@@ -188,25 +303,20 @@
     </div>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex-grow">
         {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t mt-auto">
-        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center">
-                <p class="text-gray-500 text-sm">
-                    © 2025 AI Assistant. All rights reserved.
-                </p>
-                <div class="text-gray-400 text-sm">
-                    <span>{{ '2025-02-10 20:53:50' }}</span>
-                </div>
-                <div class="flex space-x-6">
-                    <a href="#" class="text-gray-400 hover:text-gray-500">
+    <footer class="footer">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-400">© 2025 AI Assistant. All rights reserved.</span>
+                <div class="flex items-center space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
                         <i class="lucide lucide-github h-5 w-5"></i>
                     </a>
-                    <a href="#" class="text-gray-400 hover:text-gray-500">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
                         <i class="lucide lucide-twitter h-5 w-5"></i>
                     </a>
                 </div>
@@ -214,31 +324,25 @@
         </div>
     </footer>
 
-    <!-- Scripts -->
     <script>
-        // Inicializar ícones Lucide
         lucide.createIcons();
 
-        // Toggle do menu dropdown melhorado
         document.addEventListener('DOMContentLoaded', function() {
-            const profileButton = document.querySelector('.rounded-full');
-            const dropdown = profileButton?.nextElementSibling;
+            const profileButton = document.querySelector('.avatar').parentElement;
+            const dropdown = document.querySelector('.profile-dropdown');
             
             if (profileButton && dropdown) {
-                // Toggle do dropdown ao clicar no botão
                 profileButton.addEventListener('click', function(e) {
                     e.stopPropagation();
                     dropdown.classList.toggle('hidden');
                 });
 
-                // Fechar dropdown ao clicar em qualquer lugar fora
                 document.addEventListener('click', function(e) {
                     if (!dropdown.contains(e.target) && !profileButton.contains(e.target)) {
                         dropdown.classList.add('hidden');
                     }
                 });
 
-                // Fechar dropdown ao pressionar ESC
                 document.addEventListener('keydown', function(e) {
                     if (e.key === 'Escape') {
                         dropdown.classList.add('hidden');
