@@ -10,6 +10,24 @@
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     
     <style>
+        /* Estilo para input datetime-local no tema escuro */
+        input[type="datetime-local"] {
+            color-scheme: dark;
+        }
+
+        /* Animação de fade para o modal */
+        .animate-fade-in {
+            animation: fadeIn 0.2s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
         :root {
             --primary: #A855F7;
             --primary-dark: #9333EA;
@@ -215,7 +233,20 @@
                         <i class="lucide lucide-brain-circuit h-8 w-8"></i>
                         <span>NexusAI</span>
                     </a>
+                    {% if session.get('user_id') %}
+                    <div class="hidden md:flex items-center space-x-4">
+                        <a href="{{ url_for('calendar_tasks.calendar') }}" class="nav-link flex items-center space-x-2">
+                            <i class="lucide lucide-calendar h-4 w-4"></i>
+                            <span>Calendário</span>
+                        </a>
+                        <a href="{{ url_for('calendar_tasks.tasks') }}" class="nav-link flex items-center space-x-2">
+                            <i class="lucide lucide-check-square h-4 w-4"></i>
+                            <span>Tarefas</span>
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
+                
 
                 <div class="flex items-center space-x-6">
                     {% if session.get('user_id') %}

@@ -54,6 +54,16 @@ def require_active_subscription(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# Middleware para verificar autenticação
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('login.html'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 
 @main.route('/', methods=['GET', 'POST'])
 def index():

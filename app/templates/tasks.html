@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+
+{% block title %}Tarefas - NexusAI{% endblock %}
+
+{% block content %}
+<!-- Estilos personalizados -->
+<style>
+    /* Estilos para os cartões de tarefas */
+    .task-card {
+        transition: all 0.3s ease;
+        cursor: grab;
+    }
+
+    .task-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .task-card:active {
+        cursor: grabbing;
+    }
+
+    .task-card.dragging {
+        opacity: 0.5;
+        transform: scale(0.95);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Estilos para os botões */
+    .edit-btn, .status-btn {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .edit-btn:hover, .status-btn:hover {
+        transform: translateY(-1px);
+    }
+
+    /* Animação para os ícones */
+    .lucide {
+        transition: all 0.3s ease;
+    }
+
+    button:hover .lucide {
+        transform: scale(1.1);
+    }
+
+    /* Melhorias no modal */
+    #taskModal {
+        backdrop-filter: blur(8px);
+    }
+
+    #taskModal .bg-[#1E293B] {
+        box-shadow: 0 0 40px rgba(0,0,0,0.3);
+    }
+
+    /* Inputs com melhor feedback visual */
+    input:focus, select:focus, textarea:focus {
+        box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.3);
+    }
+
+    /* Estilo para o contador de tarefas */
+    [id$="-count"] {
+        min-width: 28px;
+        text-align: center;
+    }
+
+    /* Estilos para as colunas de tarefas */
+    .task-column {
+        transition: all 0.3s ease;
+    }
+
+    .task-column:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Estilos para containers de drag and drop */
+    .task-container {
+        border: 2px dashed transparent;
+        transition: all 0.2s ease;
+        min-height: 200px;
+        padding: 1rem;
+        border-radius: 0.5rem;
+    }
+
+    .task-container.drag-over {
+        border-color: rgba(139, 92, 246, 0.5);
+        background-color: rgba(139, 92, 246, 0.1);
+        transform: scale(1.02);
+    }
+
+    /* Animações para drag and drop */
+    @keyframes pulse {
+        0% { border-color: rgba(139, 92, 246, 0.3); }
+        50% { border-color: rgba(139, 92, 246, 0.6); }
+        100% { border-color: rgba(139, 92, 246, 0.3); }
+    }
+
+    .task-container.drag-over {
+        animation: pulse 1.5s infinite;
+    }
+
+    /* Estado vazio dos containers */
+    .task-container:empty::after {
+        content: 'Arraste uma tarefa para esta coluna';
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        min-height: 150px;
+        color: rgba(255, 255, 255, 0.3);
+        font-size: 0.875rem;
+        text-align: center;
+        border: 2px dashed rgba(255, 255, 255, 0.1);
+        border-radius: 0.5rem;
+        margin: 0.5rem;
+    }
+</style>
+
+<!-- No seu grid de status, atualize cada container de tarefas -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Tarefas Pendentes -->
+    <div class="task-column bg-[#1E293B] rounded-xl shadow-xl border border-gray-700 p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                <i class="lucide lucide-clock h-6 w-6 text-yellow-500"></i>
+                Pendentes
+            </h2>
+            <span id="pending-count" class="bg-yellow-500/20 text-yellow-500 px-3 py-1 rounded-full text-sm font-medium">0</span>
+        </div>
+        <div id="pending-tasks" 
+            class="space-y-4 min-h-[200px] p-4 rounded-lg transition-all duration-200 task-container"
+            data-status="pending"
+            ondragover="handleDragOver(event)"
+            ondrop="handleDrop(event)">
+        </div>
+    </div>
+    
+    <!-- Tarefas em Andamento -->
+    <div class="task-column bg-[#1E293B] rounded-xl shadow-xl border border-gray-700 p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                <i class="lucide lucide-loader-2 h-6 w-6 text-blue-500"></i>
+                Em Andamento
+            </h2>
+            <span id="in-progress-count" class="bg-blue-500/20 text-blue-500 px-3 py-1 rounded-full text-sm font-medium">0</span>
+        </div>
+        <div id="in-progress-tasks" 
+            class="space-y-4 min-h-[200px] p-4 rounded-lg transition-all duration-200 task-container"
+            data-status="in_progress"
+            ondragover="handleDragOver(event)"
+            ondrop="handleDrop(event)">
+        </div>
+    </div>
+    
+    <!-- Tarefas Concluídas -->
+    <div class="task-column bg-[#1E293B] rounded-xl shadow-xl border border-gray-700 p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                <i class="lucide lucide-check-circle h-6 w-6 text-green-500"></i>
+                Concluídas
+            </h2>
+            <span id="completed-count" class="bg-green-500/20 text-green-500 px-3 py-1 rounded-full text-sm font-medium">0</span>
+        </div>
+        <div id="completed-tasks" 
+            class="space-y-4 min-h-[200px] p-4 rounded-lg transition-all duration-200 task-container"
+            data-status="completed"
+            ondragover="handleDragOver(event)"
+            ondrop="handleDrop(event)">
+        </div>
+    </div>
+</div>
+    
+    <!-- Modal para Criar/Editar Tarefa -->
+    <div id="taskModal" class="hidden fixed inset-0 bg-gray-900/75 backdrop-blur-sm z-50">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-[#1E293B] w-full max-w-md rounded-xl shadow-xl border border-gray-700">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-semibold text-white flex items-center gap-2">
+                            <i class="lucide lucide-file-plus h-6 w-6 text-purple-500"></i>
+                            <span>Nova Tarefa</span>
+                        </h3>
+                        <button onclick="closeTaskModal()" 
+                            class="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-gray-700/50 transition-all">
+                            <i class="lucide lucide-x h-5 w-5"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="taskForm" class="space-y-5">
+                        <!-- Campos do formulário com estilos melhorados -->
+                        <div class="space-y-4">
+                            <div>
+                                <label for="taskTitle" class="block text-sm font-medium text-gray-300 mb-1">
+                                    Título*
+                                </label>
+                                <input type="text" id="taskTitle" name="title" required
+                                    class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-3 text-white 
+                                           focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                           transition-all duration-200">
+                            </div>
+                            
+                            <div>
+                                <label for="taskDueDate" class="block text-sm font-medium text-gray-300 mb-1">
+                                    Data de Vencimento
+                                </label>
+                                <input type="datetime-local" id="taskDueDate" name="due_date"
+                                    class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-3 text-white 
+                                           focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                           transition-all duration-200">
+                            </div>
+                            
+                            <div>
+                                <label for="taskPriority" class="block text-sm font-medium text-gray-300 mb-1">
+                                    Prioridade*
+                                </label>
+                                <select id="taskPriority" name="priority" required
+                                    class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-3 text-white 
+                                           focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                           transition-all duration-200">
+                                    <option value="low">Baixa</option>
+                                    <option value="medium" selected>Média</option>
+                                    <option value="high">Alta</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="taskStatus" class="block text-sm font-medium text-gray-300 mb-1">
+                                    Status*
+                                </label>
+                                <select id="taskStatus" name="status" required
+                                    class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-3 text-white 
+                                           focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                           transition-all duration-200">
+                                    <option value="pending" selected>Pendente</option>
+                                    <option value="in_progress">Em Andamento</option>
+                                    <option value="completed">Concluída</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label for="taskDescription" class="block text-sm font-medium text-gray-300 mb-1">
+                                    Descrição
+                                </label>
+                                <textarea id="taskDescription" name="description" rows="3" 
+                                    class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-3 text-white 
+                                           focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                           transition-all duration-200"></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Botões do formulário -->
+                        <div class="mt-6 flex justify-between">
+                            <button type="button" id="deleteTaskButton"
+                                onclick="deleteTask()"
+                                class="hidden px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 
+                                       transition-all duration-200 flex items-center gap-2">
+                                <i class="lucide lucide-trash-2 h-4 w-4"></i>
+                                <span>Excluir</span>
+                            </button>
+                            <div class="flex gap-3">
+                                <button type="button" onclick="closeTaskModal()" 
+                                    class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 
+                                           transition-all duration-200 flex items-center gap-2">
+                                    <i class="lucide lucide-x h-4 w-4"></i>
+                                    <span>Cancelar</span>
+                                </button>
+                                <button type="submit" 
+                                    class="px-4 py-2 bg-gradient-to-r from-purple-500 to-cyan-500 text-white rounded-lg 
+                                           hover:opacity-90 transition-all duration-200 flex items-center gap-2">
+                                    <i class="lucide lucide-save h-4 w-4"></i>
+                                    <span>Salvar</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Carregamento do Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+<!-- Inicialização dos ícones e configurações -->
+<script>
+    // Inicializar ícones Lucide
+    lucide.createIcons();
+
+    // Recriar ícones após alterações dinâmicas no DOM
+    const observer = new MutationObserver(() => {
+        lucide.createIcons();
+    });
+
+    // Observar mudanças no DOM
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+
+    // Estilo para input datetime-local no tema escuro
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateInputs = document.querySelectorAll('input[type="datetime-local"]');
+        dateInputs.forEach(input => {
+            input.style.colorScheme = 'dark';
+        });
+    });
+</script>
+
+<!-- Seu arquivo tasks.js -->
+<script src="{{ url_for('static', filename='js/tasks.js') }}"></script>
+{% endblock %}

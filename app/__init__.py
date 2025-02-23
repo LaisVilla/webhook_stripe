@@ -45,4 +45,7 @@ def create_app():
     from .routes import main as main_blueprint
     app.register_blueprint(main_blueprint)
 
+    from .calendar_tasks import calendar_tasks as calendar_tasks_blueprint
+    app.register_blueprint(calendar_tasks_blueprint)
+
     return app

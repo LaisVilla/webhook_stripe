@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+
+{% block title %}Calendário - NexusAI{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="mb-6 flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-white">Calendário</h1>
+        <button onclick="showEventModal()" class="btn btn-primary">
+            <i class="lucide lucide-plus h-4 w-4"></i>
+            <span>Novo Evento</span>
+        </button>
+    </div>
+    
+    <div class="bg-[#1E293B] rounded-xl shadow-xl border border-gray-700 overflow-hidden">
+        <div id="calendar" class="p-4"></div>
+    </div>
+
+    <!-- Modal para Criar/Editar Evento -->
+    <div id="eventModal" class="hidden fixed inset-0 bg-gray-900/75 backdrop-blur-sm z-50">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-[#1E293B] w-full max-w-md rounded-xl shadow-xl border border-gray-700">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold text-white">Novo Evento</h3>
+                        <button onclick="closeEventModal()" class="text-gray-400 hover:text-white">
+                            <i class="lucide lucide-x h-5 w-5"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="eventForm">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="title" class="block text-sm font-medium text-gray-300 mb-1">Título</label>
+                                <input type="text" id="title" name="title" required
+                                    class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-3 py-2 text-white 
+                                           focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            </div>
+                            
+                            <div>
+                                <label for="start" class="block text-sm font-medium text-gray-300 mb-1">Início</label>
+                                <input type="datetime-local" id="start" name="start" required
+                                    class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-3 py-2 text-white 
+                                           focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            </div>
+                            
+                            <div>
+                                <label for="end" class="block text-sm font-medium text-gray-300 mb-1">Fim</label>
+                                <input type="datetime-local" id="end" name="end" required
+                                    class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-3 py-2 text-white 
+                                           focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            </div>
+                            
+                            <div>
+                                <label for="description" class="block text-sm font-medium text-gray-300 mb-1">Descrição</label>
+                                <textarea id="description" name="description" rows="3" 
+                                    class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-3 py-2 text-white 
+                                           focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 flex justify-between">
+                            <button type="button" id="deleteEventButton"
+                                onclick="deleteEvent()"
+                                class="hidden px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                                <i class="lucide lucide-trash-2 h-4 w-4 mr-1"></i>
+                                Excluir
+                            </button>
+                            <div class="flex space-x-3">
+                                <button type="button" onclick="closeEventModal()" 
+                                    class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                                    Cancelar
+                                </button>
+                                <button type="submit" 
+                                    class="px-4 py-2 bg-gradient-to-r from-purple-500 to-cyan-500 text-white rounded-lg 
+                                           hover:opacity-90 transition-opacity">
+                                    Salvar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/pt-br.js'></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'pt-br',
+        height: 'auto',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        buttonText: {
+            today: 'Hoje',
+            month: 'Mês',
+            week: 'Semana',
+            day: 'Dia'
+        },
+        events: '/api/events',
+        editable: true,
+        selectable: true,
+        selectMirror: true,
+        dayMaxEvents: true,
+        eventTimeFormat: {
+            hour: '2-digit',
+            minute: '2-digit',
+            meridiem: false,
+            hour12: false
+        },
+        select: function(info) {
+            showEventModal(null, info);
+        },
+        eventClick: function(info) {
+            showEventModal(info.event);
+        },
+        eventDrop: function(info) {
+            updateEventDates(info.event);
+        },
+        eventResize: function(info) {
+            updateEventDates(info.event);
+        }
+    });
+    
+    calendar.render();
+
+    // Variável global para armazenar o evento atual sendo editado
+    let currentEvent = null;
+
+    // Função para mostrar o modal
+    window.showEventModal = function(event, dateInfo) {
+        const modalTitle = document.querySelector('#eventModal h3');
+        const titleInput = document.getElementById('title');
+        const startInput = document.getElementById('start');
+        const endInput = document.getElementById('end');
+        const descriptionInput = document.getElementById('description');
+        const deleteButton = document.getElementById('deleteEventButton');
+        
+        if (event) {
+            // Editar evento existente
+            modalTitle.textContent = 'Editar Evento';
+            currentEvent = event;
+            titleInput.value = event.title;
+            startInput.value = formatDateTime(event.start);
+            endInput.value = event.end ? formatDateTime(event.end) : '';
+            descriptionInput.value = event.extendedProps.description || '';
+            deleteButton.classList.remove('hidden');
+        } else {
+            // Novo evento
+            modalTitle.textContent = 'Novo Evento';
+            currentEvent = null;
+            titleInput.value = '';
+            if (dateInfo) {
+                startInput.value = formatDateTime(dateInfo.start);
+                endInput.value = dateInfo.allDay ? formatDateTime(dateInfo.end) : '';
+            } else {
+                startInput.value = '';
+                endInput.value = '';
+            }
+            descriptionInput.value = '';
+            deleteButton.classList.add('hidden');
+        }
+        
+        document.getElementById('eventModal').classList.remove('hidden');
+    }
+
+    // Função para fechar o modal
+    window.closeEventModal = function() {
+        document.getElementById('eventModal').classList.add('hidden');
+        currentEvent = null;
+    }
+
+    // Função para formatar data e hora
+    function formatDateTime(date) {
+        const d = new Date(date);
+        return d.toISOString().slice(0, 16);
+    }
+
+    // Função para atualizar datas do evento após arrastar ou redimensionar
+    function updateEventDates(event) {
+        const eventData = {
+            title: event.title,
+            start_time: event.start.toISOString(),
+            end_time: event.end ? event.end.toISOString() : event.start.toISOString(),
+            description: event.extendedProps.description || ''
+        };
+
+        fetch(`/api/events/${event.id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(eventData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showNotification('Evento atualizado com sucesso!', 'success');
+            } else {
+                throw new Error(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Erro ao atualizar evento.', 'error');
+            calendar.refetchEvents();
+        });
+    }
+
+    // Função para excluir evento
+    window.deleteEvent = function() {
+        if (!currentEvent) return;
+        
+        if (confirm('Tem certeza que deseja excluir este evento?')) {
+            fetch(`/api/events/${currentEvent.id}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    calendar.getEventById(currentEvent.id).remove();
+                    closeEventModal();
+                    showNotification('Evento excluído com sucesso!', 'success');
+                } else {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Erro ao excluir evento.', 'error');
+            });
+        }
+    }
+
+    // Handler do formulário
+    document.getElementById('eventForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const eventData = {
+            title: document.getElementById('title').value,
+            start_time: document.getElementById('start').value,
+            end_time: document.getElementById('end').value || document.getElementById('start').value,
+            description: document.getElementById('description').value
+        };
+        
+        const method = currentEvent ? 'PUT' : 'POST';
+        const url = currentEvent ? `/api/events/${currentEvent.id}` : '/api/events';
+        
+        fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(eventData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                calendar.refetchEvents();
+                closeEventModal();
+                showNotification(
+                    currentEvent ? 'Evento atualizado com sucesso!' : 'Evento criado com sucesso!', 
+                    'success'
+                );
+            } else {
+                throw new Error(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Erro ao salvar evento.', 'error');
+        });
+    });
+
+    // Função para mostrar notificações
+    function showNotification(message, type = 'success') {
+        const notificationDiv = document.createElement('div');
+        notificationDiv.className = `fixed bottom-4 right-4 p-4 rounded-lg shadow-lg ${
+            type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        } text-white z-50 animate-fade-in-up`;
+        notificationDiv.textContent = message;
+        
+        document.body.appendChild(notificationDiv);
+        
+        setTimeout(() => {
+            notificationDiv.remove();
+        }, 3000);
+    }
+});
+
+</script>
+
+<style>
+/* Estilos do FullCalendar */
+.fc {
+    --fc-page-bg-color: #1E293B;
+    --fc-neutral-bg-color: #1E293B;
+    --fc-neutral-text-color: #94A3B8;
+    --fc-border-color: #334155;
+    --fc-button-text-color: #F8FAFC;
+    --fc-button-bg-color: #334155;
+    --fc-button-border-color: #475569;
+    --fc-button-hover-bg-color: #475569;
+    --fc-button-hover-border-color: #64748B;
+    --fc-button-active-bg-color: #475569;
+    --fc-button-active-border-color: #64748B;
+    --fc-event-bg-color: #A855F7;
+    --fc-event-border-color: #9333EA;
+    --fc-event-text-color: #fff;
+    --fc-today-bg-color: rgba(148, 163, 184, 0.1);
+    height: 800px !important;
+}
+
+.fc-theme-standard td, .fc-theme-standard th {
+    border-color: var(--fc-border-color);
+}
+
+.fc-day-today {
+    background: var(--fc-today-bg-color) !important;
+}
+
+.fc-button {
+    text-transform: capitalize !important;
+    border-radius: 0.5rem !important;
+}
+
+.fc-toolbar-title {
+    color: #F8FAFC !important;
+}
+
+.fc-col-header-cell-cushion {
+    color: #F8FAFC !important;
+}
+
+.fc-daygrid-day-number {
+    color: #94A3B8 !important;
+}
+
+/* Animações */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(1rem);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.3s ease-out;
+}
+</style>
+{% endblock %}
