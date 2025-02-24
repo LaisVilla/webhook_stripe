@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     loadTasks();
     setupTaskForm();
     setupDragAndDrop();
@@ -19,21 +19,21 @@ function setupDragAndDrop() {
             e.preventDefault();
             container.classList.add('drag-over');
         });
-        
+
         container.addEventListener('dragleave', (e) => {
             if (!container.contains(e.relatedTarget)) {
                 container.classList.remove('drag-over');
             }
         });
-        
+
         container.addEventListener('drop', (e) => {
             e.preventDefault();
             container.classList.remove('drag-over');
-            
+
             const taskId = e.dataTransfer.getData('text/plain');
             const newStatus = container.getAttribute('data-status');
             const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
-            
+
             if (taskElement && taskElement.getAttribute('data-status') !== newStatus) {
                 fetch(`/api/tasks/${taskId}`, {
                     method: 'PUT',
@@ -44,19 +44,19 @@ function setupDragAndDrop() {
                         status: newStatus
                     })
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        loadTasks(); // Recarrega todas as tarefas
-                        showNotification('Tarefa movida com sucesso!', 'success');
-                    } else {
-                        throw new Error(data.message || 'Erro ao atualizar status');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showNotification('Erro ao mover tarefa', 'error');
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            loadTasks(); // Recarrega todas as tarefas
+                            showNotification('Tarefa movida com sucesso!', 'success');
+                        } else {
+                            throw new Error(data.message || 'Erro ao atualizar status');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showNotification('Erro ao mover tarefa', 'error');
+                    });
             }
         });
     });
@@ -68,25 +68,25 @@ function createTaskElement(task) {
     div.draggable = true;
     div.setAttribute('data-task-id', task.task_id);
     div.setAttribute('data-status', task.status);
-    
+
     div.addEventListener('dragstart', (e) => {
         e.target.classList.add('dragging');
         e.dataTransfer.setData('text/plain', task.task_id);
     });
-    
+
     div.addEventListener('dragend', (e) => {
         e.target.classList.remove('dragging');
         document.querySelectorAll('.task-container').forEach(container => {
             container.classList.remove('drag-over');
         });
     });
-    
+
     const priorityColors = {
         low: 'bg-green-500/20 text-green-500',
         medium: 'bg-yellow-500/20 text-yellow-500',
         high: 'bg-red-500/20 text-red-500'
     };
-    
+
     const priorityLabels = {
         low: 'Baixa',
         medium: 'Média',
@@ -112,7 +112,7 @@ function createTaskElement(task) {
         hour: '2-digit',
         minute: '2-digit'
     }) : '';
-    
+
     div.innerHTML = `
         <div class="flex flex-col gap-3">
             <div class="flex items-start justify-between">
@@ -148,7 +148,7 @@ function createTaskElement(task) {
             </div>
         </div>
     `;
-    
+
     return div;
 }
 
@@ -165,7 +165,7 @@ function loadTasks() {
             ['pending', 'in-progress', 'completed'].forEach(status => {
                 const countElement = document.getElementById(`${status}-count`);
                 const container = document.getElementById(`${status}-tasks`);
-                
+
                 if (countElement) countElement.textContent = '0';
                 if (container) container.innerHTML = '';
             });
@@ -189,7 +189,7 @@ function loadTasks() {
                 const tasksForStatus = tasksByStatus[status];
                 const countElement = document.getElementById(`${status.replace('_', '-')}-count`);
                 const container = document.getElementById(`${status.replace('_', '-')}-tasks`);
-                
+
                 if (countElement) {
                     countElement.textContent = tasksForStatus.length;
                 }
@@ -199,8 +199,8 @@ function loadTasks() {
                         container.innerHTML = `
                             <div class="text-gray-500 text-center py-8 border-2 border-dashed border-gray-700 rounded-xl">
                                 <i class="lucide lucide-inbox h-6 w-6 mx-auto mb-2"></i>
-                                <p>Nenhuma tarefa ${status === 'pending' ? 'pendente' : 
-                                               status === 'in_progress' ? 'em andamento' : 'concluída'}</p>
+                                <p>Nenhuma tarefa ${status === 'pending' ? 'pendente' :
+                                status === 'in_progress' ? 'em andamento' : 'concluída'}</p>
                             </div>
                         `;
                     } else {
@@ -222,129 +222,197 @@ function loadTasks() {
 // Configurar formulário
 function setupTaskForm() {
     const taskForm = document.getElementById('taskForm');
-    let currentTask = null;
+    // Definir currentTask no escopo externo para ser acessível   por todas as funções
+    window.currentTask = null;
 
     window.showTaskModal = function(taskId = null) {
+        // Corrigindo a seleção do título do modal
         const modalTitle = document.querySelector('#taskModal h3 span');
         const deleteButton = document.getElementById('deleteTaskButton');
         const statusSelect = document.getElementById('taskStatus');
 
         if (taskId) {
+            console.log('Editando tarefa:', taskId);
             fetch(`/api/tasks/${taskId}`)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro ao carregar tarefa');
+                    }
+                    return response.json();
+                })
                 .then(task => {
-                    currentTask = task;
-                    modalTitle.textContent = 'Editar Tarefa';
-                    document.getElementById('taskTitle').value = task.title || '';
-                    document.getElementById('taskDescription').value = task.description || '';
-                    document.getElementById('taskDueDate').value = task.due_date ? task.due_date.slice(0, 16) : '';
-                    document.getElementById('taskPriority').value = task.priority || 'medium';
-                    document.getElementById('taskStatus').value = task.status || 'pending';
-                    deleteButton.classList.remove('hidden');
-                    statusSelect.removeAttribute('disabled');
+                    console.log('Dados da tarefa:', task);
+                    window.currentTask = task;
+                    
+                    // Atualizar título do modal
+                    if (modalTitle) {
+                        modalTitle.textContent = 'Editar Tarefa';
+                    }
+
+                    // Preencher campos do formulário
+                    const titleInput = document.getElementById('taskTitle');
+                    const descriptionInput = document.getElementById('taskDescription');
+                    const dueDateInput = document.getElementById('taskDueDate');
+                    const prioritySelect = document.getElementById('taskPriority');
+                    const statusSelect = document.getElementById('taskStatus');
+
+                    if (titleInput) titleInput.value = task.title || '';
+                    if (descriptionInput) descriptionInput.value = task.description || '';
+                    if (dueDateInput && task.due_date) {
+                        // Formatando a data para o formato aceito pelo input datetime-local
+                        const date = new Date(task.due_date);
+                        const formattedDate = date.toISOString().slice(0, 16);
+                        dueDateInput.value = formattedDate;
+                    }
+                    if (prioritySelect) prioritySelect.value = task.priority || 'medium';
+                    if (statusSelect) {
+                        statusSelect.value = task.status || 'pending';
+                        statusSelect.removeAttribute('disabled');
+                    }
+
+                    // Mostrar botão de deletar
+                    if (deleteButton) {
+                        deleteButton.classList.remove('hidden');
+                    }
                 })
                 .catch(error => {
                     console.error('Error:', error);
                     showNotification('Erro ao carregar tarefa', 'error');
                 });
         } else {
-            modalTitle.textContent = 'Nova Tarefa';
+            // Nova tarefa
+            if (modalTitle) {
+                modalTitle.textContent = 'Nova Tarefa';
+            }
             taskForm.reset();
             currentTask = null;
-            deleteButton.classList.add('hidden');
-            document.getElementById('taskStatus').value = 'pending';
-            document.getElementById('taskPriority').value = 'medium';
-            statusSelect.setAttribute('disabled', 'disabled');
+            
+            if (deleteButton) {
+                deleteButton.classList.add('hidden');
+            }
+            if (statusSelect) {
+                statusSelect.value = 'pending';
+                statusSelect.setAttribute('disabled', 'disabled');
+            }
+
+            const prioritySelect = document.getElementById('taskPriority');
+            if (prioritySelect) {
+                prioritySelect.value = 'medium';
+            }
         }
 
-        document.getElementById('taskModal').classList.remove('hidden');
+        // Mostrar modal
+        const modal = document.getElementById('taskModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+        }
     }
 
     window.closeTaskModal = function() {
-        document.getElementById('taskModal').classList.add('hidden');
-        currentTask = null;
-        taskForm.reset();
+        const modal = document.getElementById('taskModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            currentTask = null;
+            taskForm.reset();
+        }
     }
 
     window.editTask = function(taskId) {
+        console.log('Iniciando edição da tarefa:', taskId);
         showTaskModal(taskId);
     }
 
-    window.deleteTask = function() {
-        if (!currentTask) return;
-        
-        if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
-            fetch(`/api/tasks/${currentTask.task_id}`, {
-                method: 'DELETE'
+    // Adicionar event listener para o formulário
+    if (taskForm) {
+        taskForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const taskData = {
+                title: document.getElementById('taskTitle').value.trim(),
+                description: document.getElementById('taskDescription').value.trim(),
+                due_date: document.getElementById('taskDueDate').value,
+                priority: document.getElementById('taskPriority').value,
+                status: document.getElementById('taskStatus').value
+            };
+
+            const method = window.currentTask ? 'PUT' : 'POST';
+            const url = window.currentTask ? `/api/tasks/${window.currentTask.task_id}` : '/api/tasks';
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(taskData)
             })
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
                     loadTasks();
                     closeTaskModal();
-                    showNotification('Tarefa excluída com sucesso!', 'success');
+                    showNotification(
+                        currentTask ? 'Tarefa atualizada com sucesso!' : 'Tarefa criada com sucesso!',
+                        'success'
+                    );
                 } else {
-                    throw new Error(data.message);
+                    throw new Error(data.message || 'Erro ao salvar tarefa');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                showNotification('Erro ao excluir tarefa', 'error');
+                showNotification('Erro ao salvar tarefa', 'error');
             });
-        }
+        });
     }
+}
 
-    taskForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        const taskData = {
-            title: document.getElementById('taskTitle').value.trim(),
-            description: document.getElementById('taskDescription').value.trim(),
-            due_date: document.getElementById('taskDueDate').value,
-            priority: document.getElementById('taskPriority').value,
-            status: document.getElementById('taskStatus').value
-        };
-
-        const method = currentTask ? 'PUT' : 'POST';
-        const url = currentTask ? `/api/tasks/${currentTask.task_id}` : '/api/tasks';
-
-        fetch(url, {
-            method: method,
+window.deleteTask = function() {
+    if (!currentTask || !currentTask.task_id) {
+        console.error('Nenhuma tarefa selecionada para excluir');
+        showNotification('Erro: Nenhuma tarefa selecionada', 'error');
+        return;
+    }
+    
+    console.log('Tentando excluir tarefa:', currentTask.task_id);
+    
+    if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
+        fetch(`/api/tasks/${currentTask.task_id}`, {
+            method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(taskData)
+                'Content-Type': 'application/json'
+            }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erro ao excluir tarefa');
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.status === 'success') {
                 loadTasks();
                 closeTaskModal();
-                showNotification(
-                    currentTask ? 'Tarefa atualizada com sucesso!' : 'Tarefa criada com sucesso!',
-                    'success'
-                );
+                showNotification('Tarefa excluída com sucesso!', 'success');
             } else {
-                throw new Error(data.message || 'Erro ao salvar tarefa');
+                throw new Error(data.message || 'Erro ao excluir tarefa');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            showNotification('Erro ao salvar tarefa', 'error');
+            showNotification('Erro ao excluir tarefa', 'error');
         });
-    });
+    }
 }
 
 // Mostrar notificações
 function showNotification(message, type = 'success') {
     const notificationDiv = document.createElement('div');
-    notificationDiv.className = `fixed bottom-4 right-4 p-4 rounded-lg shadow-lg ${
-        type === 'success' ? 'bg-green-500' : 'bg-red-500'
-    } text-white z-50`;
+    notificationDiv.className = `fixed bottom-4 right-4 p-4 rounded-lg shadow-lg ${type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        } text-white z-50`;
     notificationDiv.textContent = message;
-    
+
     document.body.appendChild(notificationDiv);
-    
+
     setTimeout(() => {
         notificationDiv.remove();
     }, 3000);
