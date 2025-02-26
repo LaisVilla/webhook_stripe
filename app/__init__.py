@@ -47,5 +47,7 @@ def create_app():
 
     from .calendar_tasks import calendar_tasks as calendar_tasks_blueprint
     app.register_blueprint(calendar_tasks_blueprint)
+    from .financial import financial  # Adicione esta linha
+    app.register_blueprint(financial)  # Adicione esta linha
 
     return app

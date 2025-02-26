@@ -26,12 +26,14 @@
     }
 
     /* Estilos para os botões */
-    .edit-btn, .status-btn {
+    .edit-btn,
+    .status-btn {
         position: relative;
         overflow: hidden;
     }
 
-    .edit-btn:hover, .status-btn:hover {
+    .edit-btn:hover,
+    .status-btn:hover {
         transform: translateY(-1px);
     }
 
@@ -50,11 +52,13 @@
     }
 
     #taskModal .bg-[#1E293B] {
-        box-shadow: 0 0 40px rgba(0,0,0,0.3);
+        box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
     }
 
     /* Inputs com melhor feedback visual */
-    input:focus, select:focus, textarea:focus {
+    input:focus,
+    select:focus,
+    textarea:focus {
         box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.3);
     }
 
@@ -91,9 +95,17 @@
 
     /* Animações para drag and drop */
     @keyframes pulse {
-        0% { border-color: rgba(139, 92, 246, 0.3); }
-        50% { border-color: rgba(139, 92, 246, 0.6); }
-        100% { border-color: rgba(139, 92, 246, 0.3); }
+        0% {
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        50% {
+            border-color: rgba(139, 92, 246, 0.6);
+        }
+
+        100% {
+            border-color: rgba(139, 92, 246, 0.3);
+        }
     }
 
     .task-container.drag-over {
@@ -120,15 +132,14 @@
 <!-- Cabeçalho com botão de Nova Tarefa -->
 <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-bold text-white">Minhas Tarefas</h1>
-    <button onclick="showTaskModal()"
-        class="px-4 py-2 bg-gradient-to-r from-purple-500 to-cyan-500 text-white rounded-lg 
+    <button onclick="showTaskModal('create')" class="px-4 py-2 bg-gradient-to-r from-purple-500 to-cyan-500 text-white rounded-lg 
                hover:opacity-90 transition-all duration-200 flex items-center gap-2">
         <i class="lucide lucide-plus h-5 w-5"></i>
         <span>Nova Tarefa</span>
     </button>
 </div>
 
-<!-- No seu grid de status, atualize cada container de tarefas -->
+<!-- Grid de status -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     <!-- Tarefas Pendentes -->
     <div class="task-column bg-[#1E293B] rounded-xl shadow-xl border border-gray-700 p-5">
@@ -137,16 +148,15 @@
                 <i class="lucide lucide-clock h-6 w-6 text-yellow-500"></i>
                 Pendentes
             </h2>
-            <span id="pending-count" class="bg-yellow-500/20 text-yellow-500 px-3 py-1 rounded-full text-sm font-medium">0</span>
+            <span id="pending-count"
+                class="bg-yellow-500/20 text-yellow-500 px-3 py-1 rounded-full text-sm font-medium">0</span>
         </div>
-        <div id="pending-tasks" 
+        <div id="pending-tasks"
             class="space-y-4 min-h-[200px] p-4 rounded-lg transition-all duration-200 task-container"
-            data-status="pending"
-            ondragover="handleDragOver(event)"
-            ondrop="handleDrop(event)">
+            data-status="pending" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
         </div>
     </div>
-    
+
     <!-- Tarefas em Andamento -->
     <div class="task-column bg-[#1E293B] rounded-xl shadow-xl border border-gray-700 p-5">
         <div class="flex items-center justify-between mb-4">
@@ -154,16 +164,15 @@
                 <i class="lucide lucide-loader-2 h-6 w-6 text-blue-500"></i>
                 Em Andamento
             </h2>
-            <span id="in-progress-count" class="bg-blue-500/20 text-blue-500 px-3 py-1 rounded-full text-sm font-medium">0</span>
+            <span id="in-progress-count"
+                class="bg-blue-500/20 text-blue-500 px-3 py-1 rounded-full text-sm font-medium">0</span>
         </div>
-        <div id="in-progress-tasks" 
+        <div id="in-progress-tasks"
             class="space-y-4 min-h-[200px] p-4 rounded-lg transition-all duration-200 task-container"
-            data-status="in_progress"
-            ondragover="handleDragOver(event)"
-            ondrop="handleDrop(event)">
+            data-status="in_progress" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
         </div>
     </div>
-    
+
     <!-- Tarefas Concluídas -->
     <div class="task-column bg-[#1E293B] rounded-xl shadow-xl border border-gray-700 p-5">
         <div class="flex items-center justify-between mb-4">
@@ -171,122 +180,106 @@
                 <i class="lucide lucide-check-circle h-6 w-6 text-green-500"></i>
                 Concluídas
             </h2>
-            <span id="completed-count" class="bg-green-500/20 text-green-500 px-3 py-1 rounded-full text-sm font-medium">0</span>
+            <span id="completed-count"
+                class="bg-green-500/20 text-green-500 px-3 py-1 rounded-full text-sm font-medium">0</span>
         </div>
-        <div id="completed-tasks" 
+        <div id="completed-tasks"
             class="space-y-4 min-h-[200px] p-4 rounded-lg transition-all duration-200 task-container"
-            data-status="completed"
-            ondragover="handleDragOver(event)"
-            ondrop="handleDrop(event)">
+            data-status="completed" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
         </div>
     </div>
 </div>
-    
-    <!-- Modal para Criar/Editar Tarefa -->
-    <div id="taskModal" class="hidden fixed inset-0 bg-gray-900/75 backdrop-blur-sm z-50">
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="bg-[#1E293B] w-full max-w-md rounded-xl shadow-xl border border-gray-700">
-                <div class="p-6">
-                     <button onclick="showTaskModal()"
-        class="px-4 py-2 bg-gradient-to-r from-purple-500 to-cyan-500 text-white rounded-lg 
-               hover:opacity-90 transition-all duration-200 flex items-center gap-2">
-        <i class="lucide lucide-plus h-5 w-5"></i>
-                            <span>Nova Tarefa</span>
-                        </h3>
-                        <button onclick="closeTaskModal()" 
-                            class="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-gray-700/50 transition-all">
-                            <i class="lucide lucide-x h-5 w-5"></i>
-                        </button>
-                    </div>
-                    
-                    <form id="taskForm" class="space-y-5">
-                        <!-- Campos do formulário com estilos melhorados -->
-                        <div class="space-y-4">
-                            <div>
-                                <label for="taskTitle" class="block text-sm font-medium text-gray-300 mb-1">
-                                    Título*
-                                </label>
-                                <input type="text" id="taskTitle" name="title" required
-                                    class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-3 text-white 
-                                           focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
-                                           transition-all duration-200">
-                            </div>
-                            
-                            <div>
-                                <label for="taskDueDate" class="block text-sm font-medium text-gray-300 mb-1">
-                                    Data de Vencimento
-                                </label>
-                                <input type="datetime-local" id="taskDueDate" name="due_date"
-                                    class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-3 text-white 
-                                           focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
-                                           transition-all duration-200">
-                            </div>
-                            
-                            <div>
-                                <label for="taskPriority" class="block text-sm font-medium text-gray-300 mb-1">
-                                    Prioridade*
-                                </label>
-                                <select id="taskPriority" name="priority" required
-                                    class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-3 text-white 
-                                           focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
-                                           transition-all duration-200">
-                                    <option value="low">Baixa</option>
-                                    <option value="medium" selected>Média</option>
-                                    <option value="high">Alta</option>
-                                </select>
-                            </div>
 
-                            <div>
-                                <label for="taskStatus" class="block text-sm font-medium text-gray-300 mb-1">
-                                    Status*
-                                </label>
-                                <select id="taskStatus" name="status" required
-                                    class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-3 text-white 
-                                           focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
-                                           transition-all duration-200">
-                                    <option value="pending" selected>Pendente</option>
-                                    <option value="in_progress">Em Andamento</option>
-                                    <option value="completed">Concluída</option>
-                                </select>
-                            </div>
-                            
-                            <div>
-                                <label for="taskDescription" class="block text-sm font-medium text-gray-300 mb-1">
-                                    Descrição
-                                </label>
-                                <textarea id="taskDescription" name="description" rows="3" 
-                                    class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-3 text-white 
-                                           focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
-                                           transition-all duration-200"></textarea>
-                            </div>
-                        </div>
-                        
-                        <!-- Botões do formulário -->
-                        <div class="mt-6 flex justify-between">
-                            <button type="button" id="deleteTaskButton"
-                                onclick="deleteTask()"
-                                class="hidden px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 
-                                       transition-all duration-200 flex items-center gap-2">
-                                <i class="lucide lucide-trash-2 h-4 w-4"></i>
-                                <span>Excluir</span>
-                            </button>
-                            <div class="flex gap-3">
-                                <button type="button" onclick="closeTaskModal()" 
-                                    class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 
-                                           transition-all duration-200 flex items-center gap-2">
-                                    <i class="lucide lucide-x h-4 w-4"></i>
-                                    <span>Cancelar</span>
-                                </button>
-                                <button type="submit" 
-                                    class="px-4 py-2 bg-gradient-to-r from-purple-500 to-cyan-500 text-white rounded-lg 
-                                           hover:opacity-90 transition-all duration-200 flex items-center gap-2">
-                                    <i class="lucide lucide-save h-4 w-4"></i>
-                                    <span>Salvar</span>
-                                </button>
-                            </div>
-                        </div>
-                    </form>
+<!-- Modal único para Criar/Editar Tarefa -->
+<div id="taskModal" class="hidden fixed inset-0 bg-gray-900/75 backdrop-blur-sm z-50">
+    <div class="flex items-center justify-center min-h-screen px-4">
+        <div class="bg-[#1E293B] w-full max-w-md rounded-xl shadow-xl border border-gray-700">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 id="modalTitle" class="text-xl font-semibold text-white"></h3>
+                    <button onclick="closeTaskModal()"
+                        class="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-gray-700/50 transition-all">
+                        <i class="lucide lucide-x h-5 w-5"></i>
+                    </button>
                 </div>
+
+                <form id="taskForm" class="space-y-5" onsubmit="saveTask(event)">
+                    <input type="hidden" id="taskId" name="id">
+                    <div class="space-y-4">
+                        <div>
+                            <label for="taskTitle" class="block text-sm font-medium text-gray-300 mb-1">
+                                Título*
+                            </label>
+                            <input type="text" id="taskTitle" name="title" required class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-3 text-white 
+                                       focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                       transition-all duration-200">
+                        </div>
+
+                        <div>
+                            <label for="taskDueDate" class="block text-sm font-medium text-gray-300 mb-1">
+                                Data de Vencimento
+                            </label>
+                            <input type="datetime-local" id="taskDueDate" name="due_date" class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-3 text-white 
+                                       focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                       transition-all duration-200">
+                        </div>
+
+                        <div>
+                            <label for="taskPriority" class="block text-sm font-medium text-gray-300 mb-1">
+                                Prioridade*
+                            </label>
+                            <select id="taskPriority" name="priority" required class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-3 text-white 
+                                       focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                       transition-all duration-200">
+                                <option value="low">Baixa</option>
+                                <option value="medium">Média</option>
+                                <option value="high">Alta</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="taskStatus" class="block text-sm font-medium text-gray-300 mb-1">
+                                Status*
+                            </label>
+                            <select id="taskStatus" name="status" required class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-3 text-white 
+                                       focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                       transition-all duration-200">
+                                <option value="pending">Pendente</option>
+                                <option value="in_progress">Em Andamento</option>
+                                <option value="completed">Concluída</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="taskDescription" class="block text-sm font-medium text-gray-300 mb-1">
+                                Descrição
+                            </label>
+                            <textarea id="taskDescription" name="description" rows="3" class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-3 text-white 
+                                       focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                                       transition-all duration-200"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-between">
+                        <button type="button" id="deleteTaskButton" onclick="deleteTask()" class="hidden px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 
+                                   transition-all duration-200 flex items-center gap-2">
+                            <i class="lucide lucide-trash-2 h-4 w-4"></i>
+                            <span>Excluir</span>
+                        </button>
+                        <div class="flex gap-3">
+                            <button type="button" onclick="closeTaskModal()" class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 
+                                       transition-all duration-200 flex items-center gap-2">
+                                <i class="lucide lucide-x h-4 w-4"></i>
+                                <span>Cancelar</span>
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-gradient-to-r from-purple-500 to-cyan-500 text-white rounded-lg 
+                                       hover:opacity-90 transition-all duration-200 flex items-center gap-2">
+                                <i class="lucide lucide-save h-4 w-4"></i>
+                                <span>Salvar</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -297,31 +290,421 @@
 <!-- Carregamento do Lucide Icons -->
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
-<!-- Inicialização dos ícones e configurações -->
+<!-- Todo o código JavaScript integrado -->
 <script>
-    // Inicializar ícones Lucide
-    lucide.createIcons();
+    // Configuração inicial e variáveis globais
+    const STATE = {
+        currentTask: null,
+        containers: {
+            pending: 'pending-tasks',
+            in_progress: 'in-progress-tasks',
+            completed: 'completed-tasks'
+        },
+        statusColors: {
+            pending: { bg: 'bg-yellow-500/20', text: 'text-yellow-500', icon: 'clock' },
+            in_progress: { bg: 'bg-blue-500/20', text: 'text-blue-500', icon: 'loader-2' },
+            completed: { bg: 'bg-green-500/20', text: 'text-green-500', icon: 'check-circle' }
+        },
+        priorityConfig: {
+            low: { bg: 'bg-green-500/20', text: 'text-green-500', label: 'Baixa' },
+            medium: { bg: 'bg-yellow-500/20', text: 'text-yellow-500', label: 'Média' },
+            high: { bg: 'bg-red-500/20', text: 'text-red-500', label: 'Alta' }
+        }
+    };
 
-    // Recriar ícones após alterações dinâmicas no DOM
-    const observer = new MutationObserver(() => {
-        lucide.createIcons();
-    });
+    // Funções de manipulação de datas
+    const dateUtils = {
+        formatToBR: (dateString) => {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        },
 
-    // Observar mudanças no DOM
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    });
+        formatForInput: (dateString) => {
+            if (!dateString) return '';
+            try {
+                // Remove timezone e limpa a string
+                dateString = dateString.replace(/\.000Z$/, '').replace('Z', '');
+                if (dateString.includes(' ')) {
+                    dateString = dateString.replace(' ', 'T');
+                }
+                // Certifica que a data está no formato correto
+                const date = new Date(dateString);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
 
-    // Estilo para input datetime-local no tema escuro
-    document.addEventListener('DOMContentLoaded', function() {
-        const dateInputs = document.querySelectorAll('input[type="datetime-local"]');
-        dateInputs.forEach(input => {
-            input.style.colorScheme = 'dark';
+                return `${year}-${month}-${day}T${hours}:${minutes}`;
+            } catch (error) {
+                console.error('Erro ao formatar data:', error);
+                return '';
+            }
+        },
+
+        formatForAPI: (dateString) => {
+            if (!dateString) return null;
+            try {
+                const date = new Date(dateString);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                const seconds = '00';
+
+                const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+                console.log('Data formatada para API:', formattedDate); // Debug
+                return formattedDate;
+            } catch (error) {
+                console.error('Erro ao formatar data para API:', error);
+                return null;
+            }
+        }
+    };
+    
+    // Funções de UI
+    function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `fixed bottom-4 right-4 p-4 rounded-lg shadow-lg ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white z-50`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
+    }
+
+    function createTaskElement(task) {
+        const div = document.createElement('div');
+        div.className = 'task-card bg-[#0F172A] rounded-xl shadow-lg border border-gray-700 p-5 hover:border-gray-500 transition-all duration-200';
+        div.draggable = true;
+        div.setAttribute('data-task-id', task.task_id);
+        div.setAttribute('data-status', task.status);
+
+        const statusConfig = STATE.statusColors[task.status] || STATE.statusColors.pending;
+        const priorityConfig = STATE.priorityConfig[task.priority] || STATE.priorityConfig.medium;
+        const formattedDate = dateUtils.formatToBR(task.due_date);
+
+        div.innerHTML = `
+        <div class="flex flex-col gap-3">
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2">
+                        <i class="lucide lucide-${statusConfig.icon} h-5 w-5 ${statusConfig.text}"></i>
+                        <h3 class="font-semibold text-white text-lg">${task.title || 'Sem título'}</h3>
+                    </div>
+                    ${task.description ? `<p class="text-gray-400 text-sm mt-2">${task.description}</p>` : ''}
+                </div>
+                <button type="button" 
+                    onclick="editTask('${task.task_id}')"
+                    class="edit-btn flex items-center gap-2 px-3 py-2 bg-gray-700/50 hover:bg-gray-600 
+                        text-gray-300 hover:text-white rounded-lg transition-all duration-200">
+                    <i class="lucide lucide-pencil h-4 w-4"></i>
+                    <span class="text-sm">Editar</span>
+                </button>
+            </div>
+            <div class="flex items-center justify-between mt-2">
+                <div class="flex items-center gap-2">
+                    <span class="${priorityConfig.bg} ${priorityConfig.text} text-xs px-3 py-1 rounded-full">
+                        ${priorityConfig.label}
+                    </span>
+                    ${formattedDate ? `
+                        <span class="text-gray-400 text-sm flex items-center gap-1">
+                            <i class="lucide lucide-calendar h-4 w-4"></i>
+                            ${formattedDate}
+                        </span>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+
+        div.addEventListener('dragstart', (e) => {
+            e.target.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', task.task_id);
+        });
+
+        div.addEventListener('dragend', (e) => {
+            e.target.classList.remove('dragging');
+            document.querySelectorAll('.task-container').forEach(container => {
+                container.classList.remove('drag-over');
+            });
+        });
+
+        return div;
+    }
+
+    // Funções de gerenciamento de tarefas
+    async function loadTasks() {
+        try {
+            const response = await fetch('/api/tasks');
+            if (!response.ok) throw new Error('Erro ao carregar tarefas');
+            const tasks = await response.json();
+
+            const containers = {
+                pending: document.getElementById('pending-tasks'),
+                in_progress: document.getElementById('in-progress-tasks'),
+                completed: document.getElementById('completed-tasks')
+            };
+
+            const counts = { pending: 0, in_progress: 0, completed: 0 };
+
+            Object.entries(containers).forEach(([status, container]) => {
+                if (container) {
+                    container.innerHTML = '';
+                    const countElement = document.getElementById(`${status.replace('_', '-')}-count`);
+                    if (countElement) countElement.textContent = '0';
+                }
+            });
+
+            tasks.forEach(task => {
+                const status = task.status || 'pending';
+                const container = containers[status];
+                if (container) {
+                    container.appendChild(createTaskElement(task));
+                    counts[status]++;
+                }
+            });
+
+            Object.entries(counts).forEach(([status, count]) => {
+                const elementId = `${status.replace('_', '-')}-count`;
+                const countElement = document.getElementById(elementId);
+                if (countElement) {
+                    countElement.textContent = count;
+                }
+            });
+
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('Erro ao carregar tarefas', 'error');
+        }
+    }
+
+    // Funções de modal e formulário
+    function setupTaskForm() {
+        const taskForm = document.getElementById('taskForm');
+        if (!taskForm) return;
+
+        window.showTaskModal = async function (mode, taskId = null) {
+            const modal = document.getElementById('taskModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const deleteButton = document.getElementById('deleteTaskButton');
+
+            modal.classList.remove('hidden');
+
+            if (mode === 'create') {
+                modalTitle.textContent = 'Nova Tarefa';
+                taskForm.reset();
+                document.getElementById('taskStatus').value = 'pending';
+                document.getElementById('taskPriority').value = 'medium';
+                deleteButton.classList.add('hidden');
+                STATE.currentTask = null;
+            } else if (mode === 'edit' && taskId) {
+                try {
+                    const response = await fetch(`/api/tasks/${taskId}`);
+                    if (!response.ok) throw new Error('Erro ao carregar tarefa');
+                    const task = await response.json();
+
+                    modalTitle.textContent = 'Editar Tarefa';
+                    STATE.currentTask = task;
+
+                    document.getElementById('taskId').value = task.task_id;
+                    document.getElementById('taskTitle').value = task.title || '';
+                    document.getElementById('taskDescription').value = task.description || '';
+                    document.getElementById('taskStatus').value = task.status || 'pending';
+                    document.getElementById('taskPriority').value = task.priority || 'medium';
+
+                    /// Novo código para lidar com as datas
+                    if (task.due_date) {
+                        const formattedDate = dateUtils.formatForInput(task.due_date);
+                        console.log('Data original:', task.due_date);
+                        console.log('Data formatada para input:', formattedDate);
+                        document.getElementById('taskDueDate').value = formattedDate;
+                    } else {
+                        document.getElementById('taskDueDate').value = '';
+                    }
+
+                    deleteButton.classList.remove('hidden');
+                } catch (error) {
+                    console.error('Error:', error);
+                    showNotification('Erro ao carregar tarefa', 'error');
+                }
+            }
+        };
+
+        window.closeTaskModal = function () {
+            document.getElementById('taskModal').classList.add('hidden');
+            taskForm.reset();
+            STATE.currentTask = null;
+        };
+
+        taskForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const taskData = {
+                title: document.getElementById('taskTitle').value.trim(),
+                description: document.getElementById('taskDescription').value.trim(),
+                priority: document.getElementById('taskPriority').value,
+                status: document.getElementById('taskStatus').value,
+                due_date: dateUtils.formatForAPI(document.getElementById('taskDueDate').value)
+            };
+
+            console.log('Dados a serem enviados:', taskData); // Debug
+
+
+            try {
+                const response = await fetch(
+                    STATE.currentTask ? `/api/tasks/${STATE.currentTask.task_id}` : '/api/tasks',
+                    {
+                        method: STATE.currentTask ? 'PUT' : 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(taskData)
+                    }
+                );
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Resposta da API:', data); // Debug
+
+                if (data.status === 'success') {
+                    loadTasks();
+                    closeTaskModal();
+                    showNotification(
+                        STATE.currentTask ? 'Tarefa atualizada com sucesso!' : 'Tarefa criada com sucesso!',
+                        'success'
+                    );
+                } else {
+                    throw new Error(data.message || 'Erro ao salvar tarefa');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Erro ao salvar tarefa', 'error');
+            }
+        });
+    }
+
+    // Configuração inicial
+    document.addEventListener('DOMContentLoaded', function () {
+        loadTasks();
+        setupTaskForm();
+        setupDragAndDrop();
+        setupDateHandling();
+
+        // Configurações adicionais
+        const observer = new MutationObserver(() => {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeTaskModal();
+            }
         });
     });
-</script>
 
-<!-- Seu arquivo tasks.js -->
-<script src="{{ url_for('static', filename='js/tasks.js') }}"></script>
+    // Setup de funcionalidades
+    function setupDragAndDrop() {
+        document.querySelectorAll('.task-container').forEach(container => {
+            container.addEventListener('dragover', handleDragOver);
+            container.addEventListener('dragleave', handleDragLeave);
+            container.addEventListener('drop', handleDrop);
+        });
+    }
+
+    function setupDateHandling() {
+        document.querySelectorAll('input[type="datetime-local"]').forEach(input => {
+            input.style.colorScheme = 'dark';
+        });
+    }
+
+    // Funções de drag and drop
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.currentTarget.classList.add('drag-over');
+    }
+
+    function handleDragLeave(e) {
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+    }
+
+    async function handleDrop(e) {
+        e.preventDefault();
+        const container = e.currentTarget;
+        container.classList.remove('drag-over');
+
+        const taskId = e.dataTransfer.getData('text/plain');
+        const newStatus = container.getAttribute('data-status');
+        const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
+
+        if (taskElement && taskElement.getAttribute('data-status') !== newStatus) {
+            try {
+                const response = await fetch(`/api/tasks/${taskId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                const data = await response.json();
+                if (data.status === 'success') {
+                    loadTasks();
+                    showNotification('Tarefa movida com sucesso!', 'success');
+                } else {
+                    throw new Error(data.message || 'Erro ao atualizar status');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Erro ao mover tarefa', 'error');
+            }
+        }
+    }
+
+    // Exportar funções para o escopo global
+    window.editTask = function (taskId) {
+        showTaskModal('edit', taskId);
+    };
+
+    window.deleteTask = async function () {
+        if (!STATE.currentTask) return;
+
+        if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
+            try {
+                const response = await fetch(`/api/tasks/${STATE.currentTask.task_id}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+                if (data.status === 'success') {
+                    loadTasks();
+                    closeTaskModal();
+                    showNotification('Tarefa excluída com sucesso!', 'success');
+                } else {
+                    throw new Error(data.message || 'Erro ao excluir tarefa');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Erro ao excluir tarefa', 'error');
+            }
+        }
+    };
+</script>
 {% endblock %}

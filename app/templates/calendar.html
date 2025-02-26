@@ -11,7 +11,7 @@
             <span>Novo Evento</span>
         </button>
     </div>
-    
+
     <div class="bg-[#1E293B] rounded-xl shadow-xl border border-gray-700 overflow-hidden">
         <div id="calendar" class="p-4"></div>
     </div>
@@ -22,56 +22,103 @@
             <div class="bg-[#1E293B] w-full max-w-md rounded-xl shadow-xl border border-gray-700">
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-semibold text-white">Novo Evento</h3>
+                        <h3 class="text-xl font-semibold text-white">Novo Agendamento</h3>
                         <button onclick="closeEventModal()" class="text-gray-400 hover:text-white">
                             <i class="lucide lucide-x h-5 w-5"></i>
                         </button>
                     </div>
-                    
+
                     <form id="eventForm">
                         <div class="space-y-4">
+                            <!-- Nome do Paciente -->
                             <div>
-                                <label for="title" class="block text-sm font-medium text-gray-300 mb-1">Título</label>
+                                <label for="title" class="block text-sm font-medium text-gray-300 mb-1">
+                                    Nome*
+                                </label>
                                 <input type="text" id="title" name="title" required
                                     class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-3 py-2 text-white 
-                                           focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                           focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                    placeholder="Nome completo do paciente">
                             </div>
-                            
+
+                            <!-- Data do Atendimento -->
                             <div>
-                                <label for="start" class="block text-sm font-medium text-gray-300 mb-1">Início</label>
+                                <label for="start" class="block text-sm font-medium text-gray-300 mb-1">
+                                    Data do Atendimento*
+                                </label>
                                 <input type="datetime-local" id="start" name="start" required
                                     class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-3 py-2 text-white 
                                            focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                             </div>
-                            
+
+                            <!-- Valor e Forma de Pagamento -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="eventValue" class="block text-sm font-medium text-gray-300 mb-1">
+                                        Valor do Atendimento*
+                                    </label>
+                                    <input type="number" id="eventValue" name="eventValue" required step="0.01" min="0"
+                                        class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-3 py-2 text-white 
+                                               focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        placeholder="0,00">
+                                </div>
+
+                                <div>
+                                    <label for="paymentMethod" class="block text-sm font-medium text-gray-300 mb-1">
+                                        Forma de Pagamento*
+                                    </label>
+                                    <select id="paymentMethod" name="paymentMethod" required
+                                        class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-3 py-2 text-white 
+                                               focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                        <option value="">Selecione</option>
+                                        <option value="cash">Dinheiro</option>
+                                        <option value="credit">Cartão de Crédito</option>
+                                        <option value="debit">Cartão de Débito</option>
+                                        <option value="pix">PIX</option>
+                                        <option value="insurance">Convênio</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Status do Pagamento -->
                             <div>
-                                <label for="end" class="block text-sm font-medium text-gray-300 mb-1">Fim</label>
-                                <input type="datetime-local" id="end" name="end" required
+                                <label for="paymentStatus" class="block text-sm font-medium text-gray-300 mb-1">
+                                    Status do Pagamento*
+                                </label>
+                                <select id="paymentStatus" name="paymentStatus" required
                                     class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-3 py-2 text-white 
                                            focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                    <option value="pending">Pendente</option>
+                                    <option value="paid">Pago</option>
+                                    <option value="confirmed">Confirmado</option>
+                                    <option value="cancelled">Cancelado</option>
+                                </select>
                             </div>
-                            
+
+                            <!-- Observações -->
                             <div>
-                                <label for="description" class="block text-sm font-medium text-gray-300 mb-1">Descrição</label>
-                                <textarea id="description" name="description" rows="3" 
+                                <label for="description" class="block text-sm font-medium text-gray-300 mb-1">
+                                    Observações
+                                </label>
+                                <textarea id="description" name="description" rows="3"
                                     class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-3 py-2 text-white 
-                                           focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"></textarea>
+                                           focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                    placeholder="Observações adicionais..."></textarea>
                             </div>
                         </div>
-                        
+
                         <div class="mt-6 flex justify-between">
-                            <button type="button" id="deleteEventButton"
-                                onclick="deleteEvent()"
+                            <button type="button" id="deleteEventButton" onclick="deleteEvent()"
                                 class="hidden px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
                                 <i class="lucide lucide-trash-2 h-4 w-4 mr-1"></i>
                                 Excluir
                             </button>
                             <div class="flex space-x-3">
-                                <button type="button" onclick="closeEventModal()" 
+                                <button type="button" onclick="closeEventModal()"
                                     class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors">
                                     Cancelar
                                 </button>
-                                <button type="submit" 
+                                <button type="submit"
                                     class="px-4 py-2 bg-gradient-to-r from-purple-500 to-cyan-500 text-white rounded-lg 
                                            hover:opacity-90 transition-opacity">
                                     Salvar
@@ -90,9 +137,41 @@
 <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/pt-br.js'></script>
+<script src="https://unpkg.com/@popperjs/core@2"></script>
+<script src="https://unpkg.com/tippy.js@6"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
+    // Funções auxiliares
+    function getPaymentMethodLabel(method) {
+        return {
+            cash: 'Dinheiro',
+            credit: 'Cartão de Crédito',
+            debit: 'Cartão de Débito',
+            pix: 'PIX',
+            insurance: 'Convênio'
+        }[method] || 'Não definido';
+    }
+
+    function getStatusLabel(status) {
+        return {
+            paid: 'Pago',
+            pending: 'Pendente',
+            confirmed: 'Confirmado',
+            cancelled: 'Cancelado'
+        }[status] || 'Não definido';
+    }
+
+    function getEventColor(status) {
+        return {
+            paid: '#10B981',      // Verde
+            pending: '#F59E0B',   // Amarelo
+            confirmed: '#3B82F6', // Azul
+            cancelled: '#EF4444', // Vermelho
+        }[status] || '#6B7280';   // Cinza como padrão
+    }
+
+    // Inicialização do calendário
     var calendarEl = document.getElementById('calendar');
     var calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
@@ -117,8 +196,53 @@ document.addEventListener('DOMContentLoaded', function() {
         eventTimeFormat: {
             hour: '2-digit',
             minute: '2-digit',
+            second: '2-digit',
             meridiem: false,
             hour12: false
+        },
+        slotLabelFormat: {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        },
+        eventDidMount: function(info) {
+            const status = info.event.extendedProps.payment_status;
+            const color = getEventColor(status);
+            info.el.style.backgroundColor = color;
+            info.el.style.borderColor = color;
+
+            // Adicionar ícones baseados no status
+            const statusIcon = {
+                paid: '💰',
+                pending: '⏳',
+                confirmed: '✅',
+                cancelled: '❌'
+            }[status] || '📅';
+
+            const titleEl = info.el.querySelector('.fc-event-title');
+            if (titleEl) {
+                titleEl.innerHTML = `${statusIcon} ${info.event.title}`;
+            }
+
+            // Adicionar tooltip
+            const value = info.event.extendedProps.appointment_value;
+            const paymentMethod = info.event.extendedProps.payment_method;
+
+            tippy(info.el, {
+                content: `
+                    <div class="bg-[#1E293B] p-2 rounded-lg shadow-lg border border-gray-700">
+                        <p class="text-white font-bold">${info.event.title}</p>
+                        <p class="text-gray-300">Valor: R$ ${value ? value.toFixed(2) : '0,00'}</p>
+                        <p class="text-gray-300">Pagamento: ${getPaymentMethodLabel(paymentMethod)}</p>
+                        <p class="text-gray-300">Status: ${getStatusLabel(status)}</p>
+                    </div>
+                `,
+                allowHTML: true,
+                placement: 'top',
+                theme: 'dark',
+                animation: 'scale'
+            });
         },
         select: function(info) {
             showEventModal(null, info);
@@ -133,7 +257,7 @@ document.addEventListener('DOMContentLoaded', function() {
             updateEventDates(info.event);
         }
     });
-    
+
     calendar.render();
 
     // Variável global para armazenar o evento atual sendo editado
@@ -142,37 +266,35 @@ document.addEventListener('DOMContentLoaded', function() {
     // Função para mostrar o modal
     window.showEventModal = function(event, dateInfo) {
         const modalTitle = document.querySelector('#eventModal h3');
-        const titleInput = document.getElementById('title');
-        const startInput = document.getElementById('start');
-        const endInput = document.getElementById('end');
-        const descriptionInput = document.getElementById('description');
+        const form = document.getElementById('eventForm');
         const deleteButton = document.getElementById('deleteEventButton');
-        
+
         if (event) {
-            // Editar evento existente
-            modalTitle.textContent = 'Editar Evento';
+            modalTitle.textContent = 'Editar Agendamento';
             currentEvent = event;
-            titleInput.value = event.title;
-            startInput.value = formatDateTime(event.start);
-            endInput.value = event.end ? formatDateTime(event.end) : '';
-            descriptionInput.value = event.extendedProps.description || '';
+            
+            document.getElementById('title').value = event.title;
+            document.getElementById('start').value = formatDateTime(event.start);
+            document.getElementById('description').value = event.extendedProps.description || '';
+            document.getElementById('eventValue').value = event.extendedProps.appointment_value || '';
+            document.getElementById('paymentMethod').value = event.extendedProps.payment_method || '';
+            document.getElementById('paymentStatus').value = event.extendedProps.payment_status || 'pending';
+
             deleteButton.classList.remove('hidden');
         } else {
-            // Novo evento
-            modalTitle.textContent = 'Novo Evento';
+            modalTitle.textContent = 'Novo Agendamento';
             currentEvent = null;
-            titleInput.value = '';
+            form.reset();
+
             if (dateInfo) {
-                startInput.value = formatDateTime(dateInfo.start);
-                endInput.value = dateInfo.allDay ? formatDateTime(dateInfo.end) : '';
+                document.getElementById('start').value = formatDateTime(dateInfo.start);
             } else {
-                startInput.value = '';
-                endInput.value = '';
+                document.getElementById('start').value = formatDateTime(new Date());
             }
-            descriptionInput.value = '';
+
             deleteButton.classList.add('hidden');
         }
-        
+
         document.getElementById('eventModal').classList.remove('hidden');
     }
 
@@ -188,13 +310,16 @@ document.addEventListener('DOMContentLoaded', function() {
         return d.toISOString().slice(0, 16);
     }
 
-    // Função para atualizar datas do evento após arrastar ou redimensionar
+    // Função para atualizar datas do evento
     function updateEventDates(event) {
         const eventData = {
             title: event.title,
-            start_time: event.start.toISOString(),
-            end_time: event.end ? event.end.toISOString() : event.start.toISOString(),
-            description: event.extendedProps.description || ''
+            start_time: formatDateForAPI(event.start),
+            end_time: formatDateForAPI(event.start),
+            description: event.extendedProps.description || '',
+            appointment_value: event.extendedProps.appointment_value,
+            payment_method: event.extendedProps.payment_method,
+            payment_status: event.extendedProps.payment_status
         };
 
         fetch(`/api/events/${event.id}`, {
@@ -218,12 +343,18 @@ document.addEventListener('DOMContentLoaded', function() {
             calendar.refetchEvents();
         });
     }
+    
+    function formatDateForAPI(date) {
+        if (!date) return null;
+        const d = new Date(date);
+        return d.toISOString().slice(0, 19).replace('T', ' ');
+    }
 
     // Função para excluir evento
     window.deleteEvent = function() {
         if (!currentEvent) return;
-        
-        if (confirm('Tem certeza que deseja excluir este evento?')) {
+
+        if (confirm('Tem certeza que deseja excluir este agendamento?')) {
             fetch(`/api/events/${currentEvent.id}`, {
                 method: 'DELETE'
             })
@@ -232,14 +363,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.status === 'success') {
                     calendar.getEventById(currentEvent.id).remove();
                     closeEventModal();
-                    showNotification('Evento excluído com sucesso!', 'success');
+                    showNotification('Agendamento excluído com sucesso!', 'success');
                 } else {
                     throw new Error(data.message);
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                showNotification('Erro ao excluir evento.', 'error');
+                showNotification('Erro ao excluir agendamento.', 'error');
             });
         }
     }
@@ -247,17 +378,22 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handler do formulário
     document.getElementById('eventForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        
+
+        const startDate = new Date(document.getElementById('start').value);
+
         const eventData = {
             title: document.getElementById('title').value,
-            start_time: document.getElementById('start').value,
-            end_time: document.getElementById('end').value || document.getElementById('start').value,
-            description: document.getElementById('description').value
+            start_time: formatDateForAPI(startDate),
+            end_time: formatDateForAPI(startDate),
+            description: document.getElementById('description').value,
+            appointment_value: parseFloat(document.getElementById('eventValue').value),
+            payment_method: document.getElementById('paymentMethod').value,
+            payment_status: document.getElementById('paymentStatus').value
         };
-        
+
         const method = currentEvent ? 'PUT' : 'POST';
         const url = currentEvent ? `/api/events/${currentEvent.id}` : '/api/events';
-        
+
         fetch(url, {
             method: method,
             headers: {
@@ -265,13 +401,18 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify(eventData)
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.status === 'success') {
                 calendar.refetchEvents();
                 closeEventModal();
                 showNotification(
-                    currentEvent ? 'Evento atualizado com sucesso!' : 'Evento criado com sucesso!', 
+                    currentEvent ? 'Agendamento atualizado com sucesso!' : 'Agendamento criado com sucesso!',
                     'success'
                 );
             } else {
@@ -280,7 +421,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Error:', error);
-            showNotification('Erro ao salvar evento.', 'error');
+            showNotification('Erro ao salvar agendamento.', 'error');
         });
     });
 
@@ -291,15 +432,14 @@ document.addEventListener('DOMContentLoaded', function() {
             type === 'success' ? 'bg-green-500' : 'bg-red-500'
         } text-white z-50 animate-fade-in-up`;
         notificationDiv.textContent = message;
-        
+
         document.body.appendChild(notificationDiv);
-        
+
         setTimeout(() => {
             notificationDiv.remove();
         }, 3000);
     }
 });
-
 </script>
 
 <style>
@@ -323,7 +463,8 @@ document.addEventListener('DOMContentLoaded', function() {
     height: 800px !important;
 }
 
-.fc-theme-standard td, .fc-theme-standard th {
+.fc-theme-standard td,
+.fc-theme-standard th {
     border-color: var(--fc-border-color);
 }
 
@@ -363,5 +504,16 @@ document.addEventListener('DOMContentLoaded', function() {
 .animate-fade-in-up {
     animation: fadeInUp 0.3s ease-out;
 }
+
+/* Estilos para o tooltip */
+.tippy-box[data-theme~='dark'] {
+    background-color: #1E293B;
+    border: 1px solid #334155;
+}
+
+.tippy-box[data-theme~='dark'][data-placement^='top'] > .tippy-arrow::before {
+    border-top-color: #1E293B;
+}
 </style>
 {% endblock %}
+        

@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock %}</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-    
+
     <style>
         /* Estilo para input datetime-local no tema escuro */
         input[type="datetime-local"] {
@@ -24,10 +26,12 @@
             from {
                 opacity: 0;
             }
+
             to {
                 opacity: 1;
             }
         }
+
         :root {
             --primary: #A855F7;
             --primary-dark: #9333EA;
@@ -243,73 +247,81 @@
                             <i class="lucide lucide-check-square h-4 w-4"></i>
                             <span>Tarefas</span>
                         </a>
+                        <!-- Em app/templates/base.html, na seção de navegação -->
+                        <a href="{{ url_for('financial.financial_dashboard') }}"
+                            class="flex items-center gap-2 px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg transition-all">
+                            <i class="lucide lucide-dollar-sign h-5 w-5"></i>
+                            <span>Financeiro</span>
+                        </a>
                     </div>
                     {% endif %}
                 </div>
-                
+
 
                 <div class="flex items-center space-x-6">
                     {% if session.get('user_id') %}
-                        <div class="flex items-center space-x-4">
-                            <div class="user-info hidden lg:flex items-center space-x-3">
-                                <div class="text-right">
-                                    <p class="text-sm font-semibold">{{ session.get('user_name', 'LaisVilla') }}</p>
-                                    <p class="text-xs text-gray-400">2025-02-13 20:29:42</p>
-                                </div>
-                                <div class="relative">
-                                    <button class="rounded-full p-1 hover:bg-white/5 transition-colors">
-                                        <img class="h-10 w-10 rounded-full object-cover avatar"
-                                             src="https://ui-avatars.com/api/?name=LaisVilla&background=random"
-                                             alt="Profile">
-                                        <span class="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-400 border-2 border-bg-dark-2"></span>
-                                    </button>
+                    <div class="flex items-center space-x-4">
+                        <div class="user-info hidden lg:flex items-center space-x-3">
+                            <div class="text-right">
+                                <p class="text-sm font-semibold">{{ session.get('user_name', 'LaisVilla') }}</p>
+                                <p class="text-xs text-gray-400">2025-02-13 20:29:42</p>
+                            </div>
+                            <div class="relative">
+                                <button class="rounded-full p-1 hover:bg-white/5 transition-colors">
+                                    <img class="h-10 w-10 rounded-full object-cover avatar"
+                                        src="https://ui-avatars.com/api/?name=LaisVilla&background=random"
+                                        alt="Profile">
+                                    <span
+                                        class="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-400 border-2 border-bg-dark-2"></span>
+                                </button>
 
-                                    <!-- Dropdown -->
-                                    <div class="hidden profile-dropdown absolute right-0 mt-2">
-                                        <div class="profile-header">
-                                            <div class="flex items-center space-x-3">
-                                                <img class="h-12 w-12 rounded-full object-cover avatar"
-                                                     src="https://ui-avatars.com/api/?name=LaisVilla&background=random"
-                                                     alt="Profile">
-                                                <div>
-                                                    <p class="font-medium">LaisVilla</p>
-                                                    <p class="text-sm text-gray-400">Premium Member</p>
-                                                </div>
+                                <!-- Dropdown -->
+                                <div class="hidden profile-dropdown absolute right-0 mt-2">
+                                    <div class="profile-header">
+                                        <div class="flex items-center space-x-3">
+                                            <img class="h-12 w-12 rounded-full object-cover avatar"
+                                                src="https://ui-avatars.com/api/?name=LaisVilla&background=random"
+                                                alt="Profile">
+                                            <div>
+                                                <p class="font-medium">LaisVilla</p>
+                                                <p class="text-sm text-gray-400">Premium Member</p>
                                             </div>
                                         </div>
-
-                                        <a href="#" class="dropdown-item">
-                                            <i class="lucide lucide-user-cog h-5 w-5"></i>
-                                            <span>Perfil</span>
-                                        </a>
-                                        <a href="#" class="dropdown-item">
-                                            <i class="lucide lucide-settings h-5 w-5"></i>
-                                            <span>Configurações</span>
-                                        </a>
-                                        <a href="#" class="dropdown-item">
-                                            <i class="lucide lucide-help-circle h-5 w-5"></i>
-                                            <span>Ajuda</span>
-                                        </a>
-                                        <div class="border-t border-white/5 my-1"></div>
-                                        <a href="{{ url_for('main.logout') }}" class="dropdown-item danger">
-                                            <i class="lucide lucide-log-out h-5 w-5"></i>
-                                            <span>Sair</span>
-                                        </a>
                                     </div>
+
+                                    <a href="#" class="dropdown-item">
+                                        <i class="lucide lucide-user-cog h-5 w-5"></i>
+                                        <span>Perfil</span>
+                                    </a>
+                                    <a href="#" class="dropdown-item">
+                                        <i class="lucide lucide-settings h-5 w-5"></i>
+                                        <span>Configurações</span>
+                                    </a>
+                                    <a href="#" class="dropdown-item">
+                                        <i class="lucide lucide-help-circle h-5 w-5"></i>
+                                        <span>Ajuda</span>
+                                    </a>
+                                    <div class="border-t border-white/5 my-1"></div>
+                                    <a href="{{ url_for('main.logout') }}" class="dropdown-item danger">
+                                        <i class="lucide lucide-log-out h-5 w-5"></i>
+                                        <span>Sair</span>
+                                    </a>
                                 </div>
                             </div>
                         </div>
+                    </div>
                     {% else %}
-                        <div class="flex items-center space-x-4">
-                            <a href="{{ url_for('main.login') }}" class="btn btn-secondary">
-                                <i class="lucide lucide-log-in h-4 w-4"></i>
-                                <span>Entrar</span>
-                            </a>
-                            <a href="{{ url_for('main.register') }}" class="bg-gradient-to-r from-purple-500 to-cyan-500 btn">
-                                <i class="lucide lucide-user-plus h-4 w-4"></i>
-                                <span>Criar conta</span>
-                            </a>
-                        </div>
+                    <div class="flex items-center space-x-4">
+                        <a href="{{ url_for('main.login') }}" class="btn btn-secondary">
+                            <i class="lucide lucide-log-in h-4 w-4"></i>
+                            <span>Entrar</span>
+                        </a>
+                        <a href="{{ url_for('main.register') }}"
+                            class="bg-gradient-to-r from-purple-500 to-cyan-500 btn">
+                            <i class="lucide lucide-user-plus h-4 w-4"></i>
+                            <span>Criar conta</span>
+                        </a>
+                    </div>
                     {% endif %}
                 </div>
             </div>
@@ -319,17 +331,19 @@
     <!-- Flash Messages -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="flash-message {% if category == 'success' %}flash-success{% elif category == 'error' %}flash-error{% endif %}">
-                        <i class="lucide {% if category == 'success' %}lucide-check-circle{% else %}lucide-alert-circle{% endif %} h-5 w-5"></i>
-                        <span>{{ message }}</span>
-                        <button class="ml-auto hover:opacity-75" onclick="this.parentElement.remove()">
-                            <i class="lucide lucide-x h-4 w-4"></i>
-                        </button>
-                    </div>
-                {% endfor %}
-            {% endif %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div
+            class="flash-message {% if category == 'success' %}flash-success{% elif category == 'error' %}flash-error{% endif %}">
+            <i
+                class="lucide {% if category == 'success' %}lucide-check-circle{% else %}lucide-alert-circle{% endif %} h-5 w-5"></i>
+            <span>{{ message }}</span>
+            <button class="ml-auto hover:opacity-75" onclick="this.parentElement.remove()">
+                <i class="lucide lucide-x h-4 w-4"></i>
+            </button>
+        </div>
+        {% endfor %}
+        {% endif %}
         {% endwith %}
     </div>
 
@@ -358,23 +372,23 @@
     <script>
         lucide.createIcons();
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const profileButton = document.querySelector('.avatar').parentElement;
             const dropdown = document.querySelector('.profile-dropdown');
-            
+
             if (profileButton && dropdown) {
-                profileButton.addEventListener('click', function(e) {
+                profileButton.addEventListener('click', function (e) {
                     e.stopPropagation();
                     dropdown.classList.toggle('hidden');
                 });
 
-                document.addEventListener('click', function(e) {
+                document.addEventListener('click', function (e) {
                     if (!dropdown.contains(e.target) && !profileButton.contains(e.target)) {
                         dropdown.classList.add('hidden');
                     }
                 });
 
-                document.addEventListener('keydown', function(e) {
+                document.addEventListener('keydown', function (e) {
                     if (e.key === 'Escape') {
                         dropdown.classList.add('hidden');
                     }
@@ -385,4 +399,5 @@
 
     {% block scripts %}{% endblock %}
 </body>
+
 </html>
