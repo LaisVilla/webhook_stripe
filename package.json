@@ -1,5 +1,8 @@
 {
     "scripts": {
-      "build": "tailwindcss -i ./static/css/styles.css -o ./static/css/output.css --watch"
+        "build": "tailwindcss -i ./static/css/styles.css -o ./static/css/output.css --watch"
+    },
+    "dependencies": {
+        "chart.js": "^4.4.8"
     }
-  }
+}

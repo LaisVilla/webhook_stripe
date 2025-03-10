@@ -1,424 +1,558 @@
-<!-- app/templates/financial.html -->
 {% extends "base.html" %}
 
 {% block title %}Financeiro - NexusAI{% endblock %}
 
+{% block head %}
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+    .card { @apply bg-[#1E293B] rounded-xl shadow-xl border border-gray-700 p-6; }
+    .btn { @apply px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2; }
+    .btn-primary { @apply bg-gradient-to-r from-purple-500 to-cyan-500 text-white hover:opacity-90; }
+    .btn-secondary { @apply bg-blue-500 text-white hover:opacity-90; }
+    .action-btn { @apply p-1 rounded-lg transition-all; }
+    .action-btn:hover { transform: scale(1.1); }
+    .form-input { 
+      @apply w-full border border-gray-700 rounded-lg px-4 py-2 text-white;
+    }
+    input.form-input, select.form-input { /* Seletor específico para input e select */
+      background: #0F172A !important; /* Fundo escuro forçado */
+      color: white !important;
+      -webkit-appearance: none; /* Remove estilos padrão */
+      appearance: none;
+    }
+    .tooltip { position: relative; }
+    .tooltip::after {
+      content: attr(data-tooltip);
+      position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+      padding: 4px 8px; background-color: rgba(0, 0, 0, 0.8); color: white;
+      border-radius: 4px; font-size: 12px; white-space: nowrap;
+      opacity: 0; visibility: hidden; transition: opacity 0.2s, visibility 0.2s;
+    }
+    .tooltip:hover::after { opacity: 1; visibility: visible; }
+  </style>
+{% endblock %}
+
 {% block content %}
-<!-- Dashboard Header -->
+<!-- Header -->
 <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-bold text-white">Gestão Financeira</h1>
-    <button onclick="showFinancialModal('create')" 
-            class="px-4 py-2 bg-gradient-to-r from-purple-500 to-cyan-500 text-white rounded-lg 
-                   hover:opacity-90 transition-all duration-200 flex items-center gap-2">
-        <i class="lucide lucide-plus h-5 w-5"></i>
+    <div class="flex gap-4">
+      <button onclick="refreshDashboard()" class="btn btn-secondary">
+        <i data-lucide="refresh-cw" class="h-5 w-5"></i>
+        <span>Atualizar</span>
+      </button>
+      <button onclick="showFinancialModal('create')" class="btn btn-primary">
+        <i data-lucide="plus" class="h-5 w-5"></i>
         <span>Novo Registro</span>
-    </button>
+      </button>
+    </div>
+  </div>
+
+<!-- Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="card">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-white">Total Mensal</h3>
+        <i data-lucide="dollar-sign" class="text-green-500 h-6 w-6"></i>
+      </div>
+      <p class="text-3xl font-bold text-green-500 mt-2" id="monthlyTotal">R$ 0,00</p>
+    </div>
+  
+    <div class="card">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-white">Pendentes</h3>
+        <i data-lucide="clock" class="text-yellow-500 h-6 w-6"></i>
+      </div>
+      <p class="text-3xl font-bold text-yellow-500 mt-2" id="pendingTotal">R$ 0,00</p>
+    </div>
+  
+    <div class="card">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-white">Atendimentos</h3>
+        <i data-lucide="users" class="text-blue-500 h-6 w-6"></i>
+      </div>
+      <p class="text-3xl font-bold text-blue-500 mt-2" id="appointmentCount">0</p>
+    </div>
+  
+    <div class="card">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-white">Taxa de Conclusão</h3>
+        <i data-lucide="check-circle" class="text-purple-500 h-6 w-6"></i>
+      </div>
+      <p class="text-3xl font-bold text-purple-500 mt-2" id="completionRate">0%</p>
+    </div>
+  </div>
+
+<!-- Charts -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+  <div class="card">
+    <h3 class="text-lg font-semibold text-white mb-4">Receita Diária</h3>
+    <canvas id="dailyRevenueChart" height="200"></canvas>
+  </div>
+
+  <div class="card">
+    <h3 class="text-lg font-semibold text-white mb-4">Métodos de Pagamento</h3>
+    <canvas id="paymentMethodsChart" height="200"></canvas>
+  </div>
 </div>
 
-<!-- Dashboard Grid -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-    <!-- Total Mensal -->
-    <div class="bg-[#1E293B] rounded-xl shadow-xl border border-gray-700 p-6">
-        <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-white">Total Mensal</h3>
-            <i class="lucide lucide-currency-brl text-green-500 h-6 w-6"></i>
-        </div>
-        <p class="text-3xl font-bold text-green-500 mt-2" id="monthlyTotal">R$ 0,00</p>
-    </div>
-
-    <!-- Pendentes -->
-    <div class="bg-[#1E293B] rounded-xl shadow-xl border border-gray-700 p-6">
-        <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-white">Pendentes</h3>
-            <i class="lucide lucide-clock text-yellow-500 h-6 w-6"></i>
-        </div>
-        <p class="text-3xl font-bold text-yellow-500 mt-2" id="pendingTotal">R$ 0,00</p>
-    </div>
-
-    <!-- Total de Atendimentos -->
-    <div class="bg-[#1E293B] rounded-xl shadow-xl border border-gray-700 p-6">
-        <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-white">Atendimentos</h3>
-            <i class="lucide lucide-users text-blue-500 h-6 w-6"></i>
-        </div>
-        <p class="text-3xl font-bold text-blue-500 mt-2" id="appointmentCount">0</p>
-    </div>
-</div>
-
-<!-- Tabela de Registros -->
-<div class="bg-[#1E293B] rounded-xl shadow-xl border border-gray-700 p-6">
+<!-- Records Table -->
+<div class="card">
     <div class="flex items-center justify-between mb-6">
         <h2 class="text-xl font-semibold text-white">Registros Financeiros</h2>
         <div class="flex gap-4">
-            <input type="month" id="monthFilter" 
-                   class="bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-2 text-white">
-            <select id="statusFilter" 
-                    class="bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-2 text-white">
-                <option value="all">Todos os Status</option>
+          <input type="month" id="monthFilter" class="form-input" style="background: #0F172A; color: white;">
+          <select id="statusFilter" class="form-input" style="background: #0F172A; color: white;">
+            <option value="all">Todos os Status</option>
+            <option value="paid">Pago</option>
+            <option value="pending">Pendente</option>
+            <option value="overdue">Atrasado</option>
+          </select>
+        </div>
+      </div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-white">
+      <thead class="bg-gray-700/50">
+        <tr>
+          <th class="p-4">Paciente</th>
+          <th class="p-4">Data</th>
+          <th class="p-4">Valor</th>
+          <th class="p-4">Método</th>
+          <th class="p-4">Status</th>
+          <th class="p-4">Ações</th>
+        </tr>
+      </thead>
+      <tbody id="financialRecordsTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="financialModal" class="hidden fixed inset-0 bg-gray-900/75 backdrop-blur-sm z-50">
+    <div class="flex items-center justify-center min-h-screen px-4">
+      <div class="bg-[#1E293B] w-full max-w-md rounded-xl shadow-xl border border-gray-700">
+        <div class="p-6">
+          <div class="flex justify-between items-center mb-6">
+            <h3 id="modalTitle" class="text-xl font-semibold text-white"></h3>
+            <button onclick="closeFinancialModal()" class="text-gray-400 hover:text-white">
+              <i data-lucide="x" class="h-5 w-5"></i>
+            </button>
+          </div>
+  
+          <form id="financialForm" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-1">Nome do Paciente*</label>
+              <input type="text" id="patientName" required class="form-input">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-1">Valor*</label>
+              <input type="number" id="appointmentValue" required step="0.01" min="0" class="form-input">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-1">Data do Atendimento*</label>
+              <input type="datetime-local" id="appointmentDate" required class="form-input">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-1">Método de Pagamento*</label>
+              <select id="paymentMethod" required class="form-input">
+                <option value="cash">Dinheiro</option>
+                <option value="credit">Cartão de Crédito</option>
+                <option value="debit">Cartão de Débito</option>
+                <option value="pix">PIX</option>
+                <option value="insurance">Convênio</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-1">Status*</label>
+              <select id="paymentStatus" required class="form-input">
                 <option value="paid">Pago</option>
                 <option value="pending">Pendente</option>
                 <option value="overdue">Atrasado</option>
-            </select>
-        </div>
-    </div>
-    <div class="overflow-x-auto">
-        <table class="w-full text-left text-white">
-            <thead class="bg-gray-700/50">
-                <tr>
-                    <th class="p-4">Paciente</th>
-                    <th class="p-4">Data</th>
-                    <th class="p-4">Valor</th>
-                    <th class="p-4">Método</th>
-                    <th class="p-4">Status</th>
-                    <th class="p-4">Ações</th>
-                </tr>
-            </thead>
-            <tbody id="financialRecordsTable">
-                <!-- Registros serão inseridos aqui -->
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<!-- Modal de Registro Financeiro -->
-<div id="financialModal" class="hidden fixed inset-0 bg-gray-900/75 backdrop-blur-sm z-50">
-    <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="bg-[#1E293B] w-full max-w-md rounded-xl shadow-xl border border-gray-700">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 id="modalTitle" class="text-xl font-semibold text-white"></h3>
-                    <button onclick="closeFinancialModal()" 
-                            class="text-gray-400 hover:text-white">
-                        <i class="lucide lucide-x h-5 w-5"></i>
-                    </button>
-                </div>
-
-                <form id="financialForm" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">
-                            Nome do Paciente*
-                        </label>
-                        <input type="text" id="patientName" required 
-                               class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-2 text-white">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">
-                            Valor*
-                        </label>
-                        <input type="number" id="appointmentValue" required step="0.01" min="0"
-                               class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-2 text-white">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">
-                            Data do Atendimento*
-                        </label>
-                        <input type="datetime-local" id="appointmentDate" required
-                               class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-2 text-white">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">
-                            Método de Pagamento*
-                        </label>
-                        <select id="paymentMethod" required
-                                class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-2 text-white">
-                            <option value="cash">Dinheiro</option>
-                            <option value="credit">Cartão de Crédito</option>
-                            <option value="debit">Cartão de Débito</option>
-                            <option value="pix">PIX</option>
-                            <option value="insurance">Convênio</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">
-                            Status*
-                        </label>
-                        <select id="paymentStatus" required
-                                class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-2 text-white">
-                            <option value="paid">Pago</option>
-                            <option value="pending">Pendente</option>
-                            <option value="overdue">Atrasado</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">
-                            Observações
-                        </label>
-                        <textarea id="notes" rows="3"
-                                 class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-4 py-2 text-white"></textarea>
-                    </div>
-
-                    <div class="flex justify-end gap-3 mt-6">
-                        <button type="button" onclick="closeFinancialModal()"
-                                class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600">
-                            Cancelar
-                        </button>
-                        <button type="submit"
-                                class="px-4 py-2 bg-gradient-to-r from-purple-500 to-cyan-500 text-white rounded-lg 
-                                       hover:opacity-90">
-                            Salvar
-                        </button>
-                    </div>
-                </form>
+              </select>
             </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-1">Observações</label>
+              <textarea id="notes" rows="3" class="form-input"></textarea>
+            </div>
+  
+            <div class="flex justify-end gap-3 mt-6">
+              <button type="button" onclick="closeFinancialModal()" class="btn bg-gray-700 text-white hover:bg-gray-600">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Salvar</button>
+            </div>
+          </form>
         </div>
+      </div>
     </div>
-</div>
+  </div>
 
 <script>
-// Estado global
+// API Endpoints
+const API = {
+  DASHBOARD: '/api/financial/dashboard-data',
+  RECORDS: '/api/financial/records',
+  RECORD: (id) => `/api/financial/records/${id}`
+};
+
+// State Management
 const STATE = {
-    currentRecord: null,
-    records: [],
+  currentRecord: null,
+  records: [],
+  dashboardData: null,
+  charts: { dailyRevenue: null, paymentMethods: null }
 };
 
-// Funções auxiliares
-const formatCurrency = (value) => {
-    return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-    }).format(value);
-};
+// Helper Functions
+const formatCurrency = value => 
+  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
-const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-};
+const formatDate = dateString => 
+  new Date(dateString).toLocaleString('pt-BR', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
 
-// Carregar registros
+const getPaymentMethodLabel = method => ({
+  cash: 'Dinheiro', credit: 'Crédito', debit: 'Débito',
+  pix: 'PIX', insurance: 'Convênio'
+})[method] || method;
+
+const getStatusLabel = status => ({
+  paid: 'Pago', pending: 'Pendente', overdue: 'Atrasado'
+})[status] || status;
+
+const getStatusStyle = status => ({
+  paid: 'bg-green-500/20 text-green-500',
+  pending: 'bg-yellow-500/20 text-yellow-500',
+  overdue: 'bg-red-500/20 text-red-500'
+})[status] || 'bg-gray-500/20 text-gray-500';
+
+// Dashboard Functions
+async function syncDashboard() {
+  try {
+    await Promise.all([loadFinancialRecords(), loadDashboardData()]);
+  } catch (error) {
+    console.error('Erro na sincronização:', error);
+    showNotification('Erro ao sincronizar dashboard', 'error');
+  }
+}
+
+async function loadDashboardData() {
+  try {
+    const monthFilter = document.getElementById('monthFilter').value;
+    const url = new URL(API.DASHBOARD, window.location.origin);
+    
+    if (monthFilter) url.searchParams.append('month', monthFilter);
+    
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Erro ao carregar dados do dashboard');
+    
+    STATE.dashboardData = await response.json();
+    updateDashboardUI();
+    updateCharts();
+  } catch (error) {
+    console.error('Erro ao carregar dashboard:', error);
+    showNotification('Erro ao carregar dados do dashboard', 'error');
+  }
+}
+
 async function loadFinancialRecords() {
-    try {
-        const response = await fetch('/api/financial/records');
-        if (!response.ok) throw new Error('Erro ao carregar registros');
-        
-        const records = await response.json();
-        STATE.records = records;
-        
-        updateDashboard();
-        updateTable();
-    } catch (error) {
-        console.error('Error:', error);
-        showNotification('Erro ao carregar registros', 'error');
-    }
+  try {
+    const monthFilter = document.getElementById('monthFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    const url = new URL(API.RECORDS, window.location.origin);
+    
+    if (monthFilter) url.searchParams.append('month', monthFilter);
+    if (statusFilter && statusFilter !== 'all') url.searchParams.append('status', statusFilter);
+    
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Erro ao carregar registros');
+    
+    STATE.records = (await response.json()).map(record => ({
+      ...record,
+      record_id: record.record_id || record.id || crypto.randomUUID()
+    }));
+    
+    updateTable();
+    return true;
+  } catch (error) {
+    console.error('Erro ao carregar registros:', error);
+    showNotification('Erro ao carregar registros', 'error');
+    return false;
+  }
 }
 
-// Atualizar dashboard
-function updateDashboard() {
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
-    
-    const monthlyRecords = STATE.records.filter(record => {
-        const recordDate = new Date(record.appointment_date);
-        return recordDate.getMonth() === currentMonth && 
-               recordDate.getFullYear() === currentYear;
-    });
-    
-    const monthlyTotal = monthlyRecords.reduce((sum, record) => 
-        sum + record.appointment_value, 0);
-    
-    const pendingTotal = STATE.records
-        .filter(record => record.status === 'pending')
-        .reduce((sum, record) => sum + record.appointment_value, 0);
-    
-    document.getElementById('monthlyTotal').textContent = formatCurrency(monthlyTotal);
-    document.getElementById('pendingTotal').textContent = formatCurrency(pendingTotal);
-    document.getElementById('appointmentCount').textContent = monthlyRecords.length;
+function updateDashboardUI() {
+  const data = STATE.dashboardData;
+  if (!data?.financial_summary) return;
+
+  const summary = data.financial_summary;
+  
+  document.getElementById('monthlyTotal').textContent = formatCurrency(summary.total_revenue || 0);
+  document.getElementById('pendingTotal').textContent = formatCurrency(summary.pending_payments || 0);
+  document.getElementById('appointmentCount').textContent = summary.total_appointments || 0;
+  document.getElementById('completionRate').textContent = `${(data.completion_rate || 0).toFixed(1)}%`;
 }
 
-// Atualizar tabela
 function updateTable() {
-    const tbody = document.getElementById('financialRecordsTable');
-    tbody.innerHTML = '';
-    
-    STATE.records.forEach(record => {
-        const tr = document.createElement('tr');
-        tr.className = 'border-b border-gray-700 hover:bg-gray-700/30';
-        
-        tr.innerHTML = `
-            <td class="p-4">${record.patient_name}</td>
-            <td class="p-4">${formatDate(record.appointment_date)}</td>
-            <td class="p-4">${formatCurrency(record.appointment_value)}</td>
-            <td class="p-4">${getPaymentMethodLabel(record.payment_method)}</td>
-            <td class="p-4">
-                <span class="px-3 py-1 rounded-full text-sm ${getStatusStyle(record.status)}">
-                    ${getStatusLabel(record.status)}
-                </span>
-            </td>
-            <td class="p-4">
-                <button onclick="editRecord('${record.record_id}')"
-                        class="text-blue-500 hover:text-blue-400">
-                    <i class="lucide lucide-pencil h-4 w-4"></i>
-                </button>
-            </td>
-        `;
-        
-        tbody.appendChild(tr);
-    });
+  const tbody = document.getElementById('financialRecordsTable');
+  if (!tbody) return;
+  
+  tbody.innerHTML = STATE.records.length === 0 
+    ? `<tr><td colspan="6" class="p-4 text-center text-gray-400">Nenhum registro encontrado</td></tr>`
+    : STATE.records.map(record => `
+        <tr class="border-b border-gray-700 hover:bg-gray-700/30">
+          <td class="p-4">${record.patient_name}</td>
+          <td class="p-4">${formatDate(record.appointment_date)}</td>
+          <td class="p-4">${formatCurrency(record.appointment_value)}</td>
+          <td class="p-4">${getPaymentMethodLabel(record.payment_method)}</td>
+          <td class="p-4">
+            <span class="px-3 py-1 rounded-full text-sm ${getStatusStyle(record.status)}">
+              ${getStatusLabel(record.status)}
+            </span>
+          </td>
+          <td class="p-4">
+            <div class="flex items-center gap-2">
+              <button onclick="editRecord('${record.record_id}')" 
+                class="action-btn text-blue-500 hover:text-blue-400 tooltip hover:bg-blue-500/10"
+                data-tooltip="Editar">
+                <i data-lucide="pencil" class="h-4 w-4"></i>
+              </button>
+              <button onclick="deleteRecord('${record.record_id}')"
+                class="action-btn text-red-500 hover:text-red-400 tooltip hover:bg-red-500/10"
+                data-tooltip="Excluir">
+                <i data-lucide="trash-2" class="h-4 w-4"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+  
+  // Reinitialize Lucide icons
+  lucide?.createIcons();
 }
 
-// Funções de UI
-function getPaymentMethodLabel(method) {
-    const labels = {
-        cash: 'Dinheiro',
-        credit: 'Crédito',
-        debit: 'Débito',
-        pix: 'PIX',
-        insurance: 'Convênio'
-    };
-    return labels[method] || method;
+function updateCharts() {
+  const data = STATE.dashboardData;
+  if (!data) return;
+
+  updateDailyRevenueChart(data);
+  updatePaymentMethodsChart(data);
 }
 
-function getStatusLabel(status) {
-    const labels = {
-        paid: 'Pago',
-        pending: 'Pendente',
-        overdue: 'Atrasado'
-    };
-    return labels[status] || status;
-}
+function updateDailyRevenueChart(data) {
+  const dailyData = data.daily_statistics;
+  const dates = Object.keys(dailyData);
+  const revenues = dates.map(date => dailyData[date].revenue);
 
-function getStatusStyle(status) {
-    const styles = {
-        paid: 'bg-green-500/20 text-green-500',
-        pending: 'bg-yellow-500/20 text-yellow-500',
-        overdue: 'bg-red-500/20 text-red-500'
-    };
-    return styles[status] || 'bg-gray-500/20 text-gray-500';
-}
+  if (STATE.charts.dailyRevenue) {
+    STATE.charts.dailyRevenue.destroy();
+  }
 
-// Inicialização quando a página carrega
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Página financeira carregada');  // Debug
-    loadFinancialRecords();
-    
-    // Configurar listeners de filtros
-    document.getElementById('monthFilter').addEventListener('change', updateTable);
-    document.getElementById('statusFilter').addEventListener('change', updateTable);
-    
-    // Configurar formulário
-    document.getElementById('financialForm').addEventListener('submit', handleFormSubmit);
-    
-    // Criar ícones
-    if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
+  STATE.charts.dailyRevenue = new Chart(
+    document.getElementById('dailyRevenueChart'),
+    {
+      type: 'line',
+      data: {
+        labels: dates,
+        datasets: [{
+          label: 'Receita',
+          data: revenues,
+          borderColor: 'rgb(99, 102, 241)',
+          tension: 0.1,
+          fill: true,
+          backgroundColor: 'rgba(99, 102, 241, 0.1)'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+            ticks: {
+              color: 'rgba(255, 255, 255, 0.7)',
+              callback: value => formatCurrency(value)
+            }
+          },
+          x: {
+            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+            ticks: { color: 'rgba(255, 255, 255, 0.7)' }
+          }
+        }
+      }
     }
-});
-
-// Notificação
-function showNotification(message, type = 'success') {
-    const notification = document.createElement('div');
-    notification.className = `fixed bottom-4 right-4 p-4 rounded-lg shadow-lg ${
-        type === 'success' ? 'bg-green-500' : 'bg-red-500'
-    } text-white z-50`;
-    notification.textContent = message;
-    document.body.appendChild(notification);
-    setTimeout(() => notification.remove(), 3000);
+  );
 }
 
-// Manipulação do formulário
+function updatePaymentMethodsChart(data) {
+  const paymentData = data.revenue_by_payment_method;
+  const methods = Object.keys(paymentData);
+  const values = methods.map(method => paymentData[method]);
+
+  if (STATE.charts.paymentMethods) {
+    STATE.charts.paymentMethods.destroy();
+  }
+
+  STATE.charts.paymentMethods = new Chart(
+    document.getElementById('paymentMethodsChart'),
+    {
+      type: 'doughnut',
+      data: {
+        labels: methods.map(getPaymentMethodLabel),
+        datasets: [{
+          data: values,
+          backgroundColor: [
+            'rgba(99, 102, 241, 0.8)',
+            'rgba(168, 85, 247, 0.8)',
+            'rgba(236, 72, 153, 0.8)',
+            'rgba(34, 211, 238, 0.8)',
+            'rgba(45, 212, 191, 0.8)'
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: { color: 'rgba(255, 255, 255, 0.7)' }
+          }
+        }
+      }
+    }
+  );
+}
+
+// Form Handling
 async function handleFormSubmit(e) {
-    e.preventDefault();
-    
+  e.preventDefault();
+  
+  try {
     const formData = {
-        patient_name: document.getElementById('patientName').value,
-        appointment_value: parseFloat(document.getElementById('appointmentValue').value),
-        appointment_date: document.getElementById('appointmentDate').value,
-        payment_method: document.getElementById('paymentMethod').value,
-        status: document.getElementById('paymentStatus').value,
-        notes: document.getElementById('notes').value
+      patient_name: document.getElementById('patientName').value,
+      appointment_value: parseFloat(document.getElementById('appointmentValue').value),
+      appointment_date: document.getElementById('appointmentDate').value,
+      payment_method: document.getElementById('paymentMethod').value,
+      status: document.getElementById('paymentStatus').value,
+      notes: document.getElementById('notes').value
     };
 
-    try {
-        const url = STATE.currentRecord 
-            ? `/api/financial/records/${STATE.currentRecord.record_id}`
-            : '/api/financial/records';
-            
-        const method = STATE.currentRecord ? 'PUT' : 'POST';
-        
-        const response = await fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData)
-        });
+    const url = STATE.currentRecord 
+      ? API.RECORD(STATE.currentRecord.record_id)
+      : API.RECORDS;
+      
+    const method = STATE.currentRecord ? 'PUT' : 'POST';
+    
+    const response = await fetch(url, {
+      method,
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(formData)
+    });
 
-        const data = await response.json();
-        if (data.status === 'success') {
-            await loadFinancialRecords();
-            closeFinancialModal();
-            showNotification(
-                STATE.currentRecord 
-                    ? 'Registro atualizado com sucesso!'
-                    : 'Registro criado com sucesso!'
-            );
-        } else {
-            throw new Error(data.message || 'Erro ao salvar registro');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        showNotification('Erro ao salvar registro', 'error');
+    if (!response.ok) throw new Error('Erro ao salvar registro');
+
+    const data = await response.json();
+    if (data.status === 'success') {
+      await syncDashboard();
+      closeFinancialModal();
+      showNotification(STATE.currentRecord ? 'Registro atualizado!' : 'Registro criado!');
     }
+  } catch (error) {
+    console.error('Erro ao salvar:', error);
+    showNotification('Erro ao salvar registro', 'error');
+  }
 }
 
-// Funções do modal
+// Modal Functions
 function showFinancialModal(mode, recordId = null) {
-    const modal = document.getElementById('financialModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const form = document.getElementById('financialForm');
-    
-    modal.classList.remove('hidden');
-    
-    if (mode === 'create') {
-        modalTitle.textContent = 'Novo Registro';
-        form.reset();
-        STATE.currentRecord = null;
-    } else if (mode === 'edit' && recordId) {
-        modalTitle.textContent = 'Editar Registro';
-        const record = STATE.records.find(r => r.record_id === recordId);
-        if (record) {
-            STATE.currentRecord = record;
-            document.getElementById('patientName').value = record.patient_name;
-            document.getElementById('appointmentValue').value = record.appointment_value;
-            document.getElementById('appointmentDate').value = formatDateForInput(record.appointment_date);
-            document.getElementById('paymentMethod').value = record.payment_method;
-            document.getElementById('paymentStatus').value = record.status;
-            document.getElementById('notes').value = record.notes || '';
-        }
+  const modal = document.getElementById('financialModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const form = document.getElementById('financialForm');
+  
+  modal.classList.remove('hidden');
+  modalTitle.textContent = mode === 'create' ? 'Novo Registro' : 'Editar Registro';
+  
+  if (mode === 'create') {
+    form.reset();
+    STATE.currentRecord = null;
+    document.getElementById('appointmentDate').value = new Date().toISOString().slice(0, 16);
+  } else {
+    const record = STATE.records.find(r => r.record_id === recordId);
+    if (record) {
+      STATE.currentRecord = record;
+      
+      document.getElementById('patientName').value = record.patient_name;
+      document.getElementById('appointmentValue').value = record.appointment_value;
+      document.getElementById('appointmentDate').value = new Date(record.appointment_date).toISOString().slice(0, 16);
+      document.getElementById('paymentMethod').value = record.payment_method;
+      document.getElementById('paymentStatus').value = record.status;
+      document.getElementById('notes').value = record.notes || '';
     }
+  }
 }
 
 function closeFinancialModal() {
-    document.getElementById('financialModal').classList.add('hidden');
-    document.getElementById('financialForm').reset();
-    STATE.currentRecord = null;
+  document.getElementById('financialModal').classList.add('hidden');
+  document.getElementById('financialForm').reset();
+  STATE.currentRecord = null;
 }
 
-// Função para editar registro
 function editRecord(recordId) {
-    showFinancialModal('edit', recordId);
+  showFinancialModal('edit', recordId);
 }
 
-// Função auxiliar para formatar data para input
-function formatDateForInput(dateString) {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
+async function deleteRecord(recordId) {
+  if (!confirm('Tem certeza que deseja excluir este registro?')) return;
+  
+  try {
+    const response = await fetch(API.RECORD(recordId), {
+      method: 'DELETE'
+    });
     
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
+    if (!response.ok) throw new Error('Erro ao excluir registro');
+
+    const data = await response.json();
+    if (data.status === 'success') {
+      await syncDashboard();
+      showNotification('Registro excluído com sucesso');
+    }
+  } catch (error) {
+    console.error('Erro ao excluir:', error);
+    showNotification('Erro ao excluir registro', 'error');
+  }
 }
+
+// Utility Functions
+function showNotification(message, type = 'success') {
+  const notification = document.createElement('div');
+  notification.className = `fixed bottom-4 right-4 p-4 rounded-lg shadow-lg ${
+    type === 'success' ? 'bg-green-500' : 'bg-red-500'
+  } text-white z-50`;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  setTimeout(() => notification.remove(), 3000);
+}
+
+function refreshDashboard() {
+  syncDashboard();
+  showNotification('Dashboard atualizado');
+}
+
+// Initialization
+document.addEventListener('DOMContentLoaded', () => {
+  const monthFilter = document.getElementById('monthFilter');
+  monthFilter.value = new Date().toISOString().slice(0, 7);
+  
+  monthFilter.addEventListener('change', syncDashboard);
+  document.getElementById('statusFilter').addEventListener('change', loadFinancialRecords);
+  document.getElementById('financialForm').addEventListener('submit', handleFormSubmit);
+  
+  syncDashboard();
+  lucide?.createIcons();
+});
 </script>
 {% endblock %}

@@ -6,15 +6,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock %}</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script> <!-- Adicionado aqui -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         /* Estilo para input datetime-local no tema escuro */
         input[type="datetime-local"] {
             color-scheme: dark;
+        }
+
+        /* Estilo global para inputs, selects e textareas */
+        input, select, textarea {
+            background: var(--bg-dark) !important; /* #0F172A do tema escuro */
+            color: var(--text) !important; /* #F8FAFC do tema */
+            height: 2.5rem; /* Altura padrão maior */
+            font-size: 1rem; /* Tamanho da fonte consistente */
+            -webkit-appearance: none; /* Remove estilos padrão do navegador */
+            appearance: none;
+        }
+        textarea {
+            height: 6rem; /* Altura específica para textareas */
         }
 
         /* Animação de fade para o modal */

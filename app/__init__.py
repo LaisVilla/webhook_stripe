@@ -5,6 +5,9 @@ from dotenv import load_dotenv
 from cloudinary import config as cloudinary_config
 import stripe
 import os
+from .routes import main as main_blueprint
+from .financial import financial
+from .calendar_tasks import calendar_tasks as calendar_tasks_blueprint
 
 def create_app():
     app = Flask(__name__)
@@ -42,12 +45,10 @@ def create_app():
     stripe.api_key = app.config['STRIPE_SECRET_KEY']
 
     # Registrar o blueprint
-    from .routes import main as main_blueprint
+    
     app.register_blueprint(main_blueprint)
-
-    from .calendar_tasks import calendar_tasks as calendar_tasks_blueprint
     app.register_blueprint(calendar_tasks_blueprint)
-    from .financial import financial  # Adicione esta linha
-    app.register_blueprint(financial)  # Adicione esta linha
+    app.register_blueprint(financial)  
+    
 
     return app
