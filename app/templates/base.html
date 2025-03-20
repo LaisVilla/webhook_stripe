@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock %}</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script> <!-- Adicionado aqui -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
@@ -19,16 +20,25 @@
         }
 
         /* Estilo global para inputs, selects e textareas */
-        input, select, textarea {
-            background: var(--bg-dark) !important; /* #0F172A do tema escuro */
-            color: var(--text) !important; /* #F8FAFC do tema */
-            height: 2.5rem; /* Altura padrão maior */
-            font-size: 1rem; /* Tamanho da fonte consistente */
-            -webkit-appearance: none; /* Remove estilos padrão do navegador */
+        input,
+        select,
+        textarea {
+            background: var(--bg-dark) !important;
+            /* #0F172A do tema escuro */
+            color: var(--text) !important;
+            /* #F8FAFC do tema */
+            height: 2.5rem;
+            /* Altura padrão maior */
+            font-size: 1rem;
+            /* Tamanho da fonte consistente */
+            -webkit-appearance: none;
+            /* Remove estilos padrão do navegador */
             appearance: none;
         }
+
         textarea {
-            height: 6rem; /* Altura específica para textareas */
+            height: 6rem;
+            /* Altura específica para textareas */
         }
 
         /* Animação de fade para o modal */
@@ -255,7 +265,7 @@
                     <div class="hidden md:flex items-center space-x-4">
                         <a href="{{ url_for('calendar_tasks.calendar') }}" class="nav-link flex items-center space-x-2">
                             <i class="lucide lucide-calendar h-4 w-4"></i>
-                            <span>Calendário</span>
+                            <span>Agenda</span>
                         </a>
                         <a href="{{ url_for('calendar_tasks.tasks') }}" class="nav-link flex items-center space-x-2">
                             <i class="lucide lucide-check-square h-4 w-4"></i>
@@ -365,6 +375,60 @@
     <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex-grow">
         {% block content %}{% endblock %}
     </main>
+
+    <!-- Botão flutuante para acessar a IA -->
+    <a href="{{ url_for('main.ai_services') }}"
+        class="fixed bottom-6 right-6 p-4 bg-gradient-to-r from-purple-500 to-cyan-500 text-white rounded-full shadow-lg transition-all hover:scale-110 hover:shadow-xl flex items-center justify-center group z-50">
+        <div class="flex items-center justify-center relative">
+            <i class="lucide lucide-brain h-6 w-6 group-hover:animate-pulse"></i>
+            <i class="lucide lucide-sparkles h-5 w-5 absolute -top-2 -right-2 text-yellow-300"></i>
+        </div>
+        <span
+            class="absolute opacity-0 group-hover:opacity-100 right-16 bg-gray-800 text-white text-sm py-2 px-4 rounded-lg transition-opacity duration-300 whitespace-nowrap">Assistente
+            IA</span>
+        <!-- Balão de informação -->
+        <div class="absolute bottom-16 right-0 bg-white text-gray-800 p-3 rounded-lg shadow-lg w-64 hidden animate-bounce"
+            id="ai-tooltip">
+            <p class="text-sm font-medium">Clique aqui para acessar o chat da IA!</p>
+            <p class="text-xs mt-1 text-gray-600">Tire suas dúvidas e obtenha assistência inteligente</p>
+            <button
+                onclick="document.getElementById('ai-tooltip').classList.add('hidden'); localStorage.setItem('ai_tooltip_seen', 'true');"
+                class="absolute top-1 right-1 text-gray-500 hover:text-gray-700">
+                <i class="lucide lucide-x h-4 w-4"></i>
+            </button>
+        </div>
+    </a>
+
+    <script>
+        // Mostrar o balão de informação apenas se o usuário não o viu antes
+        document.addEventListener('DOMContentLoaded', function () {
+            if (!localStorage.getItem('ai_tooltip_seen')) {
+                setTimeout(function () {
+                    const tooltip = document.getElementById('ai-tooltip');
+                    if (tooltip) tooltip.classList.remove('hidden');
+
+                    // Esconder automaticamente após 10 segundos
+                    setTimeout(function () {
+                        if (tooltip) tooltip.classList.add('hidden');
+                    }, 10000);
+                }, 2000);
+            }
+        });
+        <style>
+    /* Suavizar animação de hover no ícone */
+            .group-hover:animate-pulse {
+                transition: transform 0.2s ease-in-out;
+    }
+
+            /* Ajuste do posicionamento do tooltip em telas pequenas */
+            @media (max-width: 768px) {
+                #ai - tooltip {
+                right: 50%;
+            transform: translateX(50%);
+        }
+    }
+        </style>
+    </script>
 
     <!-- Footer -->
     <footer class="footer">

@@ -3,187 +3,305 @@
 {% block title %}Financeiro - NexusAI{% endblock %}
 
 {% block head %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-    .card { @apply bg-[#1E293B] rounded-xl shadow-xl border border-gray-700 p-6; }
-    .btn { @apply px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2; }
-    .btn-primary { @apply bg-gradient-to-r from-purple-500 to-cyan-500 text-white hover:opacity-90; }
-    .btn-secondary { @apply bg-blue-500 text-white hover:opacity-90; }
-    .action-btn { @apply p-1 rounded-lg transition-all; }
-    .action-btn:hover { transform: scale(1.1); }
-    .form-input { 
-      @apply w-full border border-gray-700 rounded-lg px-4 py-2 text-white;
-    }
-    input.form-input, select.form-input { /* Seletor específico para input e select */
-      background: #0F172A !important; /* Fundo escuro forçado */
-      color: white !important;
-      -webkit-appearance: none; /* Remove estilos padrão */
-      appearance: none;
-    }
-    .tooltip { position: relative; }
-    .tooltip::after {
-      content: attr(data-tooltip);
-      position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
-      padding: 4px 8px; background-color: rgba(0, 0, 0, 0.8); color: white;
-      border-radius: 4px; font-size: 12px; white-space: nowrap;
-      opacity: 0; visibility: hidden; transition: opacity 0.2s, visibility 0.2s;
-    }
-    .tooltip:hover::after { opacity: 1; visibility: visible; }
-  </style>
+  body { font-family: 'Inter', sans-serif; }
+  .card { 
+    @apply bg-[#1E293B] rounded-xl shadow-xl border border-gray-700 p-6 transition-all hover:shadow-2xl; 
+    backdrop-filter: blur(10px);
+  }
+  .btn { 
+    @apply px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 transform hover:scale-105 active:scale-95 font-medium; 
+  }
+  .btn-primary { 
+    @apply bg-gradient-to-r from-purple-600 to-cyan-600 text-white hover:from-purple-700 hover:to-cyan-700 shadow-md hover:shadow-lg; 
+  }
+  .btn-secondary { 
+    @apply bg-gradient-to-r from-gray-600 to-gray-700 text-white hover:from-gray-700 hover:to-gray-800 shadow-md hover:shadow-lg; 
+  }
+  .action-btn { 
+    @apply p-2 rounded-lg transition-all hover:scale-110 hover:bg-opacity-20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-purple-500; 
+  }
+  .form-input { 
+    @apply w-full border border-gray-700 rounded-lg px-4 py-2 text-white bg-[#0F172A] focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none;
+  }
+  .form-input:invalid { @apply border-red-500 focus:ring-red-500; }
+  .form-input:valid { @apply border-green-500 focus:ring-green-500; }
+  .tooltip { @apply relative; }
+  .tooltip::after {
+    @apply content-[attr(data-tooltip)] absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded opacity-0 invisible transition-all duration-200 whitespace-nowrap z-10;
+  }
+  .tooltip:hover::after { @apply opacity-100 visible; }
+  .notification { 
+    @apply fixed bottom-4 right-4 p-4 rounded-lg shadow-lg text-white z-50 animate-slide-in font-medium;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  }
+  .scrollbar-thin { 
+    @apply scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800; 
+    scrollbar-width: thin;
+  }
+  .alert { 
+    @apply bg-red-500/20 text-red-500 px-4 py-3 rounded-lg border border-red-500/30 flex items-center gap-2; 
+  }
+  .status-badge {
+    @apply px-3 py-1 rounded-full text-sm font-medium inline-flex items-center gap-1;
+  }
+  .table-row-hover {
+    @apply hover:bg-gray-700/30 transition-all cursor-pointer;
+  }
+  .chart-container {
+    @apply relative p-1 rounded-lg overflow-hidden;
+    height: 250px;
+  }
+  @keyframes slide-in { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  
+  .loading-skeleton {
+    @apply bg-gray-700/50 animate-pulse rounded;
+  }
+  
+  /* Custom scrollbar for webkit browsers */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #1a2234;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #4b5563;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
-<!-- Header -->
-<div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold text-white">Gestão Financeira</h1>
+<div class="space-y-8">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+    <h1 class="text-3xl md:text-4xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-cyan-400">Gestão Financeira</h1>
     <div class="flex gap-4">
-      <button onclick="refreshDashboard()" class="btn btn-secondary">
+      <button onclick="refreshDashboard()" class="btn btn-secondary" aria-label="Atualizar dashboard">
         <i data-lucide="refresh-cw" class="h-5 w-5"></i>
         <span>Atualizar</span>
       </button>
-      <button onclick="showFinancialModal('create')" class="btn btn-primary">
+      <button onclick="showFinancialModal('create')" class="btn btn-primary" aria-label="Novo registro financeiro">
         <i data-lucide="plus" class="h-5 w-5"></i>
         <span>Novo Registro</span>
       </button>
     </div>
   </div>
 
-<!-- Summary Cards -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-    <div class="card">
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+    <div class="card hover:translate-y-[-5px] transition-transform">
       <div class="flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-white">Total Mensal</h3>
-        <i data-lucide="dollar-sign" class="text-green-500 h-6 w-6"></i>
+        <h3 class="text-lg md:text-xl font-semibold text-white">Total Mensal</h3>
+        <div class="p-2 bg-green-500/10 rounded-full">
+          <i data-lucide="dollar-sign" class="text-green-500 h-6 w-6"></i>
+        </div>
       </div>
       <p class="text-3xl font-bold text-green-500 mt-2" id="monthlyTotal">R$ 0,00</p>
+      <p class="text-xs text-gray-400 mt-1">Receita total do mês atual</p>
     </div>
-  
-    <div class="card">
+    <div class="card hover:translate-y-[-5px] transition-transform">
       <div class="flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-white">Pendentes</h3>
-        <i data-lucide="clock" class="text-yellow-500 h-6 w-6"></i>
+        <h3 class="text-lg md:text-xl font-semibold text-white">Pendentes</h3>
+        <div class="p-2 bg-yellow-500/10 rounded-full">
+          <i data-lucide="clock" class="text-yellow-500 h-6 w-6"></i>
+        </div>
       </div>
       <p class="text-3xl font-bold text-yellow-500 mt-2" id="pendingTotal">R$ 0,00</p>
+      <p class="text-xs text-gray-400 mt-1">Pagamentos pendentes</p>
     </div>
-  
-    <div class="card">
+    <div class="card hover:translate-y-[-5px] transition-transform">
       <div class="flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-white">Atendimentos</h3>
-        <i data-lucide="users" class="text-blue-500 h-6 w-6"></i>
+        <h3 class="text-lg md:text-xl font-semibold text-white">Ticket Médio</h3>
+        <div class="p-2 bg-blue-500/10 rounded-full">
+          <i data-lucide="trending-up" class="text-blue-500 h-6 w-6"></i>
+        </div>
       </div>
-      <p class="text-3xl font-bold text-blue-500 mt-2" id="appointmentCount">0</p>
+      <p class="text-3xl font-bold text-blue-500 mt-2" id="averageTicket">R$ 0,00</p>
+      <p class="text-xs text-gray-400 mt-1">Valor médio por atendimento</p>
     </div>
-  
-    <div class="card">
+    <div class="card hover:translate-y-[-5px] transition-transform">
       <div class="flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-white">Taxa de Conclusão</h3>
-        <i data-lucide="check-circle" class="text-purple-500 h-6 w-6"></i>
+        <h3 class="text-lg md:text-xl font-semibold text-white">Atrasados (%)</h3>
+        <div class="p-2 bg-red-500/10 rounded-full">
+          <i data-lucide="alert-triangle" class="text-red-500 h-6 w-6"></i>
+        </div>
       </div>
-      <p class="text-3xl font-bold text-purple-500 mt-2" id="completionRate">0%</p>
+      <p class="text-3xl font-bold text-red-500 mt-2" id="overdueRate">0%</p>
+      <p class="text-xs text-gray-400 mt-1">Percentual de pagamentos atrasados</p>
     </div>
   </div>
 
-<!-- Charts -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-  <div class="card">
-    <h3 class="text-lg font-semibold text-white mb-4">Receita Diária</h3>
-    <canvas id="dailyRevenueChart" height="200"></canvas>
+  <!-- Alerts -->
+  <div id="alertsSection" class="space-y-2 hidden">
+    <h2 class="text-xl md:text-2xl font-semibold text-white flex items-center gap-2">
+      <i data-lucide="bell" class="text-red-500 h-5 w-5"></i>
+      Alertas
+    </h2>
+    <div id="alertsList" class="space-y-2"></div>
   </div>
 
-  <div class="card">
-    <h3 class="text-lg font-semibold text-white mb-4">Métodos de Pagamento</h3>
-    <canvas id="paymentMethodsChart" height="200"></canvas>
-  </div>
-</div>
+  <!-- Charts -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="card">
+      <h3 class="text-lg md:text-xl font-semibold text-white mb-4 flex items-center gap-2">
+        <i data-lucide="bar-chart-2" class="text-purple-500 h-5 w-5"></i>
+        Receita Diária
+      </h3>
+      <div class="chart-container">
+        <canvas id="dailyRevenueChart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <h3 class="text-lg md:text-xl font-semibold text-white mb-4 flex items-center gap-2">
+        <i data-lucide="credit-card" class="text-cyan-500 h-5 w-5"></i>
+        Métodos de Pagamento
+      </h3>
+      <div class="chart-container">
+        <canvas id="paymentMethodsChart"></canvas>
+      </div>
+    </div>
 
-<!-- Records Table -->
-<div class="card">
-    <div class="flex items-center justify-between mb-6">
-        <h2 class="text-xl font-semibold text-white">Registros Financeiros</h2>
-        <div class="flex gap-4">
-          <input type="month" id="monthFilter" class="form-input" style="background: #0F172A; color: white;">
-          <select id="statusFilter" class="form-input" style="background: #0F172A; color: white;">
+  <!-- Records Table -->
+  <div class="card">
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+      <h2 class="text-xl md:text-2xl font-semibold text-white flex items-center gap-2">
+        <i data-lucide="file-text" class="text-purple-500 h-5 w-5"></i>
+        Registros Financeiros
+      </h2>
+      <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+        <div class="relative">
+          <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
+          <input type="text" id="patientSearch" class="form-input pl-10" placeholder="Buscar paciente..." aria-label="Buscar por nome do paciente">
+        </div>
+        <div class="relative">
+          <i data-lucide="calendar" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
+          <input type="month" id="monthFilter" class="form-input pl-10" aria-label="Filtrar por mês">
+        </div>
+        <div class="relative">
+          <i data-lucide="filter" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
+          <select id="statusFilter" class="form-input pl-10" aria-label="Filtrar por status">
             <option value="all">Todos os Status</option>
             <option value="paid">Pago</option>
             <option value="pending">Pendente</option>
             <option value="overdue">Atrasado</option>
           </select>
         </div>
+        <button onclick="exportToCSV()" class="btn btn-secondary" aria-label="Exportar para CSV">
+          <i data-lucide="download" class="h-5 w-5"></i>
+          <span>Exportar</span>
+        </button>
       </div>
-  <div class="overflow-x-auto">
-    <table class="w-full text-left text-white">
-      <thead class="bg-gray-700/50">
-        <tr>
-          <th class="p-4">Paciente</th>
-          <th class="p-4">Data</th>
-          <th class="p-4">Valor</th>
-          <th class="p-4">Método</th>
-          <th class="p-4">Status</th>
-          <th class="p-4">Ações</th>
-        </tr>
-      </thead>
-      <tbody id="financialRecordsTable"></tbody>
-    </table>
+    </div>
+    <div class="overflow-x-auto scrollbar-thin rounded-lg border border-gray-700">
+      <table class="w-full text-left text-white">
+        <thead class="bg-gray-700/50 sticky top-0 z-10">
+          <tr>
+            <th class="p-4 font-semibold">Paciente</th>
+            <th class="p-4 font-semibold">Data</th>
+            <th class="p-4 font-semibold">Valor</th>
+            <th class="p-4 font-semibold">Método</th>
+            <th class="p-4 font-semibold">Status</th>
+            <th class="p-4 font-semibold">Dias em Atraso</th>
+            <th class="p-4 font-semibold">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="financialRecordsTable"></tbody>
+      </table>
+    </div>
+    <p class="mt-4 text-gray-400 text-sm flex items-center gap-2" id="recordsCount">
+      <i data-lucide="info" class="h-4 w-4"></i>
+      Mostrando 0 registros
+    </p>
   </div>
-</div>
 
-<!-- Modal -->
-<div id="financialModal" class="hidden fixed inset-0 bg-gray-900/75 backdrop-blur-sm z-50">
+  <!-- Modal -->
+  <div id="financialModal" class="hidden fixed inset-0 bg-gray-900/75 backdrop-blur-sm z-50 transition-all duration-300" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
     <div class="flex items-center justify-center min-h-screen px-4">
-      <div class="bg-[#1E293B] w-full max-w-md rounded-xl shadow-xl border border-gray-700">
+      <div class="bg-[#1E293B] w-full max-w-lg md:max-w-2xl rounded-xl shadow-xl border border-gray-700 transform transition-all duration-300 scale-95 opacity-0" id="modalContent">
         <div class="p-6">
           <div class="flex justify-between items-center mb-6">
-            <h3 id="modalTitle" class="text-xl font-semibold text-white"></h3>
-            <button onclick="closeFinancialModal()" class="text-gray-400 hover:text-white">
-              <i data-lucide="x" class="h-5 w-5"></i>
+            <h3 id="modalTitle" class="text-xl md:text-2xl font-semibold text-white"></h3>
+            <button onclick="closeFinancialModal()" class="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700/50 transition-colors" aria-label="Fechar modal">
+              <i data-lucide="x" class="h-6 w-6"></i>
             </button>
           </div>
-  
           <form id="financialForm" class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-gray-300 mb-1">Nome do Paciente*</label>
-              <input type="text" id="patientName" required class="form-input">
+              <label for="patientName" class="block text-sm font-medium text-gray-300 mb-1">Nome do Paciente*</label>
+              <div class="relative">
+                <i data-lucide="user" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
+                <input type="text" id="patientName" required class="form-input pl-10" aria-required="true">
+              </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-300 mb-1">Valor*</label>
-              <input type="number" id="appointmentValue" required step="0.01" min="0" class="form-input">
+              <label for="appointmentValue" class="block text-sm font-medium text-gray-300 mb-1">Valor*</label>
+              <div class="relative">
+                <i data-lucide="dollar-sign" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
+                <input type="number" id="appointmentValue" required step="0.01" min="0" class="form-input pl-10" aria-required="true">
+              </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-300 mb-1">Data do Atendimento*</label>
-              <input type="datetime-local" id="appointmentDate" required class="form-input">
+              <label for="appointmentDate" class="block text-sm font-medium text-gray-300 mb-1">Data do Atendimento*</label>
+              <div class="relative">
+                <i data-lucide="calendar" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
+                <input type="datetime-local" id="appointmentDate" required class="form-input pl-10" aria-required="true">
+              </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-300 mb-1">Método de Pagamento*</label>
-              <select id="paymentMethod" required class="form-input">
-                <option value="cash">Dinheiro</option>
-                <option value="credit">Cartão de Crédito</option>
-                <option value="debit">Cartão de Débito</option>
-                <option value="pix">PIX</option>
-                <option value="insurance">Convênio</option>
-              </select>
+              <label for="paymentMethod" class="block text-sm font-medium text-gray-300 mb-1">Método de Pagamento*</label>
+              <div class="relative">
+                <i data-lucide="credit-card" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
+                <select id="paymentMethod" required class="form-input pl-10" aria-required="true">
+                  <option value="cash">Dinheiro</option>
+                  <option value="credit">Cartão de Crédito</option>
+                  <option value="debit">Cartão de Débito</option>
+                  <option value="pix">PIX</option>
+                  <option value="insurance">Convênio</option>
+                </select>
+              </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-300 mb-1">Status*</label>
-              <select id="paymentStatus" required class="form-input">
-                <option value="paid">Pago</option>
-                <option value="pending">Pendente</option>
-                <option value="overdue">Atrasado</option>
-              </select>
+              <label for="paymentStatus" class="block text-sm font-medium text-gray-300 mb-1">Status*</label>
+              <div class="relative">
+                <i data-lucide="check-circle" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
+                <select id="paymentStatus" required class="form-input pl-10" aria-required="true">
+                  <option value="paid">Pago</option>
+                  <option value="pending">Pendente</option>
+                  <option value="overdue">Atrasado</option>
+                </select>
+              </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-300 mb-1">Observações</label>
-              <textarea id="notes" rows="3" class="form-input"></textarea>
+              <label for="notes" class="block text-sm font-medium text-gray-300 mb-1">Observações</label>
+              <div class="relative">
+                <i data-lucide="file-text" class="absolute left-3 top-3 text-gray-400 h-4 w-4"></i>
+                <textarea id="notes" rows="3" class="form-input pl-10"></textarea>
+              </div>
             </div>
-  
             <div class="flex justify-end gap-3 mt-6">
-              <button type="button" onclick="closeFinancialModal()" class="btn bg-gray-700 text-white hover:bg-gray-600">Cancelar</button>
-              <button type="submit" class="btn btn-primary">Salvar</button>
+              <button type="button" onclick="closeFinancialModal()" class="btn btn-secondary">Cancelar</button>
+              <button type="submit" class="btn btn-primary">
+                <i data-lucide="save" class="h-5 w-5"></i>
+                <span>Salvar</span>
+              </button>
             </div>
           </form>
         </div>
       </div>
     </div>
   </div>
+</div>
 
 <script>
 // API Endpoints
@@ -197,42 +315,42 @@ const API = {
 const STATE = {
   currentRecord: null,
   records: [],
+  filteredRecords: [],
   dashboardData: null,
-  charts: { dailyRevenue: null, paymentMethods: null }
+  charts: { dailyRevenue: null, paymentMethods: null, topPatients: null }
 };
 
 // Helper Functions
-const formatCurrency = value => 
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-
-const formatDate = dateString => 
-  new Date(dateString).toLocaleString('pt-BR', {
-    day: '2-digit', month: '2-digit', year: 'numeric',
-    hour: '2-digit', minute: '2-digit'
-  });
-
-const getPaymentMethodLabel = method => ({
-  cash: 'Dinheiro', credit: 'Crédito', debit: 'Débito',
-  pix: 'PIX', insurance: 'Convênio'
-})[method] || method;
-
-const getStatusLabel = status => ({
-  paid: 'Pago', pending: 'Pendente', overdue: 'Atrasado'
-})[status] || status;
-
-const getStatusStyle = status => ({
-  paid: 'bg-green-500/20 text-green-500',
-  pending: 'bg-yellow-500/20 text-yellow-500',
-  overdue: 'bg-red-500/20 text-red-500'
+const formatCurrency = value => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+const formatDate = dateString => new Date(dateString).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+const getPaymentMethodLabel = method => ({ cash: 'Dinheiro', credit: 'Crédito', debit: 'Débito', pix: 'PIX', insurance: 'Convênio' })[method] || method;
+const getStatusLabel = status => ({ paid: 'Pago', pending: 'Pendente', overdue: 'Atrasado' })[status] || status;
+const getStatusStyle = status => ({ 
+  paid: 'bg-green-500/20 text-green-500 border border-green-500/30', 
+  pending: 'bg-yellow-500/20 text-yellow-500 border border-yellow-500/30', 
+  overdue: 'bg-red-500/20 text-red-500 border border-red-500/30' 
 })[status] || 'bg-gray-500/20 text-gray-500';
+const getStatusIcon = status => ({ 
+  paid: 'check-circle', 
+  pending: 'clock', 
+  overdue: 'alert-triangle' 
+})[status] || 'circle';
+const calculateDaysOverdue = date => {
+  const today = new Date();
+  const appointmentDate = new Date(date);
+  return Math.max(0, Math.floor((today - appointmentDate) / (1000 * 60 * 60 * 24)));
+};
 
 // Dashboard Functions
 async function syncDashboard() {
+  showLoading(true);
   try {
     await Promise.all([loadFinancialRecords(), loadDashboardData()]);
   } catch (error) {
     console.error('Erro na sincronização:', error);
     showNotification('Erro ao sincronizar dashboard', 'error');
+  } finally {
+    showLoading(false);
   }
 }
 
@@ -240,7 +358,6 @@ async function loadDashboardData() {
   try {
     const monthFilter = document.getElementById('monthFilter').value;
     const url = new URL(API.DASHBOARD, window.location.origin);
-    
     if (monthFilter) url.searchParams.append('month', monthFilter);
     
     const response = await fetch(url);
@@ -249,6 +366,7 @@ async function loadDashboardData() {
     STATE.dashboardData = await response.json();
     updateDashboardUI();
     updateCharts();
+    updateAlerts();
   } catch (error) {
     console.error('Erro ao carregar dashboard:', error);
     showNotification('Erro ao carregar dados do dashboard', 'error');
@@ -258,12 +376,9 @@ async function loadDashboardData() {
 async function loadFinancialRecords() {
   try {
     const monthFilter = document.getElementById('monthFilter').value;
-    const statusFilter = document.getElementById('statusFilter').value;
-    
     const url = new URL(API.RECORDS, window.location.origin);
     
     if (monthFilter) url.searchParams.append('month', monthFilter);
-    if (statusFilter && statusFilter !== 'all') url.searchParams.append('status', statusFilter);
     
     const response = await fetch(url);
     if (!response.ok) throw new Error('Erro ao carregar registros');
@@ -273,7 +388,7 @@ async function loadFinancialRecords() {
       record_id: record.record_id || record.id || crypto.randomUUID()
     }));
     
-    updateTable();
+    filterRecords();
     return true;
   } catch (error) {
     console.error('Erro ao carregar registros:', error);
@@ -282,53 +397,123 @@ async function loadFinancialRecords() {
   }
 }
 
+function filterRecords() {
+  const statusFilter = document.getElementById('statusFilter').value;
+  const patientSearch = document.getElementById('patientSearch').value.toLowerCase();
+  
+  let filteredRecords = [...STATE.records];
+  
+  if (statusFilter && statusFilter !== 'all') {
+    filteredRecords = filteredRecords.filter(r => r.status === statusFilter);
+  }
+  
+  if (patientSearch) {
+    filteredRecords = filteredRecords.filter(r => r.patient_name.toLowerCase().includes(patientSearch));
+  }
+  
+  STATE.filteredRecords = filteredRecords;
+  updateTable();
+  updateDashboardFromFilteredRecords();
+  document.getElementById('recordsCount').textContent = `Mostrando ${filteredRecords.length} registros`;
+}
+
+function updateDashboardFromFilteredRecords() {
+  const records = STATE.filteredRecords;
+  
+  // Calculate totals based on filtered records
+  const totalRevenue = records.reduce((sum, record) => sum + record.appointment_value, 0);
+  const pendingPayments = records
+    .filter(r => r.status === 'pending')
+    .reduce((sum, record) => sum + record.appointment_value, 0);
+  const totalAppointments = records.length;
+  const overdueCount = records.filter(r => r.status === 'overdue').length;
+  
+  // Update UI with calculated values
+  document.getElementById('monthlyTotal').textContent = formatCurrency(totalRevenue);
+  document.getElementById('pendingTotal').textContent = formatCurrency(pendingPayments);
+  document.getElementById('averageTicket').textContent = formatCurrency(totalAppointments ? totalRevenue / totalAppointments : 0);
+  document.getElementById('overdueRate').textContent = `${totalAppointments ? ((overdueCount / totalAppointments) * 100).toFixed(1) : 0}%`;
+  
+  // Update alerts based on filtered records
+  updateAlertsFromFilteredRecords();
+}
+
+function updateAlertsFromFilteredRecords() {
+  const overdueRecords = STATE.filteredRecords.filter(r => r.status === 'overdue' && calculateDaysOverdue(r.appointment_date) > 15);
+  const alertsList = document.getElementById('alertsList');
+  const alertsSection = document.getElementById('alertsSection');
+  
+  if (overdueRecords.length > 0) {
+    alertsSection.classList.remove('hidden');
+    alertsList.innerHTML = overdueRecords.map(record => `
+      <div class="alert">${record.patient_name} - Atrasado há ${calculateDaysOverdue(record.appointment_date)} dias (${formatCurrency(record.appointment_value)})</div>
+    `).join('');
+  } else {
+    alertsSection.classList.add('hidden');
+  }
+}
+
 function updateDashboardUI() {
   const data = STATE.dashboardData;
   if (!data?.financial_summary) return;
 
+  // If we have filtered records, use those values instead
+  if (STATE.filteredRecords.length > 0) {
+    updateDashboardFromFilteredRecords();
+    return;
+  }
+
   const summary = data.financial_summary;
-  
-  document.getElementById('monthlyTotal').textContent = formatCurrency(summary.total_revenue || 0);
-  document.getElementById('pendingTotal').textContent = formatCurrency(summary.pending_payments || 0);
-  document.getElementById('appointmentCount').textContent = summary.total_appointments || 0;
-  document.getElementById('completionRate').textContent = `${(data.completion_rate || 0).toFixed(1)}%`;
+  const totalAppointments = summary.total_appointments || 0;
+  const totalRevenue = summary.total_revenue || 0;
+  const pendingPayments = summary.pending_payments || 0;
+  const overdueCount = STATE.records.filter(r => r.status === 'overdue').length;
+
+  document.getElementById('monthlyTotal').textContent = formatCurrency(totalRevenue);
+  document.getElementById('pendingTotal').textContent = formatCurrency(pendingPayments);
+  document.getElementById('averageTicket').textContent = formatCurrency(totalAppointments ? totalRevenue / totalAppointments : 0);
+  document.getElementById('overdueRate').textContent = `${totalAppointments ? ((overdueCount / totalAppointments) * 100).toFixed(1) : 0}%`;
 }
 
 function updateTable() {
   const tbody = document.getElementById('financialRecordsTable');
   if (!tbody) return;
   
-  tbody.innerHTML = STATE.records.length === 0 
-    ? `<tr><td colspan="6" class="p-4 text-center text-gray-400">Nenhum registro encontrado</td></tr>`
-    : STATE.records.map(record => `
-        <tr class="border-b border-gray-700 hover:bg-gray-700/30">
-          <td class="p-4">${record.patient_name}</td>
+  const records = STATE.filteredRecords;
+  
+  tbody.innerHTML = records.length === 0 
+    ? `<tr><td colspan="7" class="p-4 text-center text-gray-400">Nenhum registro encontrado</td></tr>`
+    : records.map(record => `
+        <tr class="border-b border-gray-700 table-row-hover ${record.status === 'overdue' ? 'bg-red-500/10' : ''}">
+          <td class="p-4 font-medium">${record.patient_name}</td>
           <td class="p-4">${formatDate(record.appointment_date)}</td>
-          <td class="p-4">${formatCurrency(record.appointment_value)}</td>
-          <td class="p-4">${getPaymentMethodLabel(record.payment_method)}</td>
+          <td class="p-4 font-medium">${formatCurrency(record.appointment_value)}</td>
           <td class="p-4">
-            <span class="px-3 py-1 rounded-full text-sm ${getStatusStyle(record.status)}">
+            <div class="flex items-center gap-2">
+              <i data-lucide="${record.payment_method === 'pix' ? 'qr-code' : 'credit-card'}" class="h-4 w-4 text-gray-400"></i>
+              ${getPaymentMethodLabel(record.payment_method)}
+            </div>
+          </td>
+          <td class="p-4">
+            <span class="status-badge ${getStatusStyle(record.status)}">
+              <i data-lucide="${getStatusIcon(record.status)}" class="h-3.5 w-3.5"></i>
               ${getStatusLabel(record.status)}
             </span>
           </td>
+          <td class="p-4">${record.status === 'overdue' ? `<span class="text-red-500 font-medium">${calculateDaysOverdue(record.appointment_date)}</span>` : '-'}</td>
           <td class="p-4">
             <div class="flex items-center gap-2">
-              <button onclick="editRecord('${record.record_id}')" 
-                class="action-btn text-blue-500 hover:text-blue-400 tooltip hover:bg-blue-500/10"
-                data-tooltip="Editar">
-                <i data-lucide="pencil" class="h-4 w-4"></i>
+              <button onclick="editRecord('${record.record_id}')" class="action-btn text-blue-500 hover:text-blue-400 tooltip hover:bg-blue-500/10" data-tooltip="Editar" aria-label="Editar registro">
+                <i data-lucide="pencil" class="h-5 w-5"></i>
               </button>
-              <button onclick="deleteRecord('${record.record_id}')"
-                class="action-btn text-red-500 hover:text-red-400 tooltip hover:bg-red-500/10"
-                data-tooltip="Excluir">
-                <i data-lucide="trash-2" class="h-4 w-4"></i>
+              <button onclick="deleteRecord('${record.record_id}')" class="action-btn text-red-500 hover:text-red-400 tooltip hover:bg-red-500/10" data-tooltip="Excluir" aria-label="Excluir registro">
+                <i data-lucide="trash-2" class="h-5 w-5"></i>
               </button>
             </div>
           </td>
         </tr>
       `).join('');
   
-  // Reinitialize Lucide icons
   lucide?.createIcons();
 }
 
@@ -338,6 +523,7 @@ function updateCharts() {
 
   updateDailyRevenueChart(data);
   updatePaymentMethodsChart(data);
+  updateTopPatientsChart();
 }
 
 function updateDailyRevenueChart(data) {
@@ -345,9 +531,7 @@ function updateDailyRevenueChart(data) {
   const dates = Object.keys(dailyData);
   const revenues = dates.map(date => dailyData[date].revenue);
 
-  if (STATE.charts.dailyRevenue) {
-    STATE.charts.dailyRevenue.destroy();
-  }
+  if (STATE.charts.dailyRevenue) STATE.charts.dailyRevenue.destroy();
 
   STATE.charts.dailyRevenue = new Chart(
     document.getElementById('dailyRevenueChart'),
@@ -359,29 +543,60 @@ function updateDailyRevenueChart(data) {
           label: 'Receita',
           data: revenues,
           borderColor: 'rgb(99, 102, 241)',
-          tension: 0.1,
+          tension: 0.3,
           fill: true,
-          backgroundColor: 'rgba(99, 102, 241, 0.1)'
+          backgroundColor: 'rgba(99, 102, 241, 0.1)',
+          pointBackgroundColor: 'rgb(99, 102, 241)',
+          pointBorderColor: '#fff',
+          pointRadius: 4,
+          pointHoverRadius: 6
         }]
       },
       options: {
         responsive: true,
-        plugins: {
-          legend: { display: false }
+        maintainAspectRatio: false,
+        plugins: { 
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            borderColor: 'rgba(99, 102, 241, 0.3)',
+            borderWidth: 1,
+            padding: 10,
+            displayColors: false,
+            callbacks: {
+              label: function(context) {
+                return formatCurrency(context.parsed.y);
+              }
+            }
+          }
         },
         scales: {
-          y: {
-            beginAtZero: true,
-            grid: { color: 'rgba(255, 255, 255, 0.1)' },
-            ticks: {
-              color: 'rgba(255, 255, 255, 0.7)',
-              callback: value => formatCurrency(value)
-            }
+          y: { 
+            beginAtZero: true, 
+            grid: { color: 'rgba(255, 255, 255, 0.1)' }, 
+            ticks: { 
+              color: 'rgba(255, 255, 255, 0.7)', 
+              callback: value => formatCurrency(value),
+              padding: 10
+            } 
           },
-          x: {
-            grid: { color: 'rgba(255, 255, 255, 0.1)' },
-            ticks: { color: 'rgba(255, 255, 255, 0.7)' }
+          x: { 
+            grid: { color: 'rgba(255, 255, 255, 0.1)' }, 
+            ticks: { 
+              color: 'rgba(255, 255, 255, 0.7)',
+              padding: 10
+            } 
           }
+        },
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
+        hover: {
+          mode: 'index',
+          intersect: false
         }
       }
     }
@@ -393,44 +608,81 @@ function updatePaymentMethodsChart(data) {
   const methods = Object.keys(paymentData);
   const values = methods.map(method => paymentData[method]);
 
-  if (STATE.charts.paymentMethods) {
-    STATE.charts.paymentMethods.destroy();
-  }
+  if (STATE.charts.paymentMethods) STATE.charts.paymentMethods.destroy();
 
   STATE.charts.paymentMethods = new Chart(
     document.getElementById('paymentMethodsChart'),
     {
-      type: 'doughnut',
+      type: 'bar',
       data: {
         labels: methods.map(getPaymentMethodLabel),
         datasets: [{
+          label: 'Receita por Método',
           data: values,
-          backgroundColor: [
-            'rgba(99, 102, 241, 0.8)',
-            'rgba(168, 85, 247, 0.8)',
-            'rgba(236, 72, 153, 0.8)',
-            'rgba(34, 211, 238, 0.8)',
-            'rgba(45, 212, 191, 0.8)'
-          ]
+          backgroundColor: ['rgba(99, 102, 241, 0.8)', 'rgba(168, 85, 247, 0.8)', 'rgba(236, 72, 153, 0.8)', 'rgba(34, 211, 238, 0.8)', 'rgba(45, 212, 191, 0.8)']
         }]
       },
       options: {
         responsive: true,
-        plugins: {
-          legend: {
-            position: 'right',
-            labels: { color: 'rgba(255, 255, 255, 0.7)' }
-          }
-        }
+        plugins: { legend: { position: 'top', labels: { color: 'rgba(255, 255, 255, 0.7)' } } },
+        scales: { y: { beginAtZero: true, ticks: { callback: value => formatCurrency(value) } } }
       }
     }
   );
 }
 
+function updateTopPatientsChart() {
+  const patientRevenue = {};
+  STATE.records.forEach(record => {
+    patientRevenue[record.patient_name] = (patientRevenue[record.patient_name] || 0) + record.appointment_value;
+  });
+  const sortedPatients = Object.entries(patientRevenue)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+  const labels = sortedPatients.map(([name]) => name);
+  const values = sortedPatients.map(([, value]) => value);
+
+  if (STATE.charts.topPatients) STATE.charts.topPatients.destroy();
+
+  STATE.charts.topPatients = new Chart(
+    document.getElementById('topPatientsChart'),
+    {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Receita',
+          data: values,
+          backgroundColor: 'rgba(99, 102, 241, 0.8)'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { callback: value => formatCurrency(value) } } }
+      }
+    }
+  );
+}
+
+function updateAlerts() {
+  const overdueRecords = STATE.records.filter(r => r.status === 'overdue' && calculateDaysOverdue(r.appointment_date) > 15);
+  const alertsList = document.getElementById('alertsList');
+  const alertsSection = document.getElementById('alertsSection');
+  
+  if (overdueRecords.length > 0) {
+    alertsSection.classList.remove('hidden');
+    alertsList.innerHTML = overdueRecords.map(record => `
+      <div class="alert">${record.patient_name} - Atrasado há ${calculateDaysOverdue(record.appointment_date)} dias (${formatCurrency(record.appointment_value)})</div>
+    `).join('');
+  } else {
+    alertsSection.classList.add('hidden');
+  }
+}
+
 // Form Handling
 async function handleFormSubmit(e) {
   e.preventDefault();
-  
   try {
     const formData = {
       patient_name: document.getElementById('patientName').value,
@@ -441,10 +693,7 @@ async function handleFormSubmit(e) {
       notes: document.getElementById('notes').value
     };
 
-    const url = STATE.currentRecord 
-      ? API.RECORD(STATE.currentRecord.record_id)
-      : API.RECORDS;
-      
+    const url = STATE.currentRecord ? API.RECORD(STATE.currentRecord.record_id) : API.RECORDS;
     const method = STATE.currentRecord ? 'PUT' : 'POST';
     
     const response = await fetch(url, {
@@ -484,7 +733,6 @@ function showFinancialModal(mode, recordId = null) {
     const record = STATE.records.find(r => r.record_id === recordId);
     if (record) {
       STATE.currentRecord = record;
-      
       document.getElementById('patientName').value = record.patient_name;
       document.getElementById('appointmentValue').value = record.appointment_value;
       document.getElementById('appointmentDate').value = new Date(record.appointment_date).toISOString().slice(0, 16);
@@ -493,10 +741,12 @@ function showFinancialModal(mode, recordId = null) {
       document.getElementById('notes').value = record.notes || '';
     }
   }
+  document.getElementById('patientName').focus();
 }
 
 function closeFinancialModal() {
-  document.getElementById('financialModal').classList.add('hidden');
+  const modal = document.getElementById('financialModal');
+  modal.classList.add('hidden');
   document.getElementById('financialForm').reset();
   STATE.currentRecord = null;
 }
@@ -507,12 +757,8 @@ function editRecord(recordId) {
 
 async function deleteRecord(recordId) {
   if (!confirm('Tem certeza que deseja excluir este registro?')) return;
-  
   try {
-    const response = await fetch(API.RECORD(recordId), {
-      method: 'DELETE'
-    });
-    
+    const response = await fetch(API.RECORD(recordId), { method: 'DELETE' });
     if (!response.ok) throw new Error('Erro ao excluir registro');
 
     const data = await response.json();
@@ -529,12 +775,19 @@ async function deleteRecord(recordId) {
 // Utility Functions
 function showNotification(message, type = 'success') {
   const notification = document.createElement('div');
-  notification.className = `fixed bottom-4 right-4 p-4 rounded-lg shadow-lg ${
-    type === 'success' ? 'bg-green-500' : 'bg-red-500'
-  } text-white z-50`;
+  notification.className = `notification ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
   notification.textContent = message;
   document.body.appendChild(notification);
   setTimeout(() => notification.remove(), 3000);
+}
+
+function showLoading(state) {
+  const loading = document.createElement('div');
+  loading.id = 'loading';
+  loading.className = 'fixed inset-0 bg-gray-900/50 flex items-center justify-center z-50';
+  loading.innerHTML = '<div class="animate-spin h-10 w-10 border-4 border-t-purple-500 rounded-full"></div>';
+  if (state) document.body.appendChild(loading);
+  else document.getElementById('loading')?.remove();
 }
 
 function refreshDashboard() {
@@ -542,13 +795,42 @@ function refreshDashboard() {
   showNotification('Dashboard atualizado');
 }
 
+function exportToCSV() {
+  const headers = ['Paciente', 'Data', 'Valor', 'Método', 'Status', 'Dias em Atraso'];
+  const rows = STATE.records.map(r => [
+    r.patient_name,
+    formatDate(r.appointment_date),
+    formatCurrency(r.appointment_value),
+    getPaymentMethodLabel(r.payment_method),
+    getStatusLabel(r.status),
+    r.status === 'overdue' ? calculateDaysOverdue(r.appointment_date) : '-'
+  ]);
+  const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'registros_financeiros.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function debounce(fn, delay) {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn(...args), delay);
+  };
+}
+
 // Initialization
 document.addEventListener('DOMContentLoaded', () => {
   const monthFilter = document.getElementById('monthFilter');
   monthFilter.value = new Date().toISOString().slice(0, 7);
   
-  monthFilter.addEventListener('change', syncDashboard);
-  document.getElementById('statusFilter').addEventListener('change', loadFinancialRecords);
+  monthFilter.addEventListener('change', debounce(syncDashboard, 300));
+  document.getElementById('statusFilter').addEventListener('change', debounce(loadFinancialRecords, 300));
+  document.getElementById('patientSearch').addEventListener('input', debounce(loadFinancialRecords, 300));
   document.getElementById('financialForm').addEventListener('submit', handleFormSubmit);
   
   syncDashboard();

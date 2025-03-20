@@ -2,6 +2,7 @@ from flask import Blueprint, request, render_template, redirect, url_for, flash,
 from firebase_admin import auth, firestore
 from anthropic import Anthropic
 import stripe
+import requests
 from functools import wraps  # Adicionando esta importação
 import os
 import json
@@ -233,9 +234,8 @@ def register():
 # Função para chamar a API da OpenAI
 def call_ai_api(user_input, max_tokens=150):
     try:
-        # Registro de data/hora UTC e usuário
         current_utc = datetime.now(pytz.UTC)
-        formatted_date = current_utc.strftime('%Y-%m-%d %H:%M:%S')
+        formatted_date = current_utc.strftime('%Y-%m-%dT%H:%M:%S.%f')
         user_login = session.get('user_email', 'Unknown')
         
         logger.info(f"""
@@ -250,101 +250,172 @@ def call_ai_api(user_input, max_tokens=150):
         # Buscar usuário no Firestore
         db = firestore.client()
         users_ref = db.collection('users')
-        query = users_ref.where('email', '==', user_login).limit(1)
-        user_docs = query.get()
-
-        if not user_docs:
-            logger.error(f"Usuário não encontrado para atualização de estatísticas - Email: {user_login}")
+        query = users_ref.where('email', '==', user_login).limit(1).get()
+        
+        if not query:
+            logger.error(f"Usuário não encontrado: {user_login}")
             return "Erro: Usuário não encontrado"
 
-        user_doc = user_docs[0]
+        user_doc = query[0]
         user_dict = user_doc.to_dict()
         
-        # Verificar estatísticas antes da chamada
         ai_stats = user_dict.get('ai_stats', {
             'total_requests': 0,
-            'remaining_requests': 10,
+            'remaining_requests': 1000,
             'total_tokens': 0,
             'last_reset': formatted_date
         })
-            # Verificar se ainda tem requisições disponíveis
+        
         if ai_stats['remaining_requests'] <= 0:
-            logger.warning(f"Limite de requisições atingido - Usuário: {user_login}")
-            return "Você atingiu o limite de requisições para este mês. Aguarde o próximo mês para mais requisições."
+            return "Você atingiu o limite de requisições para este mês."
 
-        # Verificação da API key
-        api_key = os.getenv('ANTHROPIC_API_KEY')
-        logger.debug(f"API Key presente: {'Sim' if api_key else 'Não'}")
+        # Configuração do prompt com contexto da aplicação
+        system_prompt = f"""
+        Você é Grok 3, um assistente de IA criado pela xAI, integrado a uma aplicação Flask para gestão de tarefas, atendimento de pacientes e finanças. 
+        O usuário atual é {user_login}. Hoje é {formatted_date}. 
+        Responda de forma útil e específica com base no contexto fornecido:
+        - Para tarefas: crie, liste ou gerencie tarefas.
+        - Para pacientes: sugira respostas para perguntas comuns ou triagem.
+        - Para finanças: analise dados da coleção 'financial_records' (campos: appointment_date, patient_name, status, etc.).
+        """
+
+        # Identificar intenção do usuário
+        user_input_lower = user_input.lower()
+        if "tarefa" in user_input_lower or "task" in user_input_lower:
+            if "criar" in user_input_lower or "create" in user_input_lower:
+                title = user_input.split("tarefa")[-1].strip() or "Tarefa sem nome"
+                description = "Sem descrição"
+                due_date = (datetime.now(pytz.UTC) + timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')
+                priority = "medium"
+                
+                if "descrição" in user_input_lower:
+                    description = user_input.split("descrição")[-1].strip()
+                if "prazo" in user_input_lower or "due" in user_input_lower:
+                    due_part = user_input.split("prazo")[-1].strip() or user_input.split("due")[-1].strip()
+                    due_date = due_part if due_part else due_date
+                if "prioridade" in user_input_lower or "priority" in user_input_lower:
+                    priority_part = user_input.split("prioridade")[-1].strip() or user_input.split("priority")[-1].strip()
+                    priority = priority_part if priority_part in ["low", "medium", "high"] else "medium"
+
+                task_id = str(uuid.uuid4())
+                db.collection('tasks').document(task_id).set({
+                    'user_id': session['user_id'],
+                    'title': title,
+                    'description': description,
+                    'due_date': due_date,
+                    'priority': priority,
+                    'status': 'pending',
+                    'task_id': task_id,
+                    'created_at': formatted_date,
+                    'updated_at': formatted_date
+                })
+                return f"Tarefa '{title}' criada com sucesso! ID: {task_id}"
+            
+            elif "listar" in user_input_lower or "list" in user_input_lower:
+                tasks = db.collection('tasks').where('user_id', '==', session['user_id']).get()
+                if not tasks:
+                    return "Nenhuma tarefa encontrada."
+                task_list = [
+                    f"{task.to_dict()['title']} (Status: {task.to_dict()['status']}, Prazo: {task.to_dict()['due_date']}, Prioridade: {task.to_dict()['priority']})"
+                    for task in tasks
+                ]
+                return "Suas tarefas:\n" + "\n".join(task_list)
+            
+            else:
+                return "Por favor, especifique se quer criar ou listar tarefas (ex.: 'criar tarefa X' ou 'listar tarefas')."
         
-        if not api_key:
-            logger.error(f"API key não encontrada - Usuário: {user_login} - UTC: {formatted_date}")
-            return "Error: Anthropic API key not configured. Please contact support."
-        
-        if not api_key.startswith('sk-ant-'):
-            logger.error(f"Formato inválido da API key - Usuário: {user_login} - UTC: {formatted_date}")
-            return "Error: Invalid API key format. Please check your configuration."
-        
-        # Inicializar cliente Anthropic com a chave
-        logger.debug("Inicializando cliente Anthropic")
-        client = Anthropic(api_key=api_key)
-        
-        # Criar a mensagem usando a API da Anthropic
-        logger.debug("Enviando requisição para Anthropic API")
+        elif "paciente" in user_input_lower or "patient" in user_input_lower:
+            if "agendar" in user_input_lower or "schedule" in user_input_lower:
+                return "Por favor, forneça o nome do paciente e o horário desejado (ex.: 'agendar paciente João às 14h')."
+            elif "pergunta" in user_input_lower or "question" in user_input_lower:
+                return "Encaminhe a pergunta do paciente ou descreva os sintomas para triagem básica."
+            else:
+                return "Como posso ajudar com pacientes? (ex.: 'agendar paciente' ou 'pergunta do paciente')"
+
+        elif "financeiro" in user_input_lower or "financial" in user_input_lower:
+            # Chamar a rota interna /api/financial/records
+            base_url = request.url_root
+            headers = {'Content-Type': 'application/json',
+            'Cookie': request.headers.get('Cookie')  # Propaga os cookies da sessão
+            }
+            
+            # Extrair filtro de mês, se presente
+            month_filter = None
+            if " de " in user_input_lower:
+                try:
+                    month_part = user_input_lower.split(" de ")[-1].strip()
+                    month_filter = month_part if len(month_part) == 7 and month_part[4] == '-' else None
+                except:
+                    month_filter = None
+
+            api_url = f"{base_url}api/financial/records"
+            if month_filter:
+                api_url += f"?month={month_filter}"
+
+            logger.info(f"Chamando API: {api_url} com headers: {headers}")
+            try:
+                response = requests.get(api_url, headers=headers)
+                logger.info(f"Resposta da API: Status {response.status_code}, Conteúdo: {response.text}")
+
+                if response.status_code != 200:
+                    return f"Erro ao buscar registros financeiros: Status {response.status_code}"
+
+                records = response.json()
+
+                if not isinstance(records, list):
+                    return "Erro: Resposta da API não é uma lista válida."
+
+                if not records:
+                    return "Nenhum registro financeiro encontrado para o período solicitado."
+
+                total_records = len(records)
+                total_pending = sum(1 for r in records if r.get('status') == 'pending')
+                total_completed = sum(1 for r in records if r.get('status') == 'completed')
+
+                summary = (
+                    f"Resumo financeiro{' de ' + month_filter if month_filter else ''}:\n"
+                    f"Total de registros: {total_records}\n"
+                    f"Consultas pendentes: {total_pending}\n"
+                    f"Consultas concluídas: {total_completed}"
+                )
+                return summary
+
+            except requests.RequestException as e:
+                logger.error(f"Erro ao chamar /api/financial/records: {str(e)}")
+                return "Erro ao processar o resumo financeiro. Tente novamente mais tarde."
+            except ValueError as e:
+                logger.error(f"Erro ao decodificar JSON da resposta: {str(e)}, Conteúdo: {response.text}")
+                return "Erro: Resposta inválida da API financeira."
+
+        # Resposta padrão usando Anthropic
+        client = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
         response = client.messages.create(
             model="claude-3-haiku-20240307",
-            messages=[{
-                "role": "user",
-                "content": user_input
-            }],
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_input}
+            ],
             max_tokens=max_tokens
         )
-        
-        # Log da resposta
-        logger.debug(f"Resposta recebida da API: {response.content}")
-        
-        if not response.content:
-            logger.error("Resposta vazia da API")
-            return "Erro: Resposta vazia da API"
-        
-        # Após resposta bem-sucedida, atualizar estatísticas
+
         if response.content:
-            # Verificar reset mensal
-            last_reset = datetime.strptime(ai_stats['last_reset'], '%Y-%m-%d %H:%M:%S')
+            last_reset = datetime.strptime(ai_stats['last_reset'], '%Y-%m-%dT%H:%M:%S.%f')
             if last_reset.month != current_utc.month:
                 ai_stats['remaining_requests'] = 1000
                 ai_stats['last_reset'] = formatted_date
             
-            # Atualizar contadores
             ai_stats['total_requests'] += 1
-            ai_stats['remaining_requests'] = max(0, ai_stats['remaining_requests'] - 1)
+            ai_stats['remaining_requests'] -= 1
             ai_stats['total_tokens'] += len(user_input.split())
-            
-            # Atualizar documento
             user_doc.reference.update({'ai_stats': ai_stats})
             
             return response.content[0].text
-        
+        return "Erro: Resposta vazia da API"
+
     except Exception as e:
-        error_msg = str(e)
-        current_utc = datetime.now(pytz.UTC).strftime('%Y-%m-%d %H:%M:%S')
-        user_login = session.get('user_email', 'Unknown')
-        
-        logger.error(f"""
-        ============================
-        Erro na API Anthropic
-        Timestamp (UTC): {current_utc}
-        Usuário: {user_login}
-        Erro: {error_msg}
-        Stack Trace: {logging.traceback.format_exc()}
-        ============================
-        """)
-        
-        if "401" in error_msg or "authentication_error" in error_msg:
-            return "Erro de autenticação com a API. Por favor, contate o suporte técnico."
-        elif "rate_limit" in error_msg.lower():
-            return "Muitas requisições. Por favor, tente novamente em alguns segundos."
-        else:
-            return f"Erro ao processar sua requisição: {error_msg}"
+        logger.error(f"Erro na API Anthropic: {str(e)}")
+        return f"Erro ao processar sua requisição: {str(e)}"
+    
 def update_user_ai_stats(user_login, tokens_used):
     try:
         current_utc = datetime.now(pytz.UTC)
@@ -393,45 +464,25 @@ def update_user_ai_stats(user_login, tokens_used):
         """)        
 
 @main.route('/ai-services', methods=['GET', 'POST'])
+@require_active_subscription
 def ai_services():
-    print(f"[DEBUG] Método da requisição: {request.method}")
-    
     if request.method == 'POST':
         try:
-            print("[DEBUG] Processando POST request")
-            print(f"[DEBUG] Headers: {dict(request.headers)}")
-            print(f"[DEBUG] Dados brutos: {request.get_data(as_text=True)}")
-            
-            if not request.is_json:
-                print("[DEBUG] Requisição não é JSON")
-                return jsonify({
-                    'error': 'Request must be JSON',
-                    'message': 'Content-Type must be application/json'
-                }), 400
-
             data = request.get_json()
-            print(f"[DEBUG] Dados JSON: {data}")
-            
             user_input = data.get('input', '').strip()
-            print(f"[DEBUG] Input do usuário: {user_input}")
+            if not user_input:
+                return jsonify({'error': 'Nenhum input fornecido'}), 400
             
-            # Chamar a API
             response = call_ai_api(user_input)
-            print(f"[DEBUG] Resposta da API: {response}")
-            
             return jsonify({
                 'response': response,
-                'status': 'success'
+                'status': 'success',
+                'timestamp': datetime.now(pytz.UTC).strftime('%Y-%m-%d %H:%M:%S')
             })
-
         except Exception as e:
-            print(f"[ERROR] Erro no processamento: {str(e)}")
-            return jsonify({
-                'error': 'Erro ao processar requisição',
-                'message': str(e)
-            }), 500
-
-    return render_template('ai_services.html')
+            return jsonify({'error': str(e)}), 500
+    
+    return render_template('ai_services.html', current_time=datetime.now(pytz.UTC).strftime('%Y-%m-%d %H:%M:%S'))
 
 @main.route('/api/user/ai-stats', methods=['GET'])
 def get_user_ai_stats():
