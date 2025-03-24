@@ -78,225 +78,295 @@
   ::-webkit-scrollbar-thumb:hover {
     background: #6b7280;
   }
+
+  /* Ajustes para responsividade */
+  @media (max-width: 640px) {
+    .form-input {
+      font-size: 14px;
+    }
+    .btn {
+      font-size: 14px;
+      padding: 8px 12px;
+    }
+    th, td {
+      font-size: 12px;
+      padding: 8px;
+    }
+    .chart-container {
+      height: 200px;
+    }
+  }
+  /* Adição para remover o ícone de calendário padrão do navegador */
+  input[type="month"]::-webkit-calendar-picker-indicator {
+    display: none;
+  }
+
+  input[type="month"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: transparent;
+    color: #ffffff; /* Cor do texto */
+    font-family: 'Inter', sans-serif; /* Mesma fonte do resto do design */
+    font-size: 14px; /* Tamanho da fonte */
+  }
+
+  /* Garante que o placeholder tenha a mesma cor */
+  input[type="month"]::-webkit-input-placeholder {
+    color: #9ca3af; /* Cor do placeholder (gray-400) */
+  }
+  input[type="month"]::-moz-placeholder {
+    color: #9ca3af;
+  }
+  input[type="month"]:-ms-input-placeholder {
+    color: #9ca3af;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="space-y-8">
-  <!-- Header -->
-  <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-    <h1 class="text-3xl md:text-4xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-cyan-400">Gestão Financeira</h1>
-    <div class="flex gap-4">
-      <button onclick="refreshDashboard()" class="btn btn-secondary" aria-label="Atualizar dashboard">
-        <i data-lucide="refresh-cw" class="h-5 w-5"></i>
-        <span>Atualizar</span>
-      </button>
-      <button onclick="showFinancialModal('create')" class="btn btn-primary" aria-label="Novo registro financeiro">
-        <i data-lucide="plus" class="h-5 w-5"></i>
-        <span>Novo Registro</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- Summary Cards -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-    <div class="card hover:translate-y-[-5px] transition-transform">
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg md:text-xl font-semibold text-white">Total Mensal</h3>
-        <div class="p-2 bg-green-500/10 rounded-full">
-          <i data-lucide="dollar-sign" class="text-green-500 h-6 w-6"></i>
-        </div>
-      </div>
-      <p class="text-3xl font-bold text-green-500 mt-2" id="monthlyTotal">R$ 0,00</p>
-      <p class="text-xs text-gray-400 mt-1">Receita total do mês atual</p>
-    </div>
-    <div class="card hover:translate-y-[-5px] transition-transform">
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg md:text-xl font-semibold text-white">Pendentes</h3>
-        <div class="p-2 bg-yellow-500/10 rounded-full">
-          <i data-lucide="clock" class="text-yellow-500 h-6 w-6"></i>
-        </div>
-      </div>
-      <p class="text-3xl font-bold text-yellow-500 mt-2" id="pendingTotal">R$ 0,00</p>
-      <p class="text-xs text-gray-400 mt-1">Pagamentos pendentes</p>
-    </div>
-    <div class="card hover:translate-y-[-5px] transition-transform">
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg md:text-xl font-semibold text-white">Ticket Médio</h3>
-        <div class="p-2 bg-blue-500/10 rounded-full">
-          <i data-lucide="trending-up" class="text-blue-500 h-6 w-6"></i>
-        </div>
-      </div>
-      <p class="text-3xl font-bold text-blue-500 mt-2" id="averageTicket">R$ 0,00</p>
-      <p class="text-xs text-gray-400 mt-1">Valor médio por atendimento</p>
-    </div>
-    <div class="card hover:translate-y-[-5px] transition-transform">
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg md:text-xl font-semibold text-white">Atrasados (%)</h3>
-        <div class="p-2 bg-red-500/10 rounded-full">
-          <i data-lucide="alert-triangle" class="text-red-500 h-6 w-6"></i>
-        </div>
-      </div>
-      <p class="text-3xl font-bold text-red-500 mt-2" id="overdueRate">0%</p>
-      <p class="text-xs text-gray-400 mt-1">Percentual de pagamentos atrasados</p>
-    </div>
-  </div>
-
-  <!-- Alerts -->
-  <div id="alertsSection" class="space-y-2 hidden">
-    <h2 class="text-xl md:text-2xl font-semibold text-white flex items-center gap-2">
-      <i data-lucide="bell" class="text-red-500 h-5 w-5"></i>
-      Alertas
-    </h2>
-    <div id="alertsList" class="space-y-2"></div>
-  </div>
-
-  <!-- Charts -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div class="card">
-      <h3 class="text-lg md:text-xl font-semibold text-white mb-4 flex items-center gap-2">
-        <i data-lucide="bar-chart-2" class="text-purple-500 h-5 w-5"></i>
-        Receita Diária
-      </h3>
-      <div class="chart-container">
-        <canvas id="dailyRevenueChart"></canvas>
-      </div>
-    </div>
-    <div class="card">
-      <h3 class="text-lg md:text-xl font-semibold text-white mb-4 flex items-center gap-2">
-        <i data-lucide="credit-card" class="text-cyan-500 h-5 w-5"></i>
-        Métodos de Pagamento
-      </h3>
-      <div class="chart-container">
-        <canvas id="paymentMethodsChart"></canvas>
-      </div>
-    </div>
-
-  <!-- Records Table -->
-  <div class="card">
-    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-      <h2 class="text-xl md:text-2xl font-semibold text-white flex items-center gap-2">
-        <i data-lucide="file-text" class="text-purple-500 h-5 w-5"></i>
-        Registros Financeiros
-      </h2>
-      <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-        <div class="relative">
-          <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
-          <input type="text" id="patientSearch" class="form-input pl-10" placeholder="Buscar paciente..." aria-label="Buscar por nome do paciente">
-        </div>
-        <div class="relative">
-          <i data-lucide="calendar" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
-          <input type="month" id="monthFilter" class="form-input pl-10" aria-label="Filtrar por mês">
-        </div>
-        <div class="relative">
-          <i data-lucide="filter" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
-          <select id="statusFilter" class="form-input pl-10" aria-label="Filtrar por status">
-            <option value="all">Todos os Status</option>
-            <option value="paid">Pago</option>
-            <option value="pending">Pendente</option>
-            <option value="overdue">Atrasado</option>
-          </select>
-        </div>
-        <button onclick="exportToCSV()" class="btn btn-secondary" aria-label="Exportar para CSV">
-          <i data-lucide="download" class="h-5 w-5"></i>
-          <span>Exportar</span>
+<div class="min-h-screen bg-gray-900 flex flex-col p-4 sm:p-6">
+  <div class="space-y-8">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+      <h1 class="text-3xl md:text-4xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-cyan-400">Gestão Financeira</h1>
+      <div class="flex gap-4">
+        <button onclick="refreshDashboard()" class="btn btn-secondary" aria-label="Atualizar dashboard">
+          <i data-lucide="refresh-cw" class="h-5 w-5"></i>
+          <span>Atualizar</span>
+        </button>
+        <button onclick="showFinancialModal('create')" class="btn btn-primary" aria-label="Novo registro financeiro">
+          <i data-lucide="plus" class="h-5 w-5"></i>
+          <span>Novo Registro</span>
         </button>
       </div>
     </div>
-    <div class="overflow-x-auto scrollbar-thin rounded-lg border border-gray-700">
-      <table class="w-full text-left text-white">
-        <thead class="bg-gray-700/50 sticky top-0 z-10">
-          <tr>
-            <th class="p-4 font-semibold">Paciente</th>
-            <th class="p-4 font-semibold">Data</th>
-            <th class="p-4 font-semibold">Valor</th>
-            <th class="p-4 font-semibold">Método</th>
-            <th class="p-4 font-semibold">Status</th>
-            <th class="p-4 font-semibold">Dias em Atraso</th>
-            <th class="p-4 font-semibold">Ações</th>
-          </tr>
-        </thead>
-        <tbody id="financialRecordsTable"></tbody>
-      </table>
-    </div>
-    <p class="mt-4 text-gray-400 text-sm flex items-center gap-2" id="recordsCount">
-      <i data-lucide="info" class="h-4 w-4"></i>
-      Mostrando 0 registros
-    </p>
-  </div>
 
-  <!-- Modal -->
-  <div id="financialModal" class="hidden fixed inset-0 bg-gray-900/75 backdrop-blur-sm z-50 transition-all duration-300" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
-    <div class="flex items-center justify-center min-h-screen px-4">
-      <div class="bg-[#1E293B] w-full max-w-lg md:max-w-2xl rounded-xl shadow-xl border border-gray-700 transform transition-all duration-300 scale-95 opacity-0" id="modalContent">
-        <div class="p-6">
-          <div class="flex justify-between items-center mb-6">
-            <h3 id="modalTitle" class="text-xl md:text-2xl font-semibold text-white"></h3>
-            <button onclick="closeFinancialModal()" class="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700/50 transition-colors" aria-label="Fechar modal">
-              <i data-lucide="x" class="h-6 w-6"></i>
-            </button>
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+      <div class="card hover:translate-y-[-5px] transition-transform">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg md:text-xl font-semibold text-white">Total Mensal</h3>
+          <div class="p-2 bg-green-500/10 rounded-full">
+            <i data-lucide="dollar-sign" class="text-green-500 h-6 w-6"></i>
           </div>
-          <form id="financialForm" class="space-y-4">
-            <div>
-              <label for="patientName" class="block text-sm font-medium text-gray-300 mb-1">Nome do Paciente*</label>
-              <div class="relative">
-                <i data-lucide="user" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
-                <input type="text" id="patientName" required class="form-input pl-10" aria-required="true">
-              </div>
-            </div>
-            <div>
-              <label for="appointmentValue" class="block text-sm font-medium text-gray-300 mb-1">Valor*</label>
-              <div class="relative">
-                <i data-lucide="dollar-sign" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
-                <input type="number" id="appointmentValue" required step="0.01" min="0" class="form-input pl-10" aria-required="true">
-              </div>
-            </div>
-            <div>
-              <label for="appointmentDate" class="block text-sm font-medium text-gray-300 mb-1">Data do Atendimento*</label>
-              <div class="relative">
-                <i data-lucide="calendar" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
-                <input type="datetime-local" id="appointmentDate" required class="form-input pl-10" aria-required="true">
-              </div>
-            </div>
-            <div>
-              <label for="paymentMethod" class="block text-sm font-medium text-gray-300 mb-1">Método de Pagamento*</label>
-              <div class="relative">
-                <i data-lucide="credit-card" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
-                <select id="paymentMethod" required class="form-input pl-10" aria-required="true">
-                  <option value="cash">Dinheiro</option>
-                  <option value="credit">Cartão de Crédito</option>
-                  <option value="debit">Cartão de Débito</option>
-                  <option value="pix">PIX</option>
-                  <option value="insurance">Convênio</option>
-                </select>
-              </div>
-            </div>
-            <div>
-              <label for="paymentStatus" class="block text-sm font-medium text-gray-300 mb-1">Status*</label>
-              <div class="relative">
-                <i data-lucide="check-circle" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
-                <select id="paymentStatus" required class="form-input pl-10" aria-required="true">
-                  <option value="paid">Pago</option>
-                  <option value="pending">Pendente</option>
-                  <option value="overdue">Atrasado</option>
-                </select>
-              </div>
-            </div>
-            <div>
-              <label for="notes" class="block text-sm font-medium text-gray-300 mb-1">Observações</label>
-              <div class="relative">
-                <i data-lucide="file-text" class="absolute left-3 top-3 text-gray-400 h-4 w-4"></i>
-                <textarea id="notes" rows="3" class="form-input pl-10"></textarea>
-              </div>
-            </div>
-            <div class="flex justify-end gap-3 mt-6">
-              <button type="button" onclick="closeFinancialModal()" class="btn btn-secondary">Cancelar</button>
-              <button type="submit" class="btn btn-primary">
-                <i data-lucide="save" class="h-5 w-5"></i>
-                <span>Salvar</span>
+        </div>
+        <p class="text-3xl font-bold text-green-500 mt-2" id="monthlyTotal">R$ 0,00</p>
+        <p class="text-xs text-gray-400 mt-1">Receita total do mês atual</p>
+      </div>
+      <div class="card hover:translate-y-[-5px] transition-transform">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg md:text-xl font-semibold text-white">Pendentes</h3>
+          <div class="p-2 bg-yellow-500/10 rounded-full">
+            <i data-lucide="clock" class="text-yellow-500 h-6 w-6"></i>
+          </div>
+        </div>
+        <p class="text-3xl font-bold text-yellow-500 mt-2" id="pendingTotal">R$ 0,00</p>
+        <p class="text-xs text-gray-400 mt-1">Pagamentos pendentes</p>
+      </div>
+      <div class="card hover:translate-y-[-5px] transition-transform">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg md:text-xl font-semibold text-white">Ticket Médio</h3>
+          <div class="p-2 bg-blue-500/10 rounded-full">
+            <i data-lucide="trending-up" class="text-blue-500 h-6 w-6"></i>
+          </div>
+        </div>
+        <p class="text-3xl font-bold text-blue-500 mt-2" id="averageTicket">R$ 0,00</p>
+        <p class="text-xs text-gray-400 mt-1">Valor médio por atendimento</p>
+      </div>
+      <div class="card hover:translate-y-[-5px] transition-transform">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg md:text-xl font-semibold text-white">Atrasados (%)</h3>
+          <div class="p-2 bg-red-500/10 rounded-full">
+            <i data-lucide="alert-triangle" class="text-red-500 h-6 w-6"></i>
+          </div>
+        </div>
+        <p class="text-3xl font-bold text-red-500 mt-2" id="overdueRate">0%</p>
+        <p class="text-xs text-gray-400 mt-1">Percentual de pagamentos atrasados</p>
+      </div>
+    </div>
+
+    <!-- Alerts -->
+    <div id="alertsSection" class="space-y-2 hidden">
+      <h2 class="text-xl md:text-2xl font-semibold text-white flex items-center gap-2">
+        <i data-lucide="bell" class="text-red-500 h-5 w-5"></i>
+        Alertas
+      </h2>
+      <div id="alertsList" class="space-y-2"></div>
+    </div>
+
+    <!-- Charts -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="card">
+        <h3 class="text-lg md:text-xl font-semibold text-white mb-4 flex items-center gap-2">
+          <i data-lucide="bar-chart-2" class="text-purple-500 h-5 w-5"></i>
+          Receita Diária
+        </h3>
+        <div class="chart-container">
+          <canvas id="dailyRevenueChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <h3 class="text-lg md:text-xl font-semibold text-white mb-4 flex items-center gap-2">
+          <i data-lucide="credit-card" class="text-cyan-500 h-5 w-5"></i>
+          Métodos de Pagamento
+        </h3>
+        <div class="chart-container">
+          <canvas id="paymentMethodsChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Records Table -->
+    <div class="card flex-1 flex flex-col">
+      <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-6">
+        <h2 class="text-xl md:text-2xl font-semibold text-white flex items-center gap-2 w-full sm:w-auto">
+          <i data-lucide="file-text" class="text-purple-500 h-5 w-5"></i>
+          Registros Financeiros
+        </h2>
+        <div class="flex flex-col sm:flex-row flex-wrap gap-4 w-full sm:w-auto">
+          <div class="relative flex-1 sm:flex-none">
+            <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
+            <input type="text" id="patientSearch" class="form-input pl-10 pr-4 py-2 w-full sm:w-64" placeholder="Buscar paciente..." aria-label="Buscar por nome do paciente">
+          </div>
+          <div class="relative flex-1 sm:flex-none">
+            <i data-lucide="calendar" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
+            <input type="month" id="monthFilter" class="form-input pl-10 pr-4 py-2 w-full sm:w-40" aria-label="Filtrar por mês">
+          </div>
+          <div class="relative flex-1 sm:flex-none">
+            <i data-lucide="filter" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
+            <select id="statusFilter" class="form-input pl-10 pr-4 py-2 w-full sm:w-40" aria-label="Filtrar por status">
+              <option value="all">Todos os Status</option>
+              <option value="paid">Pago</option>
+              <option value="pending">Pendente</option>
+              <option value="overdue">Atrasado</option>
+            </select>
+          </div>
+          <button onclick="exportToCSV()" class="btn btn-secondary flex items-center gap-2" aria-label="Exportar para CSV">
+            <i data-lucide="download" class="h-5 w-5"></i>
+            <span>Exportar</span>
+          </button>
+        </div>
+      </div>
+      <div class="flex-1 overflow-x-auto scrollbar-thin rounded-lg border border-gray-700 max-h-[70vh] overflow-y-auto">
+        <table class="w-full text-left text-white">
+          <thead class="bg-gray-700/50 sticky top-0 z-10">
+            <tr>
+              <th class="p-4 font-semibold w-1/5">Paciente</th>
+              <th class="p-4 font-semibold w-1/6">Data</th>
+              <th class="p-4 font-semibold w-1/6">Valor</th>
+              <th class="p-4 font-semibold w-1/6">Método</th>
+              <th class="p-4 font-semibold w-1/6">Status</th>
+              <th class="p-4 font-semibold w-1/6">Dias em Atraso</th>
+              <th class="p-4 font-semibold w-1/6">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="financialRecordsTable"></tbody>
+        </table>
+      </div>
+      <p class="mt-4 text-gray-400 text-sm flex items-center gap-2" id="recordsCount">
+        <i data-lucide="info" class="h-4 w-4"></i>
+        Mostrando 0 registros
+      </p>
+    </div>
+
+    <!-- Modal -->
+    <div id="financialModal" class="hidden fixed inset-0 bg-gray-900/75 backdrop-blur-sm z-50">
+      <div class="flex items-center justify-center min-h-screen px-4">
+        <div class="bg-[#1E293B] w-full max-w-md rounded-xl shadow-xl border border-gray-700">
+          <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h3 id="modalTitle" class="text-xl font-semibold text-white">Novo Agendamento</h3>
+              <button onclick="closeFinancialModal()" class="text-gray-400 hover:text-white">
+                <i class="lucide lucide-x h-5 w-5"></i>
               </button>
             </div>
-          </form>
+
+            <form id="financialForm">
+              <div class="space-y-4">
+                <!-- Nome do Paciente -->
+                <div>
+                  <label for="patientName" class="block text-sm font-medium text-gray-300 mb-1">Nome do Paciente*</label>
+                  <div class="relative">
+                    <i data-lucide="user" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
+                    <input type="text" id="patientName" required class="form-input pl-10 w-full" aria-required="true">
+                  </div>
+                </div>
+
+                <!-- Data do Atendimento -->
+                <div>
+                  <label for="appointmentDate" class="block text-sm font-medium text-gray-300 mb-1">Data do Atendimento*</label>
+                  <div class="relative">
+                    <i data-lucide="calendar" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
+                    <input type="datetime-local" id="appointmentDate" required class="form-input pl-10 w-full" aria-required="true">
+                  </div>
+                </div>
+
+                <!-- Valor e Forma de Pagamento -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label for="appointmentValue" class="block text-sm font-medium text-gray-300 mb-1">Valor*</label>
+                    <div class="relative">
+                      <i data-lucide="dollar-sign" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pl-8"></i>
+                      <input type="number" id="appointmentValue" required step="0.01" min="0" class="w-full bg-[#0F172A] border border-gray-700 rounded-lg px-3 py-2 text-white 
+                      focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" aria-required="true">
+                    </div>
+                  </div>
+
+                  <div>
+                    <label for="paymentMethod" class="block text-sm font-medium text-gray-300 mb-1">Método de Pagamento*</label>
+                    <div class="relative">
+                      <i data-lucide="credit-card" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
+                      <select id="paymentMethod" required class="form-input pl-10" aria-required="true">
+                        <option value="cash">Dinheiro</option>
+                        <option value="credit">Cartão de Crédito</option>
+                        <option value="debit">Cartão de Débito</option>
+                        <option value="pix">PIX</option>
+                        <option value="insurance">Convênio</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Status do Pagamento -->
+                <div>
+                  <label for="paymentStatus" class="block text-sm font-medium text-gray-300 mb-1">Status*</label>
+                  <div class="relative">
+                    <i data-lucide="check-circle" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
+                    <select id="paymentStatus" required class="form-input pl-10" aria-required="true">
+                      <option value="paid">Pago</option>
+                      <option value="pending">Pendente</option>
+                      <option value="overdue">Atrasado</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Observações -->
+                <div>
+                  <label for="notes" class="block text-sm font-medium text-gray-300 mb-1">Observações</label>
+                  <div class="relative">
+                    <i data-lucide="file-text" class="absolute left-3 top-3 text-gray-400 h-4 w-4"></i>
+                    <textarea id="notes" rows="3" class="form-input pl-10 w-full"></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-6 flex justify-between">
+                <button type="button" id="deleteEventButton" onclick="deleteEvent()" class="hidden px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                  <i class="lucide lucide-trash-2 h-4 w-4 mr-1"></i>
+                  Excluir
+                </button>
+                <div class="flex space-x-3">
+                  <button type="button" onclick="closeFinancialModal()" class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                    Cancelar
+                  </button>
+                  <button type="submit" class="px-4 py-2 bg-gradient-to-r from-purple-500 to-cyan-500 text-white rounded-lg hover:opacity-90 transition-opacity">
+                    Salvar
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
@@ -719,10 +789,14 @@ async function handleFormSubmit(e) {
 // Modal Functions
 function showFinancialModal(mode, recordId = null) {
   const modal = document.getElementById('financialModal');
+  const modalContent = document.getElementById('modalContent');
   const modalTitle = document.getElementById('modalTitle');
   const form = document.getElementById('financialForm');
   
   modal.classList.remove('hidden');
+  setTimeout(() => {
+    modalContent.classList.remove('scale-95', 'opacity-0');
+  }, 10);
   modalTitle.textContent = mode === 'create' ? 'Novo Registro' : 'Editar Registro';
   
   if (mode === 'create') {
@@ -746,9 +820,13 @@ function showFinancialModal(mode, recordId = null) {
 
 function closeFinancialModal() {
   const modal = document.getElementById('financialModal');
-  modal.classList.add('hidden');
-  document.getElementById('financialForm').reset();
-  STATE.currentRecord = null;
+  const modalContent = document.getElementById('modalContent');
+  modalContent.classList.add('scale-95', 'opacity-0');
+  setTimeout(() => {
+    modal.classList.add('hidden');
+    document.getElementById('financialForm').reset();
+    STATE.currentRecord = null;
+  }, 300);
 }
 
 function editRecord(recordId) {
