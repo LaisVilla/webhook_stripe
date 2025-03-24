@@ -35,19 +35,24 @@ def create_app():
 
     # Configuração do Firebase
     try:
-        # Tentar carregar credenciais do Firebase de variável de ambiente
-        firebase_creds_json = os.getenv('FIREBASE_CREDENTIALS')
+        # Verificar se o Firebase já foi inicializado
+        try:
+            firebase_admin.get_app()
+        except ValueError:
+            # Se não foi inicializado, então inicializa
+            firebase_creds_json = os.getenv('FIREBASE_CREDENTIALS')
+            
+            if firebase_creds_json:
+                # Se as credenciais estiverem como string JSON na variável de ambiente
+                cred_dict = json.loads(firebase_creds_json)
+                cred = credentials.Certificate(cred_dict)
+            else:
+                # Fallback para arquivo de credenciais (para desenvolvimento local)
+                cred_path = os.path.join(os.path.dirname(__file__), 'firebase-adminsdk.json')
+                cred = credentials.Certificate(cred_path)
+            
+            firebase_admin.initialize_app(cred)
         
-        if firebase_creds_json:
-            # Se as credenciais estiverem como string JSON na variável de ambiente
-            cred_dict = json.loads(firebase_creds_json)
-            cred = credentials.Certificate(cred_dict)
-        else:
-            # Fallback para arquivo de credenciais (para desenvolvimento local)
-            cred_path = os.path.join(os.path.dirname(__file__), 'firebase-adminsdk.json')
-            cred = credentials.Certificate(cred_path)
-        
-        firebase_admin.initialize_app(cred)
         app.db = firestore.client()
     except Exception as e:
         print(f"ERROR configuring Firebase: {e}")
