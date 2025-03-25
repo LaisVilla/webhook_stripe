@@ -15,21 +15,41 @@ def initialize_firebase():
     try:
         # Tenta obter o app existente
         firebase_admin.get_app()
+        print("Firebase já está inicializado")
     except ValueError:
-        # Se não existir, inicializa
-        firebase_creds_json = os.getenv('FIREBASE_CREDENTIALS')
-        
-        if firebase_creds_json:
-            # Se as credenciais estiverem como string JSON na variável de ambiente
-            try:
-                cred_dict = json.loads(firebase_creds_json)
-                cred = credentials.Certificate(cred_dict)
-                firebase_admin.initialize_app(cred)
-                print("Firebase inicializado com sucesso via variável de ambiente")
-            except Exception as e:
-                print(f"Erro ao inicializar Firebase com variável de ambiente: {e}")
-        else:
-            print("Erro: Credenciais do Firebase não encontradas")
+        try:
+            # Tenta primeiro usar FIREBASE_CREDENTIALS_JSON
+            cred_json = os.getenv('FIREBASE_CREDENTIALS_JSON')
+            if cred_json:
+                try:
+                    cred_dict = json.loads(cred_json)
+                    cred = credentials.Certificate(cred_dict)
+                    firebase_admin.initialize_app(cred)
+                    print("Firebase inicializado com sucesso via FIREBASE_CREDENTIALS_JSON")
+                    return
+                except Exception as e:
+                    print(f"Erro ao inicializar Firebase com FIREBASE_CREDENTIALS_JSON: {e}")
+            
+            # Se não encontrou FIREBASE_CREDENTIALS_JSON, tenta FIREBASE_CREDENTIALS
+            firebase_creds = os.getenv('FIREBASE_CREDENTIALS')
+            if firebase_creds:
+                try:
+                    if os.path.isfile(firebase_creds):
+                        # Se for um caminho de arquivo válido
+                        cred = credentials.Certificate(firebase_creds)
+                    else:
+                        # Se for uma string JSON
+                        cred_dict = json.loads(firebase_creds)
+                        cred = credentials.Certificate(cred_dict)
+                    
+                    firebase_admin.initialize_app(cred)
+                    print("Firebase inicializado com sucesso via FIREBASE_CREDENTIALS")
+                except Exception as e:
+                    print(f"Erro ao inicializar Firebase com FIREBASE_CREDENTIALS: {e}")
+            else:
+                print("Erro: Nenhuma credencial do Firebase encontrada")
+        except Exception as e:
+            print(f"Erro na inicialização do Firebase: {e}")
 
 # Chama a inicialização global antes de criar o app
 initialize_firebase()
@@ -46,6 +66,7 @@ def create_app():
     # Configurar secret key
     app.secret_key = app.config.get('SECRET_KEY') or os.getenv('SECRET_KEY')
     
+    # Inicializar Firestore
     try:
         app.db = firestore.client()
     except Exception as e:
@@ -59,27 +80,19 @@ def create_app():
         api_secret=os.getenv('CLOUDINARY_API_SECRET')
     )
 
-    # Verificar se a chave foi carregada corretamente
+    # Verificar se a chave OpenAI foi carregada corretamente
     api_key = os.getenv('OPENAI_API_KEY')
     if api_key:
         print(f"API key loaded successfully: {api_key[:10]}...")
     else:
         print("WARNING: API key not found!")
 
-    # Configuração do Firebase
-    cred_path = app.config['FIREBASE_CREDENTIALS_PATH']
-    cred = credentials.Certificate(cred_path)
-    firebase_admin.initialize_app(cred)
-    app.db = firestore.client()
-
     # Configuração da Stripe
-    stripe.api_key = app.config['STRIPE_SECRET_KEY']
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
-    # Registrar o blueprint
-    
+    # Registrar os blueprints
     app.register_blueprint(main_blueprint)
     app.register_blueprint(calendar_tasks_blueprint)
-    app.register_blueprint(financial)  
-    
+    app.register_blueprint(financial)
 
     return app
