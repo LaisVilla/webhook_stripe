@@ -18,46 +18,34 @@ def initialize_firebase():
         print("Firebase já está inicializado")
     except ValueError:
         try:
-            # Tenta primeiro usar FIREBASE_CREDENTIALS_JSON
-            cred_json = os.getenv('FIREBASE_CREDENTIALS_JSON')
-            if cred_json:
-                try:
-                    cred_dict = json.loads(cred_json)
-                    cred = credentials.Certificate(cred_dict)
-                    firebase_admin.initialize_app(cred)
-                    print("Firebase inicializado com sucesso via FIREBASE_CREDENTIALS_JSON")
-                    return
-                except Exception as e:
-                    print(f"Erro ao inicializar Firebase com FIREBASE_CREDENTIALS_JSON: {e}")
+            # Tenta obter as credenciais da variável de ambiente
+            firebase_creds_json = os.getenv('FIREBASE_CREDENTIALS_JSON')
             
-            # Se não encontrou FIREBASE_CREDENTIALS_JSON, tenta FIREBASE_CREDENTIALS
-            firebase_creds = os.getenv('FIREBASE_CREDENTIALS')
-            if firebase_creds:
-                try:
-                    if os.path.isfile(firebase_creds):
-                        # Se for um caminho de arquivo válido
-                        cred = credentials.Certificate(firebase_creds)
-                    else:
-                        # Se for uma string JSON
-                        cred_dict = json.loads(firebase_creds)
-                        cred = credentials.Certificate(cred_dict)
-                    
-                    firebase_admin.initialize_app(cred)
-                    print("Firebase inicializado com sucesso via FIREBASE_CREDENTIALS")
-                except Exception as e:
-                    print(f"Erro ao inicializar Firebase com FIREBASE_CREDENTIALS: {e}")
-            else:
-                print("Erro: Nenhuma credencial do Firebase encontrada")
+            if not firebase_creds_json:
+                print("Erro: FIREBASE_CREDENTIALS_JSON não encontrada")
+                return False
+            
+            try:
+                # Converte a string JSON em dicionário
+                cred_dict = json.loads(firebase_creds_json)
+                cred = credentials.Certificate(cred_dict)
+                firebase_admin.initialize_app(cred)
+                print("Firebase inicializado com sucesso via FIREBASE_CREDENTIALS_JSON")
+                return True
+            except json.JSONDecodeError as e:
+                print(f"Erro ao decodificar JSON das credenciais: {e}")
+                return False
+            except Exception as e:
+                print(f"Erro ao inicializar Firebase: {e}")
+                return False
         except Exception as e:
-            print(f"Erro na inicialização do Firebase: {e}")
-
-# Chama a inicialização global antes de criar o app
-initialize_firebase()
+            print(f"Erro geral na inicialização do Firebase: {e}")
+            return False
 
 def create_app():
     app = Flask(__name__)
     
-    # Carregar variáveis de ambiente do arquivo .env (para desenvolvimento local)
+    # Carregar variáveis de ambiente
     load_dotenv(override=True)
     
     # Carregar configuração
@@ -66,11 +54,16 @@ def create_app():
     # Configurar secret key
     app.secret_key = app.config.get('SECRET_KEY') or os.getenv('SECRET_KEY')
     
-    # Inicializar Firestore
-    try:
-        app.db = firestore.client()
-    except Exception as e:
-        print(f"Erro ao criar cliente Firestore: {e}")
+    # Inicializar Firebase
+    if initialize_firebase():
+        try:
+            app.db = firestore.client()
+            print("Firestore cliente inicializado com sucesso")
+        except Exception as e:
+            print(f"Erro ao criar cliente Firestore: {e}")
+            app.db = None
+    else:
+        print("Não foi possível inicializar o Firebase")
         app.db = None
 
     # Configuração do Cloudinary
@@ -80,17 +73,17 @@ def create_app():
         api_secret=os.getenv('CLOUDINARY_API_SECRET')
     )
 
-    # Verificar se a chave OpenAI foi carregada corretamente
+    # Verificar se a chave OpenAI foi carregada
     api_key = os.getenv('OPENAI_API_KEY')
     if api_key:
-        print(f"API key loaded successfully: {api_key[:10]}...")
+        print(f"OpenAI API key loaded successfully: {api_key[:5]}...")
     else:
-        print("WARNING: API key not found!")
+        print("WARNING: OpenAI API key not found!")
 
-    # Configuração da Stripe
+    # Configuração do Stripe
     stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
-    # Registrar os blueprints
+    # Registrar blueprints
     app.register_blueprint(main_blueprint)
     app.register_blueprint(calendar_tasks_blueprint)
     app.register_blueprint(financial)
