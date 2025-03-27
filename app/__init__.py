@@ -9,24 +9,14 @@ from cloudinary import config as cloudinary_config
 import stripe
 import os
 from flask_apscheduler import APScheduler
+from datetime import datetime  
+import pytz
 from .routes import main as main_blueprint
 from .financial import financial
 from .calendar_tasks import calendar_tasks as calendar_tasks_blueprint
-from .health import health  # Nova importação
-
+from .health import health  
 
 scheduler = APScheduler()
-
-def health_check_job():
-    """Função que será executada periodicamente para verificar a saúde da aplicação"""
-    try:
-        with app.test_client() as client:
-            response = client.get('/health')
-            print(f"Health Check Status: {response.status_code}")
-            if response.status_code != 200:
-                print(f"Health Check Failed: {response.get_json()}")
-    except Exception as e:
-        print(f"Health Check Error: {e}")
 
 def initialize_firebase():
     try:
@@ -67,6 +57,12 @@ def create_app():
     
     # Carregar configuração
     app.config.from_object('app.config.Config')
+
+    # Adicionar configurações do scheduler
+    app.config.update(
+        SCHEDULER_API_ENABLED=True,
+        SCHEDULER_TIMEZONE="America/Sao_Paulo"  # Ajustado para seu fuso horário
+    )
     
     # Configurar secret key
     app.secret_key = app.config.get('SECRET_KEY') or os.getenv('SECRET_KEY')
@@ -97,12 +93,44 @@ def create_app():
     app.register_blueprint(main_blueprint)
     app.register_blueprint(calendar_tasks_blueprint)
     app.register_blueprint(financial)
-    app.register_blueprint(health)  # Novo blueprint
+    app.register_blueprint(health) 
 
-    # Configurar e iniciar o scheduler
-    scheduler.init_app(app)
-    scheduler.add_job(id='health_check', func=health_check_job, 
-                     trigger='interval', minutes=10)
-    scheduler.start()
+    # Configurar scheduler
+    def health_check_job():
+        """Função que será executada periodicamente para verificar a saúde da aplicação"""
+        with app.app_context():
+            try:
+                with app.test_client() as client:
+                    response = client.get('/health')
+                    current_time = datetime.now(pytz.timezone('America/Sao_Paulo'))
+                    print(f"\n[Health Check] {current_time.strftime('%Y-%m-%d %H:%M:%S')}")
+                    
+                    if response.status_code != 200:
+                        print(f"Status: {response.status_code}")
+                        print(f"Failed: {response.get_json()}")
+                    else:
+                        data = response.get_json()
+                        print(f"Status: {data['status']}")
+                        print(f"Firebase: {data['services']['firebase']['status']}")
+                        if data['services']['firebase'].get('error'):
+                            print(f"Firebase Error: {data['services']['firebase']['error']}")
+            except Exception as e:
+                print(f"[Health Check] Error: {str(e)}")
+
+    # Inicializar scheduler apenas uma vez
+    if not scheduler.running:
+        scheduler.init_app(app)
+        scheduler.add_job(
+            id='health_check',
+            func=health_check_job,
+            trigger='interval',
+            minutes=10,
+            replace_existing=True,
+            next_run_time=datetime.now(pytz.timezone('America/Sao_Paulo'))  # Executa imediatamente
+        )
+        scheduler.start()
+        print("\n[Scheduler] Iniciado com sucesso")
+        print(f"[Scheduler] Próxima verificação em 10 minutos\n")
+
 
     return app
