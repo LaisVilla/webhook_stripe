@@ -6,9 +6,24 @@ from dotenv import load_dotenv
 from cloudinary import config as cloudinary_config
 import stripe
 import os
+from flask_apscheduler import APScheduler
 from .routes import main as main_blueprint
 from .financial import financial
 from .calendar_tasks import calendar_tasks as calendar_tasks_blueprint
+from .routes.health import health
+
+scheduler = APScheduler()
+
+def health_check_job():
+    """Função que será executada periodicamente para verificar a saúde da aplicação"""
+    try:
+        with app.test_client() as client:
+            response = client.get('/health')
+            print(f"Health Check Status: {response.status_code}")
+            if response.status_code != 200:
+                print(f"Health Check Failed: {response.get_json()}")
+    except Exception as e:
+        print(f"Health Check Error: {e}")
 
 # Inicialização global do Firebase
 def initialize_firebase():
@@ -16,30 +31,33 @@ def initialize_firebase():
         # Tenta obter o app existente
         firebase_admin.get_app()
         print("Firebase já está inicializado")
+        return True
     except ValueError:
         try:
-            # Tenta obter as credenciais da variável de ambiente
-            firebase_creds_json = os.getenv('FIREBASE_CREDENTIALS_JSON')
+            # Primeiro tenta usar o arquivo local (desenvolvimento)
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            cred_path = os.path.join(base_dir, 'firebase-adminsdk.json')
+
+            if os.path.exists(cred_path):
+                cred = credentials.Certificate(cred_path)
+                firebase_admin.initialize_app(cred)
+                print(f"Firebase inicializado com sucesso via arquivo local")
+                return True
             
-            if not firebase_creds_json:
-                print("Erro: FIREBASE_CREDENTIALS_JSON não encontrada")
-                return False
-            
-            try:
-                # Converte a string JSON em dicionário
+            # se não encontrar o arquivo, tenta usar a variável de ambiente (produção)
+            firebase_creds_json =os.getenv('FIREBASE_CREDENTIALS_JSON')
+            if firebase_creds_json:    
                 cred_dict = json.loads(firebase_creds_json)
                 cred = credentials.Certificate(cred_dict)
                 firebase_admin.initialize_app(cred)
                 print("Firebase inicializado com sucesso via FIREBASE_CREDENTIALS_JSON")
                 return True
-            except json.JSONDecodeError as e:
-                print(f"Erro ao decodificar JSON das credenciais: {e}")
-                return False
-            except Exception as e:
-                print(f"Erro ao inicializar Firebase: {e}")
-                return False
+            
+            print("Erro: Nenhuma credencial do Firebase encontrada")
+            return False
+        
         except Exception as e:
-            print(f"Erro geral na inicialização do Firebase: {e}")
+            print(f"Erro na inicialização do Firebase: {e}")
             return False
 
 def create_app():
@@ -73,12 +91,6 @@ def create_app():
         api_secret=os.getenv('CLOUDINARY_API_SECRET')
     )
 
-    # Verificar se a chave OpenAI foi carregada
-    api_key = os.getenv('OPENAI_API_KEY')
-    if api_key:
-        print(f"OpenAI API key loaded successfully: {api_key[:5]}...")
-    else:
-        print("WARNING: OpenAI API key not found!")
 
     # Configuração do Stripe
     stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
@@ -87,5 +99,12 @@ def create_app():
     app.register_blueprint(main_blueprint)
     app.register_blueprint(calendar_tasks_blueprint)
     app.register_blueprint(financial)
+    app.register_blueprint(health)
+
+    # Configurar e iniciar o scheduler
+    scheduler.init_app(app)
+    scheduler.add_job(id='health_check', func=health_check_job, 
+                     trigger='interval', minutes=10)
+    scheduler.start()
 
     return app
