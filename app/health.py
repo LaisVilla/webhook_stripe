@@ -4,14 +4,15 @@ import pytz
 from firebase_admin import firestore
 import os
 import platform
+import requests
 
 health = Blueprint('health', __name__)
 
 def check_firebase():
     try:
         db = firestore.client()
-        # Tenta fazer uma operação real no Firebase
-        db.collection('health_checks').document('test').get()
+        # Tenta fazer uma operação real no Firebase com timeout
+        db.collection('health_checks').document('test').get(timeout=10)
         return True, None
     except Exception as e:
         return False, str(e)
@@ -23,7 +24,9 @@ def check_environment():
             'environment': os.getenv('FLASK_ENV', 'production'),
             'debug_mode': current_app.debug if current_app else False,
             'platform': platform.system(),
-            'python_version': platform.python_version()
+            'python_version': platform.python_version(),
+            'gunicorn_timeout': os.getenv('GUNICORN_TIMEOUT', '120'),  # Timeout do Gunicorn
+            'request_timeout': '10'  # Timeout das requisições
         }
     except Exception as e:
         return {
@@ -31,6 +34,8 @@ def check_environment():
             'debug_mode': None,
             'platform': platform.system(),
             'python_version': platform.python_version(),
+            'gunicorn_timeout': os.getenv('GUNICORN_TIMEOUT', '120'),
+            'request_timeout': '10',
             'error': str(e)
         }
 
@@ -58,6 +63,14 @@ def health_check():
     - Status dos serviços externos (Firebase, Cloudinary, Stripe)
     - Informações do ambiente
     - Timestamps em UTC e local
+    
+    Este endpoint é usado para monitoramento da aplicação e não mantém ela no ar diretamente.
+    A aplicação se mantém no ar através do Gunicorn configurado no Procfile e gerenciado 
+    pela plataforma de hospedagem (Render).
+    
+    Timeouts configurados:
+    - Requisições: 10 segundos
+    - Gunicorn: 120 segundos (configurado via gunicorn -t 120)
     """
     try:
         # Horários

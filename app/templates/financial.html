@@ -273,7 +273,7 @@
     <!-- Modal -->
     <div id="financialModal" class="hidden fixed inset-0 bg-gray-900/75 backdrop-blur-sm z-50">
       <div class="flex items-center justify-center min-h-screen px-4">
-        <div class="bg-[#1E293B] w-full max-w-md rounded-xl shadow-xl border border-gray-700">
+        <div id="modalContent" class="bg-[#1E293B] w-full max-w-md rounded-xl shadow-xl border border-gray-700 transform transition-all duration-300 scale-95 opacity-0">
           <div class="p-6">
             <div class="flex justify-between items-center mb-4">
               <h3 id="modalTitle" class="text-xl font-semibold text-white">Novo Agendamento</h3>
@@ -352,7 +352,7 @@
               </div>
 
               <div class="mt-6 flex justify-between">
-                <button type="button" id="deleteEventButton" onclick="deleteEvent()" class="hidden px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                <button type="button" id="deleteEventButton" onclick="deleteRecord(STATE.currentRecord?.record_id)" class="hidden px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
                   <i class="lucide lucide-trash-2 h-4 w-4 mr-1"></i>
                   Excluir
                 </button>
