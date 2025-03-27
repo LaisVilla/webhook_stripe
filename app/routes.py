@@ -7,7 +7,7 @@ from functools import wraps  # Adicionando esta importação
 import os
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 # Configuração do logging
 logging.basicConfig(level=logging.INFO)
@@ -231,7 +231,7 @@ def register():
     
     return render_template('register.html')
 
-# Função para chamar a API da OpenAI
+
 def call_ai_api(user_input, max_tokens=150):
     try:
         current_utc = datetime.now(pytz.UTC)
@@ -391,15 +391,16 @@ def call_ai_api(user_input, max_tokens=150):
         client = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
         response = client.messages.create(
             model="claude-3-haiku-20240307",
+            system=system_prompt,  # Passando o prompt do sistema aqui
             messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_input}
+               {"role": "user", "content": user_input}
             ],
             max_tokens=max_tokens
         )
+        print(response)
 
         if response.content:
-            last_reset = datetime.strptime(ai_stats['last_reset'], '%Y-%m-%dT%H:%M:%S.%f')
+            last_reset = datetime.strptime(ai_stats['last_reset'], '%Y-%m-%d %H:%M:%S')
             if last_reset.month != current_utc.month:
                 ai_stats['remaining_requests'] = 1000
                 ai_stats['last_reset'] = formatted_date
