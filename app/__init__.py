@@ -1,5 +1,7 @@
 from flask import Flask
 import json
+from flask import Flask
+import json
 import firebase_admin
 from firebase_admin import credentials, firestore
 from dotenv import load_dotenv
@@ -10,7 +12,8 @@ from flask_apscheduler import APScheduler
 from .routes import main as main_blueprint
 from .financial import financial
 from .calendar_tasks import calendar_tasks as calendar_tasks_blueprint
-from .routes.health import health
+from .health import health  # Nova importação
+
 
 scheduler = APScheduler()
 
@@ -25,27 +28,23 @@ def health_check_job():
     except Exception as e:
         print(f"Health Check Error: {e}")
 
-# Inicialização global do Firebase
 def initialize_firebase():
     try:
-        # Tenta obter o app existente
         firebase_admin.get_app()
         print("Firebase já está inicializado")
         return True
     except ValueError:
         try:
-            # Primeiro tenta usar o arquivo local (desenvolvimento)
             base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             cred_path = os.path.join(base_dir, 'firebase-adminsdk.json')
-
+            
             if os.path.exists(cred_path):
                 cred = credentials.Certificate(cred_path)
                 firebase_admin.initialize_app(cred)
                 print(f"Firebase inicializado com sucesso via arquivo local")
                 return True
             
-            # se não encontrar o arquivo, tenta usar a variável de ambiente (produção)
-            firebase_creds_json =os.getenv('FIREBASE_CREDENTIALS_JSON')
+            firebase_creds_json = os.getenv('FIREBASE_CREDENTIALS_JSON')
             if firebase_creds_json:    
                 cred_dict = json.loads(firebase_creds_json)
                 cred = credentials.Certificate(cred_dict)
@@ -55,7 +54,7 @@ def initialize_firebase():
             
             print("Erro: Nenhuma credencial do Firebase encontrada")
             return False
-        
+            
         except Exception as e:
             print(f"Erro na inicialização do Firebase: {e}")
             return False
@@ -91,7 +90,6 @@ def create_app():
         api_secret=os.getenv('CLOUDINARY_API_SECRET')
     )
 
-
     # Configuração do Stripe
     stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
@@ -99,7 +97,7 @@ def create_app():
     app.register_blueprint(main_blueprint)
     app.register_blueprint(calendar_tasks_blueprint)
     app.register_blueprint(financial)
-    app.register_blueprint(health)
+    app.register_blueprint(health)  # Novo blueprint
 
     # Configurar e iniciar o scheduler
     scheduler.init_app(app)
