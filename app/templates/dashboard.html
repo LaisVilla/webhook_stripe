@@ -1,0 +1,539 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - NexusAI{% endblock %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-900">
+    <!-- Sidebar Refinada -->
+    <aside class="hidden md:flex w-64 flex-col bg-gray-800/95 backdrop-blur-sm border-r border-gray-700/50 shadow-xl">
+        <!-- Logo e Branding -->
+        <div class="p-6">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-r from-purple-500 to-cyan-500 p-2 rounded-xl">
+                    <i class="lucide lucide-brain-circuit text-white h-6 w-6"></i>
+                </div>
+                <span class="text-xl font-bold bg-gradient-to-r from-purple-500 to-cyan-500 bg-clip-text text-transparent">
+                    NexusAI
+                </span>
+            </div>
+        </div>
+
+        <!-- Perfil do Usuário -->
+        <div class="px-4 mb-6">
+            <div class="flex items-center space-x-3 bg-gradient-to-r from-gray-800 to-gray-700/50 p-3 rounded-xl border border-gray-700/50 shadow-lg">
+                <div class="relative">
+                    <img class="h-10 w-10 rounded-full object-cover border-2 border-purple-500/30" 
+                         src="{{ session.get('profile_image', 'https://ui-avatars.com/api/?name=LaisVilla&background=random') }}" 
+                         alt="Profile">
+                    <span class="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-400 border-2 border-gray-800"></span>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-white">LaisVilla</p>
+                    <p class="text-xs bg-gradient-to-r from-purple-500 to-cyan-500 bg-clip-text text-transparent font-medium">
+                        Premium Member
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu de Navegação Aprimorado -->
+        <nav class="flex-1 px-4 space-y-2 overflow-y-auto">
+            <!-- Dashboard -->
+            <a href="{{ url_for('main.dashboard') }}" 
+               class="flex items-center px-4 py-3 text-gray-300 hover:bg-gradient-to-r hover:from-purple-600/20 hover:to-cyan-600/20 hover:text-white rounded-xl transition-all group {% if request.endpoint == 'main.dashboard' %}bg-gradient-to-r from-purple-600/20 to-cyan-600/20 text-white{% endif %}">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gray-700/50 p-2 rounded-lg group-hover:bg-gray-700 transition-colors">
+                        <i class="lucide lucide-layout-dashboard h-5 w-5"></i>
+                    </div>
+                    <span>Dashboard</span>
+                </div>
+                {% if request.endpoint == 'main.dashboard' %}
+                <div class="ml-auto bg-gradient-to-r from-purple-500 to-cyan-500 h-2 w-2 rounded-full"></div>
+                {% endif %}
+            </a>
+
+            <!-- IA Assistant -->
+            <a href="{{ url_for('main.ai_services') }}"
+               class="flex items-center px-4 py-3 text-gray-300 hover:bg-gradient-to-r hover:from-purple-600/20 hover:to-cyan-600/20 hover:text-white rounded-xl transition-all group {% if request.endpoint == 'main.ai_services' %}bg-gradient-to-r from-purple-600/20 to-cyan-600/20 text-white{% endif %}">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gray-700/50 p-2 rounded-lg group-hover:bg-gray-700 transition-colors">
+                        <i class="lucide lucide-brain h-5 w-5"></i>
+                    </div>
+                    <span>IA Assistant</span>
+                </div>
+                <div class="ml-auto bg-purple-500 px-2 py-1 rounded-full text-xs">
+                    New
+                </div>
+            </a>
+
+            <!-- Agenda -->
+            <a href="{{ url_for('calendar_tasks.calendar') }}"
+               class="flex items-center px-4 py-3 text-gray-300 hover:bg-gradient-to-r hover:from-purple-600/20 hover:to-cyan-600/20 hover:text-white rounded-xl transition-all group">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gray-700/50 p-2 rounded-lg group-hover:bg-gray-700 transition-colors">
+                        <i class="lucide lucide-calendar h-5 w-5"></i>
+                    </div>
+                    <span>Agenda</span>
+                </div>
+                <div class="ml-auto text-xs text-gray-400">
+                    2 eventos
+                </div>
+            </a>
+
+            <!-- Tarefas -->
+            <a href="{{ url_for('calendar_tasks.tasks') }}"
+               class="flex items-center px-4 py-3 text-gray-300 hover:bg-gradient-to-r hover:from-purple-600/20 hover:to-cyan-600/20 hover:text-white rounded-xl transition-all group">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gray-700/50 p-2 rounded-lg group-hover:bg-gray-700 transition-colors">
+                        <i class="lucide lucide-check-square h-5 w-5"></i>
+                    </div>
+                    <span>Tarefas</span>
+                </div>
+                <div class="ml-auto bg-cyan-500/20 text-cyan-300 px-2 py-1 rounded-full text-xs">
+                    5 pendentes
+                </div>
+            </a>
+
+            <!-- Financeiro -->
+            <a href="{{ url_for('financial.financial_dashboard') }}"
+               class="flex items-center px-4 py-3 text-gray-300 hover:bg-gradient-to-r hover:from-purple-600/20 hover:to-cyan-600/20 hover:text-white rounded-xl transition-all group">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gray-700/50 p-2 rounded-lg group-hover:bg-gray-700 transition-colors">
+                        <i class="lucide lucide-dollar-sign h-5 w-5"></i>
+                    </div>
+                    <span>Financeiro</span>
+                </div>
+            </a>
+
+            <!-- Separador -->
+            <div class="my-6 border-t border-gray-700/50"></div>
+
+            <!-- Configurações e Logout -->
+            <a href="#" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gradient-to-r hover:from-purple-600/20 hover:to-cyan-600/20 hover:text-white rounded-xl transition-all group">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gray-700/50 p-2 rounded-lg group-hover:bg-gray-700 transition-colors">
+                        <i class="lucide lucide-settings h-5 w-5"></i>
+                    </div>
+                    <span>Configurações</span>
+                </div>
+            </a>
+
+            <a href="{{ url_for('main.logout') }}" 
+               class="flex items-center px-4 py-3 text-red-400 hover:bg-red-400/10 hover:text-red-300 rounded-xl transition-all group">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-red-400/10 p-2 rounded-lg group-hover:bg-red-400/20 transition-colors">
+                        <i class="lucide lucide-log-out h-5 w-5"></i>
+                    </div>
+                    <span>Sair</span>
+                </div>
+            </a>
+        </nav>
+
+        <!-- Footer da Sidebar -->
+        <div class="p-4 border-t border-gray-700/50">
+            <div class="flex items-center justify-between text-xs text-gray-400">
+                <span>v2.0.0</span>
+                <span>2025 © NexusAI</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Header Superior -->
+        <header class="bg-gray-800/95 backdrop-blur-sm border-b border-gray-700/50 sticky top-0 z-40">
+            <div class="flex items-center justify-between px-6 py-4">
+                <!-- Lado Esquerdo -->
+                <div class="flex items-center space-x-4">
+                    <button class="md:hidden text-gray-400 hover:text-white">
+                        <i class="lucide lucide-menu h-6 w-6"></i>
+                    </button>
+                    
+                    <div>
+                        <div class="flex items-center space-x-2 text-sm text-gray-400">
+                            <span>Bem-vindo de volta,</span>
+                            <span class="text-purple-400">LaisVilla</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lado Direito -->
+                <div class="flex items-center space-x-4">
+                    <!-- Data e Hora -->
+                    <div class="hidden lg:flex items-center space-x-2 text-sm text-gray-400 bg-gray-700/30 px-3 py-1.5 rounded-lg">
+                        <i class="lucide lucide-clock h-4 w-4"></i>
+                        <span>2025-03-28 02:17:36 UTC</span>
+                    </div>
+
+                    <!-- Botões de Ação -->
+                    <button class="relative p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-700/50 transition-colors">
+                        <i class="lucide lucide-bell h-5 w-5"></i>
+                        <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400"></span>
+                    </button>
+
+                    <button class="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-700/50 transition-colors">
+                        <i class="lucide lucide-settings h-5 w-5"></i>
+                    </button>
+
+                    <!-- Perfil -->
+                    <div class="relative group">
+                        <button class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-700/50 transition-colors">
+                            <div class="relative">
+                                <img class="h-8 w-8 rounded-full object-cover border-2 border-purple-500/30" 
+                                     src="https://ui-avatars.com/api/?name=LaisVilla&background=random" 
+                                     alt="Profile">
+                                <span class="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-green-400 border-2 border-gray-800"></span>
+                            </div>
+                        </button>
+
+                        <!-- Dropdown do Perfil -->
+                        <div class="hidden group-hover:block absolute right-0 mt-2 w-64 rounded-xl bg-gray-800/95 backdrop-blur-sm border border-gray-700/50 shadow-lg">
+                            <!-- ... (mantenha o conteúdo do dropdown como estava) ... -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Área de Conteúdo Principal com Scroll -->
+        <main class="flex-1 overflow-auto">
+            <!-- Estatísticas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
+                <!-- Card de Estatística - Requisições IA -->
+                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-purple-500/50 transition-all group">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="bg-purple-500/10 p-3 rounded-xl group-hover:scale-110 transition-transform">
+                            <i class="lucide lucide-brain-circuit text-purple-500 h-6 w-6"></i>
+                        </div>
+                        <span class="text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded-full">Últimas 24h</span>
+                    </div>
+                    <div class="space-y-2">
+                        <h3 class="text-2xl font-bold text-white">{{ session.get('ai_stats', {}).get('total_requests', 0) }}</h3>
+                        <p class="text-sm text-gray-400">Requisições IA</p>
+                        <div class="flex items-center space-x-2 text-xs">
+                            <span class="text-green-400 flex items-center">
+                                <i class="lucide lucide-trending-up h-4 w-4 mr-1"></i>
+                                +12%
+                            </span>
+                            <span class="text-gray-500">vs. última semana</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card de Estatística - Requisições Restantes -->
+                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-cyan-500/50 transition-all group">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="bg-cyan-500/10 p-3 rounded-xl group-hover:scale-110 transition-transform">
+                            <i class="lucide lucide-zap text-cyan-500 h-6 w-6"></i>
+                        </div>
+                        <span class="text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded-full">Premium</span>
+                    </div>
+                    <div class="space-y-2">
+                        <h3 class="text-2xl font-bold text-white">{{ session.get('ai_stats', {}).get('remaining_requests', 1000) }}</h3>
+                        <p class="text-sm text-gray-400">Requisições Restantes</p>
+                        <div class="w-full bg-gray-700/50 rounded-full h-1.5">
+                            <div class="bg-gradient-to-r from-cyan-500 to-purple-500 h-1.5 rounded-full" 
+                                 style="width: {{ (1000 - session.get('ai_stats', {}).get('remaining_requests', 0)) / 10 }}%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card de Estatística - Tarefas Pendentes -->
+                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-green-500/50 transition-all group">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="bg-green-500/10 p-3 rounded-xl group-hover:scale-110 transition-transform">
+                            <i class="lucide lucide-check-circle text-green-500 h-6 w-6"></i>
+                        </div>
+                        <span class="text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded-full">Hoje</span>
+                    </div>
+                    <div class="space-y-2">
+                        <h3 class="text-2xl font-bold text-white">5</h3>
+                        <p class="text-sm text-gray-400">Tarefas Pendentes</p>
+                        <div class="flex items-center space-x-2 text-xs">
+                            <span class="text-red-400 flex items-center">
+                                <i class="lucide lucide-clock h-4 w-4 mr-1"></i>
+                                3 atrasadas
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card de Estatística - Status do Sistema -->
+                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-yellow-500/50 transition-all group">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="bg-yellow-500/10 p-3 rounded-xl group-hover:scale-110 transition-transform">
+                            <i class="lucide lucide-activity text-yellow-500 h-6 w-6"></i>
+                        </div>
+                        <span class="text-xs text-green-400 bg-green-500/10 px-2 py-1 rounded-full">Online</span>
+                    </div>
+                    <div class="space-y-2">
+                        <h3 class="text-2xl font-bold text-white">99.9%</h3>
+                        <p class="text-sm text-gray-400">Uptime do Sistema</p>
+                        <div class="flex items-center space-x-2 text-xs">
+                            <span class="text-gray-400">Última atualização:</span>
+                            <span class="text-white">{{ current_time }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cards de Acesso Rápido -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+                <!-- Card IA Assistant -->
+                <div class="group relative bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-purple-500/50 transition-all overflow-hidden">
+                    <!-- Efeito de gradiente no hover -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    
+                    <div class="relative">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-white group-hover:text-purple-400 transition-colors">IA Assistant</h3>
+                            <div class="bg-purple-500/20 p-3 rounded-xl group-hover:scale-110 transition-transform">
+                                <i class="lucide lucide-brain text-purple-500 h-6 w-6"></i>
+                            </div>
+                        </div>
+                        
+                        <p class="text-gray-400 mb-6">Acesse nossa IA para obter assistência inteligente em suas tarefas diárias</p>
+                        
+                        <div class="flex items-center justify-between">
+                            <a href="{{ url_for('main.ai_services') }}" 
+                               class="inline-flex items-center space-x-2 text-purple-400 hover:text-purple-300 transition-colors">
+                                <span>Acessar agora</span>
+                                <i class="lucide lucide-arrow-right h-4 w-4"></i>
+                            </a>
+                            
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs text-gray-500">{{ session.get('ai_stats', {}).get('total_requests', 0) }} requisições</span>
+                                <div class="h-2 w-2 rounded-full bg-purple-500 animate-pulse"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Continuarei com os outros cards... -->
+                                 <!-- Card Agenda -->
+                <div class="group relative bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-cyan-500/50 transition-all overflow-hidden">
+                    <!-- Efeito de gradiente no hover -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    
+                    <div class="relative">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-white group-hover:text-cyan-400 transition-colors">Agenda</h3>
+                            <div class="bg-cyan-500/20 p-3 rounded-xl group-hover:scale-110 transition-transform">
+                                <i class="lucide lucide-calendar text-cyan-500 h-6 w-6"></i>
+                            </div>
+                        </div>
+                        
+                        <p class="text-gray-400 mb-6">Gerencie seus compromissos e eventos com nossa agenda inteligente</p>
+                        
+                        <div class="flex items-center justify-between">
+                            <a href="{{ url_for('calendar_tasks.calendar') }}" 
+                               class="inline-flex items-center space-x-2 text-cyan-400 hover:text-cyan-300 transition-colors">
+                                <span>Ver agenda</span>
+                                <i class="lucide lucide-arrow-right h-4 w-4"></i>
+                            </a>
+                            
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs px-2 py-1 rounded-full bg-cyan-500/10 text-cyan-400">Hoje: 2 eventos</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Financeiro -->
+                <div class="group relative bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-green-500/50 transition-all overflow-hidden">
+                    <!-- Efeito de gradiente no hover -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    
+                    <div class="relative">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-white group-hover:text-green-400 transition-colors">Financeiro</h3>
+                            <div class="bg-green-500/20 p-3 rounded-xl group-hover:scale-110 transition-transform">
+                                <i class="lucide lucide-dollar-sign text-green-500 h-6 w-6"></i>
+                            </div>
+                        </div>
+                        
+                        <p class="text-gray-400 mb-6">Acompanhe suas finanças e transações com nosso painel financeiro</p>
+                        
+                        <div class="flex items-center justify-between">
+                            <a href="{{ url_for('financial.financial_dashboard') }}" 
+                               class="inline-flex items-center space-x-2 text-green-400 hover:text-green-300 transition-colors">
+                                <span>Ver relatórios</span>
+                                <i class="lucide lucide-arrow-right h-4 w-4"></i>
+                            </a>
+                            
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs text-gray-400">Última atualização:</span>
+                                <span class="text-xs text-green-400">{{ current_time }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Atividade Recente e Estatísticas -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+                <!-- Atividade Recente -->
+                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm overflow-hidden">
+                    <div class="p-6 border-b border-gray-700/50">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-lg font-semibold text-white">Atividade Recente</h2>
+                            <button class="text-gray-400 hover:text-white transition-colors">
+                                <i class="lucide lucide-more-horizontal h-5 w-5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="divide-y divide-gray-700/50">
+                        <!-- Atividade - IA -->
+                        <div class="p-4 hover:bg-gray-700/20 transition-colors">
+                            <div class="flex items-center space-x-4">
+                                <div class="bg-purple-500/20 p-2 rounded-lg">
+                                    <i class="lucide lucide-brain text-purple-500 h-5 w-5"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm text-white">Nova requisição IA</p>
+                                    <p class="text-xs text-gray-400 mt-1">
+                                        "Como melhorar minha produtividade?"
+                                    </p>
+                                    <p class="text-xs text-gray-500 mt-1">2 minutos atrás</p>
+                                </div>
+                                <button class="text-gray-400 hover:text-white transition-colors">
+                                    <i class="lucide lucide-chevron-right h-5 w-5"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Atividade - Agenda -->
+                        <div class="p-4 hover:bg-gray-700/20 transition-colors">
+                            <div class="flex items-center space-x-4">
+                                <div class="bg-cyan-500/20 p-2 rounded-lg">
+                                    <i class="lucide lucide-calendar text-cyan-500 h-5 w-5"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm text-white">Novo evento agendado</p>
+                                    <p class="text-xs text-gray-400 mt-1">
+                                        "Reunião de planejamento"
+                                    </p>
+                                    <p class="text-xs text-gray-500 mt-1">1 hora atrás</p>
+                                </div>
+                                <button class="text-gray-400 hover:text-white transition-colors">
+                                    <i class="lucide lucide-chevron-right h-5 w-5"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Atividade - Tarefa -->
+                        <div class="p-4 hover:bg-gray-700/20 transition-colors">
+                            <div class="flex items-center space-x-4">
+                                <div class="bg-green-500/20 p-2 rounded-lg">
+                                    <i class="lucide lucide-check-circle text-green-500 h-5 w-5"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm text-white">Tarefa concluída</p>
+                                    <p class="text-xs text-gray-400 mt-1">
+                                        "Preparar apresentação"
+                                    </p>
+                                    <p class="text-xs text-gray-500 mt-1">3 horas atrás</p>
+                                </div>
+                                <button class="text-gray-400 hover:text-white transition-colors">
+                                    <i class="lucide lucide-chevron-right h-5 w-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 border-t border-gray-700/50">
+                        <a href="#" class="text-sm text-gray-400 hover:text-white transition-colors flex items-center justify-center space-x-2">
+                            <span>Ver todas as atividades</span>
+                            <i class="lucide lucide-arrow-right h-4 w-4"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Estatísticas Detalhadas -->
+                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm overflow-hidden">
+                    <div class="p-6 border-b border-gray-700/50">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-lg font-semibold text-white">Detalhes da Conta</h2>
+                            <span class="text-xs text-gray-400">{{ current_time }} UTC</span>
+                        </div>
+                    </div>
+
+                    <div class="p-6 space-y-6">
+                        <!-- Status da Assinatura -->
+                        <div class="flex items-center justify-between">
+                            <div class="space-y-1">
+                                <p class="text-sm text-gray-400">Status da Assinatura</p>
+                                <p class="text-lg font-medium text-white">Premium</p>
+                            </div>
+                            <div class="bg-green-500/20 px-3 py-1 rounded-full">
+                                <span class="text-xs text-green-400">Ativo</span>
+                            </div>
+                        </div>
+
+                        <!-- Próxima Cobrança -->
+                        <div class="flex items-center justify-between">
+                            <div class="space-y-1">
+                                <p class="text-sm text-gray-400">Próxima Cobrança</p>
+                                <p class="text-lg font-medium text-white">2025-04-28</p>
+                            </div>
+                            <div class="bg-purple-500/20 px-3 py-1 rounded-full">
+                                <span class="text-xs text-purple-400">30 dias restantes</span>
+                            </div>
+                        </div>
+
+                        <!-- Uso da IA -->
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <p class="text-sm text-gray-400">Uso da IA este mês</p>
+                                <span class="text-xs text-gray-400">
+                                    {{ session.get('ai_stats', {}).get('total_requests', 0) }}/1000
+                                </span>
+                            </div>
+                            <div class="w-full bg-gray-700/50 rounded-full h-2">
+                                <div class="bg-gradient-to-r from-purple-500 to-cyan-500 h-2 rounded-full" 
+                                     style="width: {{ (session.get('ai_stats', {}).get('total_requests', 0) / 1000) * 100 }}%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 border-t border-gray-700/50 bg-gray-800/50">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-400">Último login:</span>
+                            <span class="text-white">{{ current_time }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Formatar a data atual em português
+        const dateElement = document.getElementById('current-date');
+        const now = new Date();
+        
+        const weekdays = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+        const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        
+        const formattedDate = `${weekdays[now.getDay()]}, ${now.getDate()} de ${months[now.getMonth()]} de ${now.getFullYear()}`;
+        if (dateElement) {
+            dateElement.textContent = formattedDate;
+        }
+
+        // Atualizar hora em tempo real
+        function updateTime() {
+            const timeElements = document.querySelectorAll('[data-live-time]');
+            const now = new Date();
+            const timeStr = now.toISOString().replace('T', ' ').slice(0, 19);
+            timeElements.forEach(el => el.textContent = timeStr);
+        }
+
+        setInterval(updateTime, 1000);
+        updateTime();
+    });
+</script>
+{% endblock %}

@@ -126,6 +126,13 @@
             letter-spacing: -0.01em;
         }
 
+        @media (max-width: 640px) {
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+            }
+        }
+
         .btn-primary {
             background: linear-gradient(to right, #A855F7, #06B6D4);
             color: white;
@@ -164,6 +171,14 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             padding: 0.5rem;
             width: 280px;
+            z-index: 100;
+        }
+
+        @media (max-width: 640px) {
+            .profile-dropdown {
+                width: 250px;
+                right: -70px;
+            }
         }
 
         .dropdown-item {
@@ -248,6 +263,43 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--primary);
         }
+
+        /* Responsividade para dispositivos móveis */
+        @media (max-width: 768px) {
+            .nav-brand span {
+                font-size: 1.1rem;
+            }
+
+            .flash-message {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+            }
+
+            .footer {
+                padding: 1.5rem 0;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Ajustes para telas muito pequenas */
+        @media (max-width: 480px) {
+            .btn {
+                padding: 0.5rem 1rem;
+            }
+
+            .nav-brand i {
+                width: 1.5rem;
+                height: 1.5rem;
+            }
+        }
+
+        /* Ajuste para o botão flutuante em dispositivos móveis */
+        @media (max-width: 640px) {
+            .fixed.bottom-24.right-6 {
+                bottom: 1rem;
+                right: 1rem;
+            }
+        }
     </style>
 </head>
 
@@ -258,34 +310,15 @@
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center space-x-4">
                     <a href="{{ url_for('main.index') }}" class="nav-brand flex items-center space-x-2">
-                        <i class="lucide lucide-brain-circuit h-8 w-8"></i>
+                        <i class="lucide lucide-brain-circuit h-6 w-6 sm:h-8 sm:w-8"></i>
                         <span>NexusAI</span>
                     </a>
-                    {% if session.get('user_id') %}
-                    <div class="hidden md:flex items-center space-x-4">
-                        <a href="{{ url_for('calendar_tasks.calendar') }}" class="nav-link flex items-center space-x-2">
-                            <i class="lucide lucide-calendar h-4 w-4"></i>
-                            <span>Agenda</span>
-                        </a>
-                        <a href="{{ url_for('calendar_tasks.tasks') }}" class="nav-link flex items-center space-x-2">
-                            <i class="lucide lucide-check-square h-4 w-4"></i>
-                            <span>Tarefas</span>
-                        </a>
-                        <!-- Em app/templates/base.html, na seção de navegação -->
-                        <a href="{{ url_for('financial.financial_dashboard') }}"
-                            class="flex items-center gap-2 px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg transition-all">
-                            <i class="lucide lucide-dollar-sign h-5 w-5"></i>
-                            <span>Financeiro</span>
-                        </a>
-                    </div>
-                    {% endif %}
                 </div>
 
-
-                <div class="flex items-center space-x-6">
+                <div class="flex items-center space-x-2 sm:space-x-6">
                     {% if session.get('user_id') %}
-                    <div class="flex items-center space-x-4">
-                        <div class="user-info hidden lg:flex items-center space-x-3">
+                    <div class="flex items-center space-x-2 sm:space-x-4">
+                        <div class="user-info hidden md:flex items-center space-x-3">
                             <div class="text-right">
                                 <p class="text-sm font-semibold">{{ session.get('user_name', 'LaisVilla') }}</p>
                                 <p class="text-xs text-gray-400">2025-02-13 20:29:42</p>
@@ -333,17 +366,58 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- Versão móvel do avatar -->
+                        <div class="md:hidden relative">
+                            <button class="rounded-full p-1 hover:bg-white/5 transition-colors">
+                                <img class="h-8 w-8 rounded-full object-cover avatar"
+                                    src="https://ui-avatars.com/api/?name=LaisVilla&background=random" alt="Profile">
+                                <span
+                                    class="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-400 border-2 border-bg-dark-2"></span>
+                            </button>
+                            <!-- Dropdown móvel -->
+                            <div class="hidden profile-dropdown absolute right-0 mt-2">
+                                <div class="profile-header">
+                                    <div class="flex items-center space-x-3">
+                                        <img class="h-10 w-10 rounded-full object-cover avatar"
+                                            src="https://ui-avatars.com/api/?name=LaisVilla&background=random"
+                                            alt="Profile">
+                                        <div>
+                                            <p class="font-medium">LaisVilla</p>
+                                            <p class="text-sm text-gray-400">Premium Member</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <a href="#" class="dropdown-item">
+                                    <i class="lucide lucide-user-cog h-5 w-5"></i>
+                                    <span>Perfil</span>
+                                </a>
+                                <a href="#" class="dropdown-item">
+                                    <i class="lucide lucide-settings h-5 w-5"></i>
+                                    <span>Configurações</span>
+                                </a>
+                                <a href="#" class="dropdown-item">
+                                    <i class="lucide lucide-help-circle h-5 w-5"></i>
+                                    <span>Ajuda</span>
+                                </a>
+                                <div class="border-t border-white/5 my-1"></div>
+                                <a href="{{ url_for('main.logout') }}" class="dropdown-item danger">
+                                    <i class="lucide lucide-log-out h-5 w-5"></i>
+                                    <span>Sair</span>
+                                </a>
+                            </div>
+                        </div>
                     </div>
                     {% else %}
-                    <div class="flex items-center space-x-4">
-                        <a href="{{ url_for('main.login') }}" class="btn btn-secondary">
-                            <i class="lucide lucide-log-in h-4 w-4"></i>
-                            <span>Entrar</span>
+                    <div class="flex items-center space-x-2 sm:space-x-4">
+                        <a href="{{ url_for('main.login') }}" class="btn btn-secondary text-xs sm:text-sm">
+                            <i class="lucide lucide-log-in h-3 w-3 sm:h-4 sm:w-4"></i>
+                            <span class="hidden xs:inline">Entrar</span>
                         </a>
                         <a href="{{ url_for('main.register') }}"
-                            class="bg-gradient-to-r from-purple-500 to-cyan-500 btn">
-                            <i class="lucide lucide-user-plus h-4 w-4"></i>
-                            <span>Criar conta</span>
+                            class="bg-gradient-to-r from-purple-500 to-cyan-500 btn text-xs sm:text-sm">
+                            <i class="lucide lucide-user-plus h-3 w-3 sm:h-4 sm:w-4"></i>
+                            <span class="hidden xs:inline">Criar conta</span>
                         </a>
                     </div>
                     {% endif %}
@@ -372,32 +446,55 @@
     </div>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex-grow">
+    <main class="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8 flex-grow">
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Botão flutuante para acessar a IA -->
+    <!-- Botão flutuante para acessar a IA - apenas para usuários logados -->
+    {% if session.get('user_id') %}
     <a href="{{ url_for('main.ai_services') }}"
-        class="fixed bottom-6 right-6 p-4 bg-gradient-to-r from-purple-500 to-cyan-500 text-white rounded-full shadow-lg transition-all hover:scale-110 hover:shadow-xl flex items-center justify-center group z-50">
+        class="fixed bottom-16 sm:bottom-24 right-4 sm:right-6 p-3 sm:p-4 bg-gradient-to-r from-purple-500 to-cyan-500 text-white rounded-full shadow-lg transition-all hover:scale-110 hover:shadow-xl flex items-center justify-center group z-50">
         <div class="flex items-center justify-center relative">
-            <i class="lucide lucide-brain h-6 w-6 group-hover:animate-pulse"></i>
-            <i class="lucide lucide-sparkles h-5 w-5 absolute -top-2 -right-2 text-yellow-300"></i>
+            <!-- Ícone principal do cérebro -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-brain-circuit h-5 w-5 sm:h-6 sm:w-6 group-hover:animate-pulse">
+                <path
+                    d="M12 4.5a2.5 2.5 0 0 0-4.96-.46 2.5 2.5 0 0 0-1.98 3 2.5 2.5 0 0 0-1.32 4.24 3 3 0 0 0 .34 5.58 2.5 2.5 0 0 0 2.96 3.08 2.5 2.5 0 0 0 4.91.05L12 20V4.5Z" />
+                <path d="M16 8V5c0-1.1.9-2 2-2" />
+                <path d="M12 13h4" />
+                <path d="M12 16h3" />
+                <path d="M12 19h2" />
+            </svg>
+
+            <!-- Círculos concêntricos animados -->
+            <div class="absolute inset-0 animate-ping opacity-20 bg-white rounded-full"></div>
+
+            <!-- Efeito de brilho -->
+            <div
+                class="absolute inset-0 bg-gradient-to-r from-purple-400 to-cyan-400 opacity-0 group-hover:opacity-20 rounded-full transition-opacity duration-300">
+            </div>
         </div>
+
         <span
-            class="absolute opacity-0 group-hover:opacity-100 right-16 bg-gray-800 text-white text-sm py-2 px-4 rounded-lg transition-opacity duration-300 whitespace-nowrap">Assistente
-            IA</span>
-        <!-- Balão de informação -->
-        <div class="absolute bottom-16 right-0 bg-white text-gray-800 p-3 rounded-lg shadow-lg w-64 hidden animate-bounce"
-            id="ai-tooltip">
-            <p class="text-sm font-medium">Clique aqui para acessar o chat da IA!</p>
-            <p class="text-xs mt-1 text-gray-600">Tire suas dúvidas e obtenha assistência inteligente</p>
-            <button
-                onclick="document.getElementById('ai-tooltip').classList.add('hidden'); localStorage.setItem('ai_tooltip_seen', 'true');"
-                class="absolute top-1 right-1 text-gray-500 hover:text-gray-700">
-                <i class="lucide lucide-x h-4 w-4"></i>
-            </button>
-        </div>
+            class="absolute opacity-0 group-hover:opacity-100 right-16 bg-gray-800 text-white text-xs sm:text-sm py-2 px-4 rounded-lg transition-opacity duration-300 whitespace-nowrap hidden sm:block">
+            Assistente IA
+        </span>
     </a>
+
+
+    <!-- Balão de informação -->
+    <div class="absolute bottom-16 right-0 sm:right-0 bg-white text-gray-800 p-3 rounded-lg shadow-lg w-56 sm:w-64 hidden animate-bounce"
+        id="ai-tooltip">
+        <p class="text-xs sm:text-sm font-medium">Clique aqui para acessar o chat da IA!</p>
+        <p class="text-xs mt-1 text-gray-600">Tire suas dúvidas e obtenha assistência inteligente</p>
+        <button
+            onclick="document.getElementById('ai-tooltip').classList.add('hidden'); localStorage.setItem('ai_tooltip_seen', 'true');"
+            class="absolute top-1 right-1 text-gray-500 hover:text-gray-700">
+            <i class="lucide lucide-x h-3 w-3 sm:h-4 sm:w-4"></i>
+        </button>
+    </div>
+    {% endif %}
 
     <script>
         // Mostrar o balão de informação apenas se o usuário não o viu antes
@@ -414,33 +511,44 @@
                 }, 2000);
             }
         });
-        <style>
-    /* Suavizar animação de hover no ícone */
-            .group-hover:animate-pulse {
-                transition: transform 0.2s ease-in-out;
-    }
-
-            /* Ajuste do posicionamento do tooltip em telas pequenas */
-            @media (max-width: 768px) {
-                #ai - tooltip {
-                right: 50%;
-            transform: translateX(50%);
-        }
-    }
-        </style>
     </script>
+
+    <style>
+        /* Suavizar animação de hover no ícone */
+        .group-hover:animate-pulse {
+            transition: transform 0.2s ease-in-out;
+        }
+
+        /* Ajuste do posicionamento do tooltip em telas pequenas */
+        @media (max-width: 768px) {
+            #ai-tooltip {
+                right: 50%;
+                transform: translateX(50%);
+                bottom: 5rem;
+                width: 80%;
+                max-width: 250px;
+            }
+        }
+
+        /* Adicionar classe para telas extra pequenas */
+        @media (min-width: 400px) {
+            .xs\:inline {
+                display: inline;
+            }
+        }
+    </style>
 
     <!-- Footer -->
     <footer class="footer">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-400">© 2025 AI Assistant. All rights reserved.</span>
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
+                <span class="text-xs sm:text-sm text-gray-400">© 2025 AI Assistant. All rights reserved.</span>
                 <div class="flex items-center space-x-4">
                     <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                        <i class="lucide lucide-github h-5 w-5"></i>
+                        <i class="lucide lucide-github h-4 w-4 sm:h-5 sm:w-5"></i>
                     </a>
                     <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                        <i class="lucide lucide-twitter h-5 w-5"></i>
+                        <i class="lucide lucide-twitter h-4 w-4 sm:h-5 sm:w-5"></i>
                     </a>
                 </div>
             </div>
@@ -451,27 +559,39 @@
         lucide.createIcons();
 
         document.addEventListener('DOMContentLoaded', function () {
-            const profileButton = document.querySelector('.avatar').parentElement;
-            const dropdown = document.querySelector('.profile-dropdown');
+            // Selecionar todos os botões de perfil (desktop e mobile)
+            const profileButtons = document.querySelectorAll('.avatar');
+            
+            profileButtons.forEach(button => {
+                const dropdown = button.closest('.relative').querySelector('.profile-dropdown');
+                
+                if (button && dropdown) {
+                    button.parentElement.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        dropdown.classList.toggle('hidden');
+                    });
+                }
+            });
 
-            if (profileButton && dropdown) {
-                profileButton.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    dropdown.classList.toggle('hidden');
-                });
-
-                document.addEventListener('click', function (e) {
-                    if (!dropdown.contains(e.target) && !profileButton.contains(e.target)) {
+            // Fechar dropdowns ao clicar fora
+            document.addEventListener('click', function (e) {
+                const dropdowns = document.querySelectorAll('.profile-dropdown');
+                dropdowns.forEach(dropdown => {
+                    if (!dropdown.contains(e.target) && !e.target.closest('.avatar')) {
                         dropdown.classList.add('hidden');
                     }
                 });
+            });
 
-                document.addEventListener('keydown', function (e) {
-                    if (e.key === 'Escape') {
+            // Fechar dropdowns com Escape
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    const dropdowns = document.querySelectorAll('.profile-dropdown');
+                    dropdowns.forEach(dropdown => {
                         dropdown.classList.add('hidden');
-                    }
-                });
-            }
+                    });
+                }
+            });
         });
     </script>
 

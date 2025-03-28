@@ -3,7 +3,7 @@ from firebase_admin import auth, firestore
 from anthropic import Anthropic
 import stripe
 import requests
-from functools import wraps  # Adicionando esta importação
+from functools import wraps  
 import os
 import json
 import logging
@@ -127,7 +127,7 @@ def login():
                     
                     # Redirecionar baseado no status da assinatura
                     if user_data.get('subscription_status') == 'active':
-                        return redirect(url_for('main.ai_services'))
+                        return redirect(url_for('main.dashboard'))
                     else:
                         return redirect(url_for('main.payments'))
                 
@@ -798,7 +798,7 @@ def success():
                 print(f"Status da assinatura atualizado para o usuário: {customer_email}")
                 
                 flash('Assinatura ativada com sucesso!', 'success')
-                return redirect(url_for('main.ai_services'))
+                return redirect(url_for('main.dashboard'))
 
         except Exception as e:
             print(f"Erro na rota success: {str(e)}")
