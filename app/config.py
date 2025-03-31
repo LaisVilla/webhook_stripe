@@ -93,13 +93,13 @@ class Config:
     if DEVELOPMENT:
         APP_URL = 'http://127.0.0.1:5000'  # Local URL
     else:
-        APP_URL = 'https://your-production-url.com'  # Production URL
+        APP_URL = 'https://nexusai-unq0.onrender.com'  # Production URL
 
     # Override via environment variable
     APP_URL = os.getenv('APP_URL', APP_URL)
 
     # Health check interval in seconds
-    HEALTH_CHECK_INTERVAL = int(os.getenv('HEALTH_CHECK_INTERVAL', 600))
+    HEALTH_CHECK_INTERVAL = int(os.getenv('HEALTH_CHECK_INTERVAL', 10))
 
     # Additional settings
     SESSION_COOKIE_SECURE = True
