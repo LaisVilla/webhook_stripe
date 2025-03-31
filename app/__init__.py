@@ -124,7 +124,7 @@ def create_app():
             id='health_check',
             func=health_check_job,
             trigger='interval',
-            minutes=1,
+            minutes=10,
             replace_existing=True,
             next_run_time=datetime.now(pytz.timezone('America/Sao_Paulo'))  # Executa imediatamente
         )

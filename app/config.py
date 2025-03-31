@@ -99,7 +99,7 @@ class Config:
     APP_URL = os.getenv('APP_URL', APP_URL)
 
     # Health check interval in seconds
-    HEALTH_CHECK_INTERVAL = int(os.getenv('HEALTH_CHECK_INTERVAL', 10))
+    HEALTH_CHECK_INTERVAL = int(os.getenv('HEALTH_CHECK_INTERVAL', 600))
 
     # Additional settings
     SESSION_COOKIE_SECURE = True
