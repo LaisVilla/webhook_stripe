@@ -326,7 +326,7 @@
                             <div class="relative">
                                 <button class="rounded-full p-1 hover:bg-white/5 transition-colors">
                                     <img class="h-10 w-10 rounded-full object-cover avatar"
-                                        src="https://ui-avatars.com/api/?name=LaisVilla&background=random"
+                                        src="https://ui-avatars.com/api/?name=&background=random"
                                         alt="Profile">
                                     <span
                                         class="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-400 border-2 border-bg-dark-2"></span>
@@ -334,27 +334,11 @@
 
                                 <!-- Dropdown -->
                                 <div class="hidden profile-dropdown absolute right-0 mt-2">
-                                    <div class="profile-header">
-                                        <div class="flex items-center space-x-3">
-                                            <img class="h-12 w-12 rounded-full object-cover avatar"
-                                                src="https://ui-avatars.com/api/?name=LaisVilla&background=random"
-                                                alt="Profile">
-                                            <div>
-                                                <p class="font-medium">LaisVilla</p>
-                                                <p class="text-sm text-gray-400">Premium Member</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <a href="#" class="dropdown-item">
-                                        <i class="lucide lucide-user-cog h-5 w-5"></i>
-                                        <span>Perfil</span>
-                                    </a>
-                                    <a href="#" class="dropdown-item">
+                                    <a href="{{ url_for('main.profile_settings') }}" class="dropdown-item">
                                         <i class="lucide lucide-settings h-5 w-5"></i>
                                         <span>Configurações</span>
                                     </a>
-                                    <a href="#" class="dropdown-item">
+                                    <a href="{{ url_for('main.help') }}" class="dropdown-item">
                                         <i class="lucide lucide-help-circle h-5 w-5"></i>
                                         <span>Ajuda</span>
                                     </a>
@@ -537,23 +521,6 @@
             }
         }
     </style>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
-                <span class="text-xs sm:text-sm text-gray-400">© 2025 AI Assistant. All rights reserved.</span>
-                <div class="flex items-center space-x-4">
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                        <i class="lucide lucide-github h-4 w-4 sm:h-5 sm:w-5"></i>
-                    </a>
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                        <i class="lucide lucide-twitter h-4 w-4 sm:h-5 sm:w-5"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </footer>
 
     <script>
         lucide.createIcons();

@@ -93,7 +93,9 @@ def create_app():
     app.register_blueprint(main_blueprint)
     app.register_blueprint(calendar_tasks_blueprint)
     app.register_blueprint(financial)
-    app.register_blueprint(health) 
+    app.register_blueprint(health)
+    
+    
 
     # Configurar scheduler
     def health_check_job():

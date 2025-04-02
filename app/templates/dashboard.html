@@ -17,25 +17,6 @@
                 </span>
             </div>
         </div>
-
-        <!-- Perfil do Usuário -->
-        <div class="px-4 mb-6">
-            <div class="flex items-center space-x-3 bg-gradient-to-r from-gray-800 to-gray-700/50 p-3 rounded-xl border border-gray-700/50 shadow-lg">
-                <div class="relative">
-                    <img class="h-10 w-10 rounded-full object-cover border-2 border-purple-500/30" 
-                         src="{{ session.get('profile_image', 'https://ui-avatars.com/api/?name=LaisVilla&background=random') }}" 
-                         alt="Profile">
-                    <span class="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-400 border-2 border-gray-800"></span>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-white">LaisVilla</p>
-                    <p class="text-xs bg-gradient-to-r from-purple-500 to-cyan-500 bg-clip-text text-transparent font-medium">
-                        Premium Member
-                    </p>
-                </div>
-            </div>
-        </div>
-
         <!-- Menu de Navegação Aprimorado -->
         <nav class="flex-1 px-4 space-y-2 overflow-y-auto">
             <!-- Dashboard -->
@@ -60,9 +41,6 @@
                         <i class="lucide lucide-brain h-5 w-5"></i>
                     </div>
                     <span>IA Assistant</span>
-                </div>
-                <div class="ml-auto bg-purple-500 px-2 py-1 rounded-full text-xs">
-                    New
                 </div>
             </a>
 
@@ -152,53 +130,16 @@
                     <div>
                         <div class="flex items-center space-x-2 text-sm text-gray-400">
                             <span>Bem-vindo de volta,</span>
-                            <span class="text-purple-400">LaisVilla</span>
+                            <span class="text-purple-400">{{ session.get('user_name', 'LaisVilla') }}</span>
                         </div>
                     </div>
                 </div>
-
-                <!-- Lado Direito -->
-                <div class="flex items-center space-x-4">
-                    <!-- Data e Hora -->
-                    <div class="hidden lg:flex items-center space-x-2 text-sm text-gray-400 bg-gray-700/30 px-3 py-1.5 rounded-lg">
-                        <i class="lucide lucide-clock h-4 w-4"></i>
-                        <span>2025-03-28 02:17:36 UTC</span>
-                    </div>
-
-                    <!-- Botões de Ação -->
-                    <button class="relative p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-700/50 transition-colors">
-                        <i class="lucide lucide-bell h-5 w-5"></i>
-                        <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400"></span>
-                    </button>
-
-                    <button class="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-700/50 transition-colors">
-                        <i class="lucide lucide-settings h-5 w-5"></i>
-                    </button>
-
-                    <!-- Perfil -->
-                    <div class="relative group">
-                        <button class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-700/50 transition-colors">
-                            <div class="relative">
-                                <img class="h-8 w-8 rounded-full object-cover border-2 border-purple-500/30" 
-                                     src="https://ui-avatars.com/api/?name=LaisVilla&background=random" 
-                                     alt="Profile">
-                                <span class="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-green-400 border-2 border-gray-800"></span>
-                            </div>
-                        </button>
-
-                        <!-- Dropdown do Perfil -->
-                        <div class="hidden group-hover:block absolute right-0 mt-2 w-64 rounded-xl bg-gray-800/95 backdrop-blur-sm border border-gray-700/50 shadow-lg">
-                            <!-- ... (mantenha o conteúdo do dropdown como estava) ... -->
-                        </div>
-                    </div>
-                </div>
-            </div>
         </header>
 
         <!-- Área de Conteúdo Principal com Scroll -->
         <main class="flex-1 overflow-auto">
             <!-- Estatísticas -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
                 <!-- Card de Estatística - Requisições IA -->
                 <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-purple-500/50 transition-all group">
                     <div class="flex items-center justify-between mb-4">
@@ -239,7 +180,7 @@
                 </div>
 
                 <!-- Card de Estatística - Tarefas Pendentes -->
-                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-green-500/50 transition-all group">
+                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-green-500/50 transition-all group" id="pending-tasks-card">
                     <div class="flex items-center justify-between mb-4">
                         <div class="bg-green-500/10 p-3 rounded-xl group-hover:scale-110 transition-transform">
                             <i class="lucide lucide-check-circle text-green-500 h-6 w-6"></i>
@@ -247,31 +188,13 @@
                         <span class="text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded-full">Hoje</span>
                     </div>
                     <div class="space-y-2">
-                        <h3 class="text-2xl font-bold text-white">5</h3>
+                        <h3 class="text-2xl font-bold text-white" id="pending-tasks-count">0</h3>
                         <p class="text-sm text-gray-400">Tarefas Pendentes</p>
                         <div class="flex items-center space-x-2 text-xs">
                             <span class="text-red-400 flex items-center">
                                 <i class="lucide lucide-clock h-4 w-4 mr-1"></i>
-                                3 atrasadas
+                                <span id="overdue-tasks-count">0</span> atrasadas
                             </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card de Estatística - Status do Sistema -->
-                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-yellow-500/50 transition-all group">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="bg-yellow-500/10 p-3 rounded-xl group-hover:scale-110 transition-transform">
-                            <i class="lucide lucide-activity text-yellow-500 h-6 w-6"></i>
-                        </div>
-                        <span class="text-xs text-green-400 bg-green-500/10 px-2 py-1 rounded-full">Online</span>
-                    </div>
-                    <div class="space-y-2">
-                        <h3 class="text-2xl font-bold text-white">99.9%</h3>
-                        <p class="text-sm text-gray-400">Uptime do Sistema</p>
-                        <div class="flex items-center space-x-2 text-xs">
-                            <span class="text-gray-400">Última atualização:</span>
-                            <span class="text-white">{{ current_time }}</span>
                         </div>
                     </div>
                 </div>
@@ -279,38 +202,8 @@
 
             <!-- Cards de Acesso Rápido -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-                <!-- Card IA Assistant -->
-                <div class="group relative bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-purple-500/50 transition-all overflow-hidden">
-                    <!-- Efeito de gradiente no hover -->
-                    <div class="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    
-                    <div class="relative">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-semibold text-white group-hover:text-purple-400 transition-colors">IA Assistant</h3>
-                            <div class="bg-purple-500/20 p-3 rounded-xl group-hover:scale-110 transition-transform">
-                                <i class="lucide lucide-brain text-purple-500 h-6 w-6"></i>
-                            </div>
-                        </div>
-                        
-                        <p class="text-gray-400 mb-6">Acesse nossa IA para obter assistência inteligente em suas tarefas diárias</p>
-                        
-                        <div class="flex items-center justify-between">
-                            <a href="{{ url_for('main.ai_services') }}" 
-                               class="inline-flex items-center space-x-2 text-purple-400 hover:text-purple-300 transition-colors">
-                                <span>Acessar agora</span>
-                                <i class="lucide lucide-arrow-right h-4 w-4"></i>
-                            </a>
-                            
-                            <div class="flex items-center space-x-2">
-                                <span class="text-xs text-gray-500">{{ session.get('ai_stats', {}).get('total_requests', 0) }} requisições</span>
-                                <div class="h-2 w-2 rounded-full bg-purple-500 animate-pulse"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Continuarei com os outros cards... -->
-                                 <!-- Card Agenda -->
+                <!-- Card Agenda -->
                 <div class="group relative bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-cyan-500/50 transition-all overflow-hidden">
                     <!-- Efeito de gradiente no hover -->
                     <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -334,6 +227,35 @@
                             
                             <div class="flex items-center space-x-2">
                                 <span class="text-xs px-2 py-1 rounded-full bg-cyan-500/10 text-cyan-400">Hoje: 2 eventos</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Tarefas -->
+                <div class="group relative bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-amber-500/50 transition-all overflow-hidden">
+                    <!-- Efeito de gradiente no hover -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    
+                    <div class="relative">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-white group-hover:text-amber-400 transition-colors">Tarefas</h3>
+                            <div class="bg-amber-500/20 p-3 rounded-xl group-hover:scale-110 transition-transform">
+                                <i class="lucide lucide-check-square text-amber-500 h-6 w-6"></i>
+                            </div>
+                        </div>
+                        
+                        <p class="text-gray-400 mb-6">Organize suas tarefas e acompanhe seu progresso diário</p>
+                        
+                        <div class="flex items-center justify-between">
+                            <a href="{{ url_for('calendar_tasks.tasks') }}" 
+                               class="inline-flex items-center space-x-2 text-amber-400 hover:text-amber-300 transition-colors">
+                                <span>Ver tarefas</span>
+                                <i class="lucide lucide-arrow-right h-4 w-4"></i>
+                            </a>
+                            
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs px-2 py-1 rounded-full bg-amber-500/10 text-amber-400" id="tasks-card-count">5 pendentes</span>
                             </div>
                         </div>
                     </div>
@@ -363,7 +285,7 @@
                             
                             <div class="flex items-center space-x-2">
                                 <span class="text-xs text-gray-400">Última atualização:</span>
-                                <span class="text-xs text-green-400">{{ current_time }}</span>
+                                <span class="text-xs text-green-400" data-live-time>{{ current_time }}</span>
                             </div>
                         </div>
                     </div>
@@ -455,7 +377,7 @@
                     <div class="p-6 border-b border-gray-700/50">
                         <div class="flex items-center justify-between">
                             <h2 class="text-lg font-semibold text-white">Detalhes da Conta</h2>
-                            <span class="text-xs text-gray-400">{{ current_time }} UTC</span>
+                            <span class="text-xs text-gray-400" data-live-time>{{ current_time }}</span>
                         </div>
                     </div>
 
@@ -501,7 +423,7 @@
                     <div class="p-4 border-t border-gray-700/50 bg-gray-800/50">
                         <div class="flex items-center justify-between text-sm">
                             <span class="text-gray-400">Último login:</span>
-                            <span class="text-white">{{ current_time }}</span>
+                            <span class="text-white" data-live-time>{{ current_time }}</span>
                         </div>
                     </div>
                 </div>
@@ -510,7 +432,28 @@
     </div>
 </div>
 
+<!-- Scripts separados do HTML -->
 <script>
+    // Carregar tarefas pendentes
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/api/tasks')
+            .then(response => response.json())
+            .then(tasks => {
+                const pendingTasks = tasks.filter(task => task.status === 'pending');
+                const overdueTasks = pendingTasks.filter(task => {
+                    if (!task.due_date) return false;
+                    const dueDate = new Date(task.due_date);
+                    const today = new Date();
+                    return dueDate < today;
+                });
+                
+                document.getElementById('pending-tasks-count').textContent = pendingTasks.length;
+                document.getElementById('overdue-tasks-count').textContent = overdueTasks.length;
+            })
+            .catch(error => console.error('Erro ao carregar tarefas:', error));
+    });
+
+    // Formatação de data e hora
     document.addEventListener('DOMContentLoaded', function() {
         // Formatar a data atual em português
         const dateElement = document.getElementById('current-date');

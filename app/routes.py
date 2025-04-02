@@ -840,6 +840,125 @@ def dashboard():
 
     return render_template('dashboard.html', user_data=user_data)
 
+@main.route('/profile/settings', methods=['GET', 'POST'])
+def profile_settings():
+    # Verificar se o usuário está logado
+    if not session.get('user_id'):
+        flash('Please login to access this feature.', 'error')
+        return redirect(url_for('main.login'))
+
+    if request.method == 'POST':
+        try:
+            name = request.form.get('name')
+            phone = request.form.get('phone')
+            
+            # Atualizar no Firestore
+            db = firestore.client()
+            user_doc = db.collection('users').document(session['user_id'])
+            
+            update_data = {
+                'name': name,
+                'phone': phone,
+                'updated_at': datetime.utcnow().isoformat()
+            }
+            
+            user_doc.update(update_data)
+            session['user_name'] = name  # Atualizar na sessão também
+            
+            return jsonify({'success': True})
+        except Exception as e:
+            print(f"Erro ao atualizar perfil: {str(e)}")
+            return jsonify({'success': False, 'error': str(e)})
+
+    try:
+        # Buscar dados do usuário no Firestore
+        db = firestore.client()
+        user_doc = db.collection('users').document(session['user_id']).get()
+        
+        if user_doc.exists:
+            user_data = user_doc.to_dict()
+            user_info = {
+                'name': user_data.get('name', session.get('user_name', 'LaisVilla')),
+                'email': user_data.get('email', session.get('user_email', '')),
+                'phone': user_data.get('phone', ''),
+                'profile_image': user_data.get('profile_image_url'),
+                'subscription_status': user_data.get('subscription_status', 'inactive'),
+                'last_login': user_data.get('last_login', datetime.utcnow().isoformat()),
+                'requests_remaining': user_data.get('ai_stats', {}).get('remaining_requests', 1000)
+            }
+        else:
+            # Dados padrão se não encontrar no Firestore
+            user_info = {
+                'name': session.get('user_name', 'LaisVilla'),
+                'email': session.get('user_email', ''),
+                'phone': '',
+                'profile_image': None,
+                'subscription_status': 'inactive',
+                'last_login': datetime.utcnow().isoformat(),
+                'requests_remaining': 1000
+            }
+
+    except Exception as e:
+        print(f"Erro ao buscar dados do usuário: {str(e)}")
+        user_info = {
+            'name': session.get('user_name', 'LaisVilla'),
+            'email': session.get('user_email', ''),
+            'phone': '',
+            'profile_image': None,
+            'subscription_status': 'inactive',
+            'last_login': datetime.utcnow().isoformat(),
+            'requests_remaining': 1000
+        }
+
+    return render_template('profile_settings.html', user_data=user_info)
+
+@main.route('/profile/upload-image', methods=['POST'])
+def upload_profile_image():
+    if not session.get('user_id'):
+        return jsonify({'success': False, 'error': 'User not authenticated'})
+
+    try:
+        file = request.files.get('profile_image')
+        if not file:
+            return jsonify({'success': False, 'error': 'Nenhum arquivo enviado'})
+
+        try:
+            # Upload para o Cloudinary (já que você tem configurado)
+            upload_result = cloudinary.uploader.upload(file)
+            image_url = upload_result.get('secure_url')
+
+            # Atualizar URL no Firestore
+            db = firestore.client()
+            user_doc = db.collection('users').document(session['user_id'])
+            user_doc.update({
+                'profile_image_url': image_url,
+                'updated_at': datetime.utcnow().isoformat()
+            })
+
+            # Atualizar na sessão
+            session['profile_image'] = image_url
+
+            return jsonify({
+                'success': True,
+                'image_url': image_url
+            })
+
+        except Exception as upload_error:
+            print(f"Erro no upload: {str(upload_error)}")
+            # Fallback para avatar gerado
+            return jsonify({
+                'success': True,
+                'image_url': f'https://ui-avatars.com/api/?name={session.get("user_name", "User")}&background=random'
+            })
+
+    except Exception as e:
+        print(f"Erro no processamento do upload: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)})
+
+@main.route('/help')
+def help():
+    return render_template('help.html')
+
 @main.route('/logout')
 def logout():
     session.clear()

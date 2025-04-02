@@ -3,105 +3,164 @@
 {% block title %}Configurações de Perfil{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto">
-    <!-- Cabeçalho -->
-    <div class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-900">Configurações de Perfil</h1>
-        <p class="mt-1 text-sm text-gray-500">
-            Atualize suas informações e foto de perfil
-        </p>
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10"> <!-- Aumentado max-w e padding -->
+    <!-- Cabeçalho com animação sutil -->
+    <div class="mb-10 animate__animated animate__fadeIn">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl bg-gradient-to-r from-purple-500 to-cyan-500 bg-clip-text text-transparent">
+            Configurações de Perfil
+        </h1>
     </div>
 
-    <!-- Card Principal -->
-    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-        <!-- Seção da Foto -->
-        <div class="p-6 border-b border-gray-200">
-            <div class="flex items-center space-x-6">
-                <div class="relative">
+    <!-- Card Principal com efeito de glassmorphism melhorado -->
+    <div class="w-full dark:bg-[#0F172A]/40 backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden border border-purple-500/20 dark:border-purple-500/10 transition-all duration-300 hover:shadow-2xl" 
+         style="background-image: linear-gradient(to right, rgba(168, 85, 247, 0.05), rgba(6, 182, 212, 0.05))">
+        
+        <!-- Seção da Foto com interação melhorada -->
+        <div class="p-8 border-b border-purple-200/30 dark:border-purple-700/20">
+            <div class="flex flex-col sm:flex-row items-center sm:space-x-10 space-y-6 sm:space-y-0">
+                <div class="relative group">
+                    <div class="absolute inset-0 bg-gradient-to-r from-purple-500 to-cyan-500 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                     <img id="profile-image" 
-                         class="h-24 w-24 rounded-full object-cover border-2 border-indigo-200"
+                         class="h-36 w-36 rounded-full object-cover border-4 transition-transform duration-300 group-hover:scale-105" 
+                         style="border-image: linear-gradient(to right, #a855f7, #06b6d4) 1"
                          src="{% if user_data.profile_image %}{{ user_data.profile_image }}{% else %}https://ui-avatars.com/api/?name={{ user_data.name|urlencode }}&background=random{% endif %}"
                          alt="Profile">
-                    <button id="change-photo" 
-                            class="absolute bottom-0 right-0 bg-indigo-600 text-white p-2 rounded-full shadow-lg hover:bg-indigo-700 transition-colors">
-                        <i class="lucide lucide-camera h-4 w-4"></i>
-                    </button>
+                    
+                    <div class="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer">
+                        <span class="text-white font-medium flex items-center">
+                            <i class="lucide lucide-image-plus h-5 w-5 mr-1"></i>
+                            Trocar imagem
+                        </span>
+                    </div>
                 </div>
-                <div>
-                    <h3 class="text-lg font-medium text-gray-900">Foto de Perfil</h3>
-                    <p class="text-sm text-gray-500">PNG, JPG até 5MB</p>
-                    <!-- Status do usuário -->
-                    <span class="inline-flex items-center mt-2 px-2.5 py-0.5 rounded-full text-xs font-medium {% if user_data.subscription_status == 'active' %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                
+                <div class="text-center sm:text-left">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-1">Foto de Perfil</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">PNG, JPG até 5MB</p>
+                    <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium text-white shadow-sm"
+                          style="background-image: linear-gradient(to right, #a855f7, #06b6d4)">
+                        <i class="lucide lucide-badge-check h-4 w-4 mr-1.5"></i>
                         {{ user_data.subscription_status|title }}
                     </span>
                 </div>
             </div>
-            <!-- Input file oculto -->
-            <input type="file" 
-                   id="profile-image-input" 
-                   accept="image/*" 
-                   class="hidden">
+            <input type="file" id="profile-image-input" accept="image/*" class="hidden">
         </div>
 
-        <!-- Formulário -->
-        <form method="POST" class="p-6 space-y-6">
-            <!-- Nome -->
-            <div>
-                <label for="name" class="block text-sm font-medium text-gray-700">Nome</label>
-                <input type="text" 
-                       name="name" 
-                       id="name" 
-                       value="{{ user_data.name }}"
-                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-            </div>
+        <!-- Formulário com campos melhorados -->
+        <form method="POST" class="p-8 space-y-8">
+            <!-- Campos de entrada com animação e feedback visual -->
+            <div class="grid grid-cols-1 gap-8 sm:grid-cols-2">
+                <div class="col-span-2 sm:col-span-1 group">
+                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2 transition-colors group-focus-within:text-purple-500">Nome</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 dark:text-gray-500">
+                            <i class="lucide lucide-user h-5 w-5"></i>
+                        </span>
+                        <input type="text" 
+                               name="name" 
+                               id="name" 
+                               value="{{ user_data.name }}"
+                               class="pl-10 mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-[#0F172A]/30 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 transition-all duration-200">
+                    </div>
+                </div>
 
-            <!-- Email (readonly) -->
-            <div>
-                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                <input type="email" 
-                       id="email" 
-                       value="{{ user_data.email }}"
-                       class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm" 
-                       readonly>
-            </div>
+                <!-- Email -->
+                <div class="col-span-2 sm:col-span-1 group">
+                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Email</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 dark:text-gray-500">
+                            <i class="lucide lucide-mail h-5 w-5"></i>
+                        </span>
+                        <input type="email" 
+                               id="email" 
+                               value="{{ user_data.email }}"
+                               class="pl-10 mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-[#0F172A]/30 dark:text-gray-400 shadow-sm bg-gray-50 dark:bg-gray-800/30" 
+                               readonly>
+                        <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
+                            <i class="lucide lucide-lock h-4 w-4"></i>
+                        </span>
+                    </div>
+                </div>
 
-            <!-- Telefone -->
-            <div>
-                <label for="phone" class="block text-sm font-medium text-gray-700">Telefone</label>
-                <input type="tel" 
-                       name="phone" 
-                       id="phone" 
-                       value="{{ user_data.phone }}"
-                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-            </div>
-
-            <!-- Informações adicionais -->
-            <div class="bg-gray-50 rounded-lg p-4">
-                <div class="flex items-center justify-between text-sm text-gray-500">
-                    <div>Último acesso: {{ user_data.last_login|default('N/A') }}</div>
-                    <div>Requests disponíveis: {{ user_data.requests_remaining|default('0') }}</div>
+                <!-- Telefone -->
+                <div class="col-span-2 group">
+                    <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2 transition-colors group-focus-within:text-purple-500">Telefone</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 dark:text-gray-500">
+                            <i class="lucide lucide-phone h-5 w-5"></i>
+                        </span>
+                        <input type="tel" 
+                               name="phone" 
+                               id="phone" 
+                               value="{{ user_data.phone }}"
+                               class="pl-10 mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-[#0F172A]/30 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 transition-all duration-200">
+                    </div>
                 </div>
             </div>
 
-            <!-- Botões -->
-            <div class="flex justify-end space-x-3 pt-4">
+            <!-- Informações adicionais com design de cartão -->
+            <div class="rounded-xl p-6 dark:bg-[#0F172A]/30 border border-gray-100 dark:border-gray-800 shadow-sm" 
+                 style="background-image: linear-gradient(to right, rgba(168, 85, 247, 0.05), rgba(6, 182, 212, 0.05))">
+                <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-4 flex items-center">
+                    <i class="lucide lucide-info h-4 w-4 mr-2"></i>
+                    Informações da Conta
+                </h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm text-gray-500 dark:text-gray-400">
+                    <div class="flex items-center space-x-3 bg-white/50 dark:bg-gray-800/20 p-3 rounded-lg">
+                        <div class="flex-shrink-0 h-9 w-9 flex items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
+                            <i class="lucide lucide-clock h-5 w-5 text-purple-500 dark:text-purple-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Último acesso</p>
+                            <p class="font-medium text-gray-900 dark:text-white">{{ user_data.last_login|default('N/A') }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3 bg-white/50 dark:bg-gray-800/20 p-3 rounded-lg">
+                        <div class="flex-shrink-0 h-9 w-9 flex items-center justify-center rounded-full bg-cyan-100 dark:bg-cyan-900/30">
+                            <i class="lucide lucide-zap h-5 w-5 text-cyan-500 dark:text-cyan-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Requests disponíveis</p>
+                            <p class="font-medium text-gray-900 dark:text-white">{{ user_data.requests_remaining|default('0') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botões com efeitos de hover melhorados -->
+            <div class="flex flex-col-reverse sm:flex-row sm:justify-end space-y-4 space-y-reverse sm:space-y-0 sm:space-x-4 pt-6">
                 <a href="{{ url_for('main.index') }}" 
-                   class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    Cancelar
+                   class="w-full sm:w-auto px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-[#0F172A]/30 hover:bg-gray-50 dark:hover:bg-[#0F172A]/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 text-center transition-all duration-200 hover:shadow-md"
+                   style="background-image: linear-gradient(to right, rgba(168, 85, 247, 0.05), rgba(6, 182, 212, 0.05))">
+                    <span class="flex items-center justify-center">
+                        <i class="lucide lucide-x h-4 w-4 mr-2"></i>
+                        Cancelar
+                    </span>
                 </a>
                 <button type="submit" 
-                        class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    Salvar Alterações
+                        class="w-full sm:w-auto px-6 py-3 border border-transparent rounded-lg shadow-md text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-200 hover:shadow-lg hover:scale-105"
+                        style="background-image: linear-gradient(to right, #a855f7, #06b6d4)">
+                    <span class="flex items-center justify-center">
+                        <i class="lucide lucide-save h-4 w-4 mr-2"></i>
+                        Salvar Alterações
+                    </span>
                 </button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Loading Overlay -->
-<div id="loading-overlay" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-    <div class="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent"></div>
+<!-- Loading Overlay com animação melhorada -->
+<div id="loading-overlay" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 dark:bg-black dark:bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity duration-300">
+    <div class="p-4 rounded-xl bg-white/10 backdrop-blur-md">
+        <div class="animate-spin rounded-full h-16 w-16 border-4 border-t-transparent" style="border-image: linear-gradient(to right, #a855f7, #06b6d4) 1"></div>
+        <p class="text-white text-center mt-4 font-medium">Processando...</p>
+    </div>
 </div>
+
+<!-- Toast de notificação -->
+<div id="toast-container" class="fixed bottom-4 right-4 z-50"></div>
 {% endblock %}
 
 {% block scripts %}
@@ -112,6 +171,52 @@ document.addEventListener('DOMContentLoaded', function() {
     const profileImage = document.getElementById('profile-image');
     const loadingOverlay = document.getElementById('loading-overlay');
     const form = document.querySelector('form');
+    const toastContainer = document.getElementById('toast-container');
+
+    // Função para mostrar toast
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = 'flex items-center p-4 mb-3 rounded-lg shadow-lg transform transition-all duration-300 translate-y-10 opacity-0 max-w-xs';
+        
+        let bgColor, icon;
+        if (type === 'success') {
+            bgColor = 'bg-gradient-to-r from-purple-500 to-cyan-500';
+            icon = '<i class="lucide lucide-check-circle h-5 w-5 mr-3"></i>';
+        } else {
+            bgColor = 'bg-gradient-to-r from-red-500 to-orange-500';
+            icon = '<i class="lucide lucide-alert-circle h-5 w-5 mr-3"></i>';
+        }
+        
+        toast.className += ' ' + bgColor;
+        toast.innerHTML = `
+            <div class="flex items-center text-white">
+                ${icon}
+                <p>${message}</p>
+            </div>
+            <button class="ml-auto text-white opacity-70 hover:opacity-100">
+                <i class="lucide lucide-x h-4 w-4"></i>
+            </button>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        // Animação de entrada
+        setTimeout(() => {
+            toast.classList.remove('translate-y-10', 'opacity-0');
+        }, 10);
+        
+        // Auto-remover após 5 segundos
+        setTimeout(() => {
+            toast.classList.add('translate-y-10', 'opacity-0');
+            setTimeout(() => toast.remove(), 300);
+        }, 5000);
+        
+        // Botão de fechar
+        toast.querySelector('button').addEventListener('click', () => {
+            toast.classList.add('translate-y-10', 'opacity-0');
+            setTimeout(() => toast.remove(), 300);
+        });
+    }
 
     // Handler para o formulário
     form.addEventListener('submit', async function(e) {
@@ -126,12 +231,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             if (response.ok) {
-                window.location.reload();
+                showToast('Alterações salvas com sucesso!', 'success');
+                setTimeout(() => window.location.reload(), 1500);
             } else {
                 throw new Error('Erro ao salvar alterações');
             }
         } catch (error) {
-            alert(error.message);
+            showToast(error.message, 'error');
         } finally {
             loadingOverlay.classList.add('hidden');
         }
@@ -147,12 +253,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!file) return;
 
         if (file.size > 5 * 1024 * 1024) {
-            alert('Arquivo muito grande. Máximo 5MB.');
+            showToast('Arquivo muito grande. Máximo 5MB.', 'error');
             return;
         }
 
         if (!file.type.match('image.*')) {
-            alert('Por favor, selecione apenas imagens.');
+            showToast('Por favor, selecione apenas imagens.', 'error');
             return;
         }
 
@@ -170,8 +276,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
 
             if (data.success) {
-                // Atualizar imagem na página
-                profileImage.src = data.image_url;
+                // Atualizar imagem na página com efeito de transição
+                profileImage.style.opacity = '0';
+                setTimeout(() => {
+                    profileImage.src = data.image_url;
+                    profileImage.style.opacity = '1';
+                }, 300);
                 
                 // Atualizar imagem no header
                 const headerProfileImage = document.querySelector('nav img.rounded-full');
@@ -179,22 +289,31 @@ document.addEventListener('DOMContentLoaded', function() {
                     headerProfileImage.src = data.image_url;
                 }
 
-                // Mostrar mensagem de sucesso
-                const toast = document.createElement('div');
-                toast.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transition-opacity duration-500';
-                toast.textContent = 'Imagem atualizada com sucesso!';
-                document.body.appendChild(toast);
-                setTimeout(() => {
-                    toast.style.opacity = '0';
-                    setTimeout(() => toast.remove(), 500);
-                }, 3000);
+                showToast('Imagem atualizada com sucesso!', 'success');
             } else {
                 throw new Error(data.error);
             }
         } catch (error) {
-            alert('Erro ao fazer upload: ' + error.message);
+            showToast('Erro ao fazer upload: ' + error.message, 'error');
         } finally {
             loadingOverlay.classList.add('hidden');
+        }
+    });
+
+    // Adicionar efeitos de foco aos campos
+    const inputGroups = document.querySelectorAll('.group');
+    inputGroups.forEach(group => {
+        const input = group.querySelector('input');
+        const icon = group.querySelector('.absolute .lucide');
+        
+        if (input && icon) {
+            input.addEventListener('focus', () => {
+                icon.classList.add('text-purple-500');
+            });
+            
+            input.addEventListener('blur', () => {
+                icon.classList.remove('text-purple-500');
+            });
         }
     });
 });

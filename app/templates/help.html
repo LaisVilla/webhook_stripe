@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Central de Ajuda{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Cabeçalho -->
+    <div class="mb-12 animate__animated animate__fadeIn">
+        <h1 class="text-4xl font-bold text-gray-900 dark:text-white sm:text-5xl bg-gradient-to-r from-purple-500 to-cyan-500 bg-clip-text text-transparent">
+            Central de Ajuda
+        </h1>
+        <p class="mt-4 text-xl text-gray-500 dark:text-gray-400">
+            Encontre respostas para suas dúvidas mais frequentes
+        </p>
+    </div>
+
+    <!-- Seções de Ajuda -->
+    <div class="space-y-10">
+        <!-- Seção: Começando -->
+        <div class="bg-white dark:bg-[#1E293B] w-full rounded-xl shadow-xl border border-gray-700 transform transition-all duration-300 hover:scale-[1.01] overflow-hidden">
+            <div class="p-8 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-2xl font-bold bg-gradient-to-r from-purple-500 to-cyan-500 bg-clip-text text-transparent flex items-center">
+                    <i class="lucide lucide-rocket h-6 w-6 text-purple-500 mr-3"></i>
+                    Começando
+                </h2>
+            </div>
+            <div class="p-8 space-y-6">
+                <div class="space-y-6">
+                    <details class="group">
+                        <summary class="flex items-center justify-between cursor-pointer text-gray-700 dark:text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800/30">
+                            <span class="font-medium text-lg">Como começar a usar a plataforma?</span>
+                            <i class="lucide lucide-chevron-down h-5 w-5 group-open:rotate-180 transition-transform"></i>
+                        </summary>
+                        <p class="mt-4 text-gray-600 dark:text-gray-400 pl-6 pr-4">
+                            Para começar, complete seu perfil e configure suas preferências iniciais. 
+                            Você pode acessar todas as funcionalidades através do menu principal.
+                        </p>
+                    </details>
+
+                    <details class="group">
+                        <summary class="flex items-center justify-between cursor-pointer text-gray-700 dark:text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800/30">
+                            <span class="font-medium text-lg">Como configurar minha conta?</span>
+                            <i class="lucide lucide-chevron-down h-5 w-5 group-open:rotate-180 transition-transform"></i>
+                        </summary>
+                        <p class="mt-4 text-gray-600 dark:text-gray-400 pl-6 pr-4">
+                            Acesse as configurações de perfil através do menu do usuário no canto superior direito. 
+                            Lá você pode atualizar suas informações pessoais e preferências.
+                        </p>
+                    </details>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção: Serviços de IA -->
+        <div class="bg-white dark:bg-[#1E293B] w-full rounded-xl shadow-xl border border-gray-700 transform transition-all duration-300 hover:scale-[1.01] overflow-hidden">
+            <div class="p-8 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-2xl font-bold bg-gradient-to-r from-purple-500 to-cyan-500 bg-clip-text text-transparent flex items-center">
+                    <i class="lucide lucide-brain-circuit h-6 w-6 text-purple-500 mr-3"></i>
+                    Serviços de IA
+                </h2>
+            </div>
+            <div class="p-8 space-y-6">
+                <details class="group">
+                    <summary class="flex items-center justify-between cursor-pointer text-gray-700 dark:text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800/30">
+                        <span class="font-medium text-lg">Como usar os serviços de IA?</span>
+                        <i class="lucide lucide-chevron-down h-5 w-5 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="mt-4 text-gray-600 dark:text-gray-400 pl-6 pr-4">
+                        Nossos serviços de IA estão disponíveis para todos os usuários com assinatura ativa. 
+                        Cada plano tem um limite mensal de requisições que pode ser visualizado no seu painel.
+                    </p>
+                </details>
+
+                <details class="group">
+                    <summary class="flex items-center justify-between cursor-pointer text-gray-700 dark:text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800/30">
+                        <span class="font-medium text-lg">Quantas requisições posso fazer?</span>
+                        <i class="lucide lucide-chevron-down h-5 w-5 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="mt-4 text-gray-600 dark:text-gray-400 pl-6 pr-4">
+                        O número de requisições depende do seu plano de assinatura. 
+                        Você pode verificar seu saldo atual de requisições no painel principal ou nas configurações do perfil.
+                    </p>
+                </details>
+            </div>
+        </div>
+
+        <!-- Seção: Assinatura e Pagamentos -->
+        <div class="bg-white dark:bg-[#1E293B] w-full rounded-xl shadow-xl border border-gray-700 transform transition-all duration-300 hover:scale-[1.01] overflow-hidden">
+            <div class="p-8 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-2xl font-bold bg-gradient-to-r from-purple-500 to-cyan-500 bg-clip-text text-transparent flex items-center">
+                    <i class="lucide lucide-credit-card h-6 w-6 text-purple-500 mr-3"></i>
+                    Assinatura e Pagamentos
+                </h2>
+            </div>
+            <div class="p-8 space-y-6">
+                <details class="group">
+                    <summary class="flex items-center justify-between cursor-pointer text-gray-700 dark:text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800/30">
+                        <span class="font-medium text-lg">Como gerenciar minha assinatura?</span>
+                        <i class="lucide lucide-chevron-down h-5 w-5 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="mt-4 text-gray-600 dark:text-gray-400 pl-6 pr-4">
+                        Você pode gerenciar sua assinatura através da seção de pagamentos. 
+                        Lá você encontra informações sobre seu plano atual e opções para upgrade.
+                    </p>
+                </details>
+
+                <details class="group">
+                    <summary class="flex items-center justify-between cursor-pointer text-gray-700 dark:text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800/30">
+                        <span class="font-medium text-lg">Quais métodos de pagamento são aceitos?</span>
+                        <i class="lucide lucide-chevron-down h-5 w-5 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="mt-4 text-gray-600 dark:text-gray-400 pl-6 pr-4">
+                        Aceitamos cartões de crédito das principais bandeiras através do nosso sistema seguro de pagamentos Stripe.
+                    </p>
+                </details>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção de Contato -->
+    <div class="mt-12 bg-[#1E293B] w-full rounded-xl shadow-xl border border-gray-700 transform transition-all duration-300 hover:scale-[1.01] p-10">
+        <div class="text-center">
+            <h3 class="text-2xl font-bold bg-gradient-to-r from-purple-500 to-cyan-500 bg-clip-text text-transparent">Ainda precisa de ajuda?</h3>
+            <p class="mt-4 text-lg text-purple-600 dark:text-purple-300">
+                Nossa equipe de suporte está disponível para ajudar
+            </p>
+            <a href="mailto:support@example.com" 
+               class="mt-8 inline-flex items-center px-10 py-4 border border-transparent text-lg font-medium rounded-md text-white bg-gradient-to-r from-purple-500 to-cyan-500 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-300">
+                <i class="lucide lucide-mail h-6 w-6 mr-2"></i>
+                Contatar Suporte
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
