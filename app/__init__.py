@@ -97,9 +97,9 @@ def create_app():
     
     
 
-    # Configurar scheduler
+        # Configurar scheduler
     def health_check_job():
-        """Função que será executada periodicamente para verificar a saúde da aplicação"""
+        """Função simplificada para verificação periódica"""
         with app.app_context():
             try:
                 with app.test_client() as client:
@@ -107,32 +107,26 @@ def create_app():
                     current_time = datetime.now(pytz.timezone('America/Sao_Paulo'))
                     print(f"\n[Health Check] {current_time.strftime('%Y-%m-%d %H:%M:%S')}")
                     
-                    if response.status_code != 200:
-                        print(f"Status: {response.status_code}")
-                        print(f"Failed: {response.get_json()}")
-                    else:
+                    if response.status_code == 200:
                         data = response.get_json()
                         print(f"Status: {data['status']}")
-                        print(f"Firebase: {data['services']['firebase']['status']}")
-                        if data['services']['firebase'].get('error'):
-                            print(f"Firebase Error: {data['services']['firebase']['error']}")
+                        print(f"Firebase: {data['firebase']}")
+                    else:
+                        print(f"Health check failed with status: {response.status_code}")
             except Exception as e:
                 print(f"[Health Check] Error: {str(e)}")
 
-    # Inicializar scheduler apenas uma vez
+    # Inicializar scheduler
     if not scheduler.running:
         scheduler.init_app(app)
         scheduler.add_job(
             id='health_check',
             func=health_check_job,
             trigger='interval',
-            minutes=10,
-            replace_existing=True,
-            next_run_time=datetime.now(pytz.timezone('America/Sao_Paulo'))  # Executa imediatamente
+            seconds=30,  # Executa a cada 30 segundos
+            replace_existing=True
         )
         scheduler.start()
-        print("\n[Scheduler] Iniciado com sucesso")
-        print(f"[Scheduler] Próxima verificação em 10 minutos\n")
-
+        print("[Scheduler] Iniciado com sucesso")
 
     return app
