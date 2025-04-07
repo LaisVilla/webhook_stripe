@@ -23,14 +23,14 @@ def ping_server():
         try:
             response = requests.get(
                 f"{app_url}/health",
-                timeout=10,  # Adiciona um timeout para evitar esperas muito longas
+                timeout=60,  # Adiciona um timeout para evitar esperas muito longas
                 headers={'User-Agent': 'NexusAi-HealthCheck/1.0'}
             )
             logger.info(f"[{current_time}] Health check ping: {response.status_code}")
         except Exception as e:
             logger.error(f"[{current_time}] Health check failed: {str(e)}")
         # Wait for 10 minutes before the next ping
-        time.sleep(60)
+        time.sleep(600)
 
 def start_health_check():
     """
