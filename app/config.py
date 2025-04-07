@@ -86,7 +86,7 @@ class Config:
         }
     }
 
-    # Check if in development environment
+    '''# Check if in development environment
     DEVELOPMENT = os.environ.get('FLASK_ENV') == 'development'
 
     # Base URL of the application for health checks
@@ -99,7 +99,7 @@ class Config:
     APP_URL = os.getenv('APP_URL', APP_URL)
 
     # Health check interval in seconds
-    HEALTH_CHECK_INTERVAL = int(os.getenv('HEALTH_CHECK_INTERVAL', 600))
+    HEALTH_CHECK_INTERVAL = int(os.getenv('HEALTH_CHECK_INTERVAL', 600))'''
 
     # Additional settings
     SESSION_COOKIE_SECURE = True
