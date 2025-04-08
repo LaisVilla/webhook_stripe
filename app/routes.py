@@ -123,7 +123,7 @@ def login():
                     print("Session data updated successfully")
                     print(f"Session: {session}")
                     
-                    flash('Login successful!', 'success')
+                    flash('Login efetuado com sucesso!', 'success')
                     
                     # Redirecionar baseado no status da assinatura
                     if user_data.get('subscription_status') == 'active':

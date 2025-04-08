@@ -6,103 +6,115 @@
 <div class="flex h-screen bg-gray-900">
     <!-- Sidebar Refinada -->
     <aside class="hidden md:flex w-64 flex-col bg-gray-800/95 backdrop-blur-sm border-r border-gray-700/50 shadow-xl">
-        <!-- Logo e Branding -->
-        <div class="p-6">
-            <div class="flex items-center space-x-3">
-                <div class="bg-gradient-to-r from-purple-500 to-cyan-500 p-2 rounded-xl">
-                    <i class="lucide lucide-brain-circuit text-white h-6 w-6"></i>
-                </div>
-                <span class="text-xl font-bold bg-gradient-to-r from-purple-500 to-cyan-500 bg-clip-text text-transparent">
-                    NexusAI
-                </span>
-            </div>
-        </div>
+        
         <!-- Menu de Navegação Aprimorado -->
-        <nav class="flex-1 px-4 space-y-2 overflow-y-auto">
+        <nav class="flex-1 px-4 space-y-2 py-6 overflow-y-auto">
             <!-- Dashboard -->
             <a href="{{ url_for('main.dashboard') }}" 
-               class="flex items-center px-4 py-3 text-gray-300 hover:bg-gradient-to-r hover:from-purple-600/20 hover:to-cyan-600/20 hover:text-white rounded-xl transition-all group {% if request.endpoint == 'main.dashboard' %}bg-gradient-to-r from-purple-600/20 to-cyan-600/20 text-white{% endif %}">
+               class="flex items-center px-4 py-3 text-gray-300 hover:bg-gradient-to-r hover:from-purple-600/30 hover:to-cyan-600/30 hover:text-white rounded-xl transition-all duration-300 transform hover:translate-x-1 group {% if request.endpoint == 'main.dashboard' %}bg-gradient-to-r from-purple-600/30 to-cyan-600/30 text-white{% endif %}">
                 <div class="flex items-center space-x-3">
-                    <div class="bg-gray-700/50 p-2 rounded-lg group-hover:bg-gray-700 transition-colors">
+                    <div class="bg-gray-700/50 p-2 rounded-lg group-hover:bg-gray-700 group-hover:scale-110 transition-all duration-300">
                         <i class="lucide lucide-layout-dashboard h-5 w-5"></i>
                     </div>
-                    <span>Dashboard</span>
+                    <span class="group-hover:font-medium">Dashboard</span>
                 </div>
                 {% if request.endpoint == 'main.dashboard' %}
-                <div class="ml-auto bg-gradient-to-r from-purple-500 to-cyan-500 h-2 w-2 rounded-full"></div>
+                <div class="ml-auto bg-gradient-to-r from-purple-500 to-cyan-500 h-2 w-2 rounded-full animate-pulse"></div>
                 {% endif %}
             </a>
 
             <!-- IA Assistant -->
             <a href="{{ url_for('main.ai_services') }}"
-               class="flex items-center px-4 py-3 text-gray-300 hover:bg-gradient-to-r hover:from-purple-600/20 hover:to-cyan-600/20 hover:text-white rounded-xl transition-all group {% if request.endpoint == 'main.ai_services' %}bg-gradient-to-r from-purple-600/20 to-cyan-600/20 text-white{% endif %}">
+               class="flex items-center px-4 py-3 text-gray-300 hover:bg-gradient-to-r hover:from-purple-600/30 hover:to-cyan-600/30 hover:text-white rounded-xl transition-all duration-300 transform hover:translate-x-1 group {% if request.endpoint == 'main.ai_services' %}bg-gradient-to-r from-purple-600/30 to-cyan-600/30 text-white{% endif %}">
                 <div class="flex items-center space-x-3">
-                    <div class="bg-gray-700/50 p-2 rounded-lg group-hover:bg-gray-700 transition-colors">
+                    <div class="bg-gray-700/50 p-2 rounded-lg group-hover:bg-gray-700 group-hover:scale-110 transition-all duration-300">
                         <i class="lucide lucide-brain h-5 w-5"></i>
                     </div>
-                    <span>IA Assistant</span>
+                    <span class="group-hover:font-medium">IA Assistant</span>
                 </div>
+                {% if request.endpoint == 'main.ai_services' %}
+                <div class="ml-auto bg-gradient-to-r from-purple-500 to-cyan-500 h-2 w-2 rounded-full animate-pulse"></div>
+                {% endif %}
             </a>
 
             <!-- Agenda -->
             <a href="{{ url_for('calendar_tasks.calendar') }}"
-               class="flex items-center px-4 py-3 text-gray-300 hover:bg-gradient-to-r hover:from-purple-600/20 hover:to-cyan-600/20 hover:text-white rounded-xl transition-all group">
+               class="flex items-center px-4 py-3 text-gray-300 hover:bg-gradient-to-r hover:from-purple-600/30 hover:to-cyan-600/30 hover:text-white rounded-xl transition-all duration-300 transform hover:translate-x-1 group {% if request.endpoint == 'calendar_tasks.calendar' %}bg-gradient-to-r from-purple-600/30 to-cyan-600/30 text-white{% endif %}">
                 <div class="flex items-center space-x-3">
-                    <div class="bg-gray-700/50 p-2 rounded-lg group-hover:bg-gray-700 transition-colors">
+                    <div class="bg-gray-700/50 p-2 rounded-lg group-hover:bg-gray-700 group-hover:scale-110 transition-all duration-300">
                         <i class="lucide lucide-calendar h-5 w-5"></i>
                     </div>
-                    <span>Agenda</span>
+                    <span class="group-hover:font-medium">Agenda</span>
                 </div>
-                <div class="ml-auto text-xs text-gray-400">
-                    2 eventos
-                </div>
+                
+                {% if request.endpoint == 'calendar_tasks.calendar' %}
+                <div class="ml-2 bg-gradient-to-r from-purple-500 to-cyan-500 h-2 w-2 rounded-full animate-pulse"></div>
+                {% endif %}
             </a>
 
             <!-- Tarefas -->
             <a href="{{ url_for('calendar_tasks.tasks') }}"
-               class="flex items-center px-4 py-3 text-gray-300 hover:bg-gradient-to-r hover:from-purple-600/20 hover:to-cyan-600/20 hover:text-white rounded-xl transition-all group">
+               class="flex items-center px-4 py-3 text-gray-300 hover:bg-gradient-to-r hover:from-purple-600/30 hover:to-cyan-600/30 hover:text-white rounded-xl transition-all duration-300 transform hover:translate-x-1 group {% if request.endpoint == 'calendar_tasks.tasks' %}bg-gradient-to-r from-purple-600/30 to-cyan-600/30 text-white{% endif %}">
                 <div class="flex items-center space-x-3">
-                    <div class="bg-gray-700/50 p-2 rounded-lg group-hover:bg-gray-700 transition-colors">
+                    <div class="bg-gray-700/50 p-2 rounded-lg group-hover:bg-gray-700 group-hover:scale-110 transition-all duration-300">
                         <i class="lucide lucide-check-square h-5 w-5"></i>
                     </div>
-                    <span>Tarefas</span>
+                    <span class="group-hover:font-medium">Tarefas</span>
                 </div>
-                <div class="ml-auto bg-cyan-500/20 text-cyan-300 px-2 py-1 rounded-full text-xs">
-                    5 pendentes
-                </div>
+                {% if request.endpoint == 'calendar_tasks.tasks' %}
+                <div class="ml-2 bg-gradient-to-r from-purple-500 to-cyan-500 h-2 w-2 rounded-full animate-pulse"></div>
+                {% endif %}
             </a>
 
             <!-- Financeiro -->
             <a href="{{ url_for('financial.financial_dashboard') }}"
-               class="flex items-center px-4 py-3 text-gray-300 hover:bg-gradient-to-r hover:from-purple-600/20 hover:to-cyan-600/20 hover:text-white rounded-xl transition-all group">
+               class="flex items-center px-4 py-3 text-gray-300 hover:bg-gradient-to-r hover:from-purple-600/30 hover:to-cyan-600/30 hover:text-white rounded-xl transition-all duration-300 transform hover:translate-x-1 group {% if request.endpoint == 'financial.financial_dashboard' %}bg-gradient-to-r from-purple-600/30 to-cyan-600/30 text-white{% endif %}">
                 <div class="flex items-center space-x-3">
-                    <div class="bg-gray-700/50 p-2 rounded-lg group-hover:bg-gray-700 transition-colors">
+                    <div class="bg-gray-700/50 p-2 rounded-lg group-hover:bg-gray-700 group-hover:scale-110 transition-all duration-300">
                         <i class="lucide lucide-dollar-sign h-5 w-5"></i>
                     </div>
-                    <span>Financeiro</span>
+                    <span class="group-hover:font-medium">Financeiro</span>
                 </div>
+                {% if request.endpoint == 'financial.financial_dashboard' %}
+                <div class="ml-auto bg-gradient-to-r from-purple-500 to-cyan-500 h-2 w-2 rounded-full animate-pulse"></div>
+                {% endif %}
             </a>
 
             <!-- Separador -->
             <div class="my-6 border-t border-gray-700/50"></div>
 
             <!-- Configurações e Logout -->
-            <a href="#" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gradient-to-r hover:from-purple-600/20 hover:to-cyan-600/20 hover:text-white rounded-xl transition-all group">
+            <a href="{{ url_for('main.profile_settings') }}" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gradient-to-r hover:from-purple-600/30 hover:to-cyan-600/30 hover:text-white rounded-xl transition-all duration-300 transform hover:translate-x-1 group {% if request.endpoint == 'main.profile_settings' %}bg-gradient-to-r from-purple-600/30 to-cyan-600/30 text-white{% endif %}">
                 <div class="flex items-center space-x-3">
-                    <div class="bg-gray-700/50 p-2 rounded-lg group-hover:bg-gray-700 transition-colors">
+                    <div class="bg-gray-700/50 p-2 rounded-lg group-hover:bg-gray-700 group-hover:scale-110 transition-all duration-300">
                         <i class="lucide lucide-settings h-5 w-5"></i>
                     </div>
-                    <span>Configurações</span>
+                    <span class="group-hover:font-medium">Configurações</span>
                 </div>
+                {% if request.endpoint == 'main.profile_settings' %}
+                <div class="ml-auto bg-gradient-to-r from-purple-500 to-cyan-500 h-2 w-2 rounded-full animate-pulse"></div>
+                {% endif %}
+            </a>
+
+            <a href="{{ url_for('main.help') }}" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gradient-to-r hover:from-purple-600/30 hover:to-cyan-600/30 hover:text-white rounded-xl transition-all duration-300 transform hover:translate-x-1 group {% if request.endpoint == 'main.help' %}bg-gradient-to-r from-purple-600/30 to-cyan-600/30 text-white{% endif %}">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gray-700/50 p-2 rounded-lg group-hover:bg-gray-700 group-hover:scale-110 transition-all duration-300">
+                        <i class="lucide lucide-help-circle h-5 w-5"></i>
+                    </div>
+                    <span class="group-hover:font-medium">Ajuda</span>
+                </div>
+                {% if request.endpoint == 'main.help' %}
+                <div class="ml-auto bg-gradient-to-r from-purple-500 to-cyan-500 h-2 w-2 rounded-full animate-pulse"></div>
+                {% endif %}
             </a>
 
             <a href="{{ url_for('main.logout') }}" 
-               class="flex items-center px-4 py-3 text-red-400 hover:bg-red-400/10 hover:text-red-300 rounded-xl transition-all group">
+               class="flex items-center px-4 py-3 text-red-400 hover:bg-red-400/20 hover:text-red-300 rounded-xl transition-all duration-300 transform hover:translate-x-1 group">
                 <div class="flex items-center space-x-3">
-                    <div class="bg-red-400/10 p-2 rounded-lg group-hover:bg-red-400/20 transition-colors">
+                    <div class="bg-red-400/10 p-2 rounded-lg group-hover:bg-red-400/30 group-hover:scale-110 transition-all duration-300">
                         <i class="lucide lucide-log-out h-5 w-5"></i>
                     </div>
-                    <span>Sair</span>
+                    <span class="group-hover:font-medium">Sair</span>
                 </div>
             </a>
         </nav>
@@ -123,14 +135,14 @@
             <div class="flex items-center justify-between px-6 py-4">
                 <!-- Lado Esquerdo -->
                 <div class="flex items-center space-x-4">
-                    <button class="md:hidden text-gray-400 hover:text-white">
+                    <button class="md:hidden text-gray-400 hover:text-white hover:scale-110 transition-all duration-300">
                         <i class="lucide lucide-menu h-6 w-6"></i>
                     </button>
                     
                     <div>
                         <div class="flex items-center space-x-2 text-sm text-gray-400">
                             <span>Bem-vindo de volta,</span>
-                            <span class="text-purple-400">{{ session.get('user_name', 'LaisVilla') }}</span>
+                            <span class="text-purple-400 hover:text-purple-300 transition-colors duration-300">{{ session.get('user_name', 'LaisVilla') }}</span>
                         </div>
                     </div>
                 </div>
@@ -141,15 +153,15 @@
             <!-- Estatísticas -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
                 <!-- Card de Estatística - Requisições IA -->
-                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-purple-500/50 transition-all group">
+                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-purple-500/50 transition-all duration-300 hover:shadow-purple-500/10 group">
                     <div class="flex items-center justify-between mb-4">
-                        <div class="bg-purple-500/10 p-3 rounded-xl group-hover:scale-110 transition-transform">
+                        <div class="bg-purple-500/10 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
                             <i class="lucide lucide-brain-circuit text-purple-500 h-6 w-6"></i>
                         </div>
-                        <span class="text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded-full">Últimas 24h</span>
+                        <span class="text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded-full group-hover:bg-purple-500/20 group-hover:text-purple-300 transition-all duration-300">Últimas 24h</span>
                     </div>
                     <div class="space-y-2">
-                        <h3 class="text-2xl font-bold text-white">{{ session.get('ai_stats', {}).get('total_requests', 0) }}</h3>
+                        <h3 class="text-2xl font-bold text-white group-hover:text-purple-300 transition-colors duration-300">{{ session.get('ai_stats', {}).get('total_requests', 0) }}</h3>
                         <p class="text-sm text-gray-400">Requisições IA</p>
                         <div class="flex items-center space-x-2 text-xs">
                             <span class="text-green-400 flex items-center">
@@ -162,56 +174,86 @@
                 </div>
 
                 <!-- Card de Estatística - Requisições Restantes -->
-                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-cyan-500/50 transition-all group">
+                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-cyan-500/10 group">
                     <div class="flex items-center justify-between mb-4">
-                        <div class="bg-cyan-500/10 p-3 rounded-xl group-hover:scale-110 transition-transform">
+                        <div class="bg-cyan-500/10 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
                             <i class="lucide lucide-zap text-cyan-500 h-6 w-6"></i>
                         </div>
-                        <span class="text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded-full">Premium</span>
+                        <span class="text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded-full group-hover:bg-cyan-500/20 group-hover:text-cyan-300 transition-all duration-300">Premium</span>
                     </div>
                     <div class="space-y-2">
-                        <h3 class="text-2xl font-bold text-white">{{ session.get('ai_stats', {}).get('remaining_requests', 1000) }}</h3>
+                        <h3 class="text-2xl font-bold text-white group-hover:text-cyan-300 transition-colors duration-300">{{ session.get('ai_stats', {}).get('remaining_requests', 1000) }}</h3>
                         <p class="text-sm text-gray-400">Requisições Restantes</p>
-                        <div class="w-full bg-gray-700/50 rounded-full h-1.5">
-                            <div class="bg-gradient-to-r from-cyan-500 to-purple-500 h-1.5 rounded-full" 
+                        <div class="w-full bg-gray-700/50 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-gradient-to-r from-cyan-500 to-purple-500 h-1.5 rounded-full transition-all duration-500 ease-in-out" 
                                  style="width: {{ (1000 - session.get('ai_stats', {}).get('remaining_requests', 0)) / 10 }}%"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Card de Estatística - Tarefas Pendentes -->
-                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-green-500/50 transition-all group" id="pending-tasks-card">
+                <!-- Card de Estatística - Tarefas (Expandido) -->
+                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-amber-500/50 transition-all duration-300 hover:shadow-amber-500/10 group" id="tasks-stats-card">
                     <div class="flex items-center justify-between mb-4">
-                        <div class="bg-green-500/10 p-3 rounded-xl group-hover:scale-110 transition-transform">
-                            <i class="lucide lucide-check-circle text-green-500 h-6 w-6"></i>
+                        <div class="bg-amber-500/10 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                            <i class="lucide lucide-check-square text-amber-500 h-6 w-6"></i>
                         </div>
-                        <span class="text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded-full">Hoje</span>
+                        <span class="text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded-full group-hover:bg-amber-500/20 group-hover:text-amber-300 transition-all duration-300">Hoje</span>
                     </div>
-                    <div class="space-y-2">
-                        <h3 class="text-2xl font-bold text-white" id="pending-tasks-count">0</h3>
-                        <p class="text-sm text-gray-400">Tarefas Pendentes</p>
-                        <div class="flex items-center space-x-2 text-xs">
-                            <span class="text-red-400 flex items-center">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-lg font-bold text-white group-hover:text-amber-300 transition-colors duration-300">Status das Tarefas</h3>
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-2">
+                            <!-- Pendentes -->
+                            <div class="bg-gray-700/30 rounded-lg p-2 text-center">
+                                <div class="text-amber-400 font-bold text-xl" id="pending-tasks-count">0</div>
+                                <div class="text-xs text-gray-400">Pendentes</div>
+                            </div>
+                            
+                            <!-- Em Andamento -->
+                            <div class="bg-gray-700/30 rounded-lg p-2 text-center">
+                                <div class="text-blue-400 font-bold text-xl" id="in-progress-tasks-count">0</div>
+                                <div class="text-xs text-gray-400">Em Andamento</div>
+                            </div>
+                            
+                            <!-- Concluídas -->
+                            <div class="bg-gray-700/30 rounded-lg p-2 text-center">
+                                <div class="text-green-400 font-bold text-xl" id="completed-tasks-count">0</div>
+                                <div class="text-xs text-gray-400">Concluídas</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <span class="text-red-400 flex items-center text-xs">
                                 <i class="lucide lucide-clock h-4 w-4 mr-1"></i>
                                 <span id="overdue-tasks-count">0</span> atrasadas
                             </span>
+                            
+                            <a href="{{ url_for('calendar_tasks.tasks') }}" 
+                               class="inline-flex items-center space-x-2 text-amber-400 hover:text-amber-300 transition-colors duration-300 group-hover:translate-x-1 transform">
+                                <span>Ver tarefas</span>
+                                <i class="lucide lucide-arrow-right h-4 w-4 group-hover:translate-x-2 transition-transform duration-300"></i>
+                            </a>
                         </div>
+                        
+                        <p class="text-gray-400 text-sm mt-2">Organize suas tarefas e acompanhe seu progresso diário</p>
+                        
                     </div>
                 </div>
             </div>
 
             <!-- Cards de Acesso Rápido -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
                 <!-- Card Agenda -->
-                <div class="group relative bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-cyan-500/50 transition-all overflow-hidden">
+                <div class="group relative bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-cyan-500/10 overflow-hidden">
                     <!-- Efeito de gradiente no hover -->
-                    <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     
                     <div class="relative">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-semibold text-white group-hover:text-cyan-400 transition-colors">Agenda</h3>
-                            <div class="bg-cyan-500/20 p-3 rounded-xl group-hover:scale-110 transition-transform">
+                            <h3 class="text-lg font-semibold text-white group-hover:text-cyan-400 transition-colors duration-300">Agenda</h3>
+                            <div class="bg-cyan-500/20 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
                                 <i class="lucide lucide-calendar text-cyan-500 h-6 w-6"></i>
                             </div>
                         </div>
@@ -220,56 +262,27 @@
                         
                         <div class="flex items-center justify-between">
                             <a href="{{ url_for('calendar_tasks.calendar') }}" 
-                               class="inline-flex items-center space-x-2 text-cyan-400 hover:text-cyan-300 transition-colors">
+                               class="inline-flex items-center space-x-2 text-cyan-400 hover:text-cyan-300 transition-colors duration-300 group-hover:translate-x-1 transform">
                                 <span>Ver agenda</span>
-                                <i class="lucide lucide-arrow-right h-4 w-4"></i>
+                                <i class="lucide lucide-arrow-right h-4 w-4 group-hover:translate-x-1 transition-transform duration-300"></i>
                             </a>
                             
                             <div class="flex items-center space-x-2">
-                                <span class="text-xs px-2 py-1 rounded-full bg-cyan-500/10 text-cyan-400">Hoje: 2 eventos</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card Tarefas -->
-                <div class="group relative bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-amber-500/50 transition-all overflow-hidden">
-                    <!-- Efeito de gradiente no hover -->
-                    <div class="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    
-                    <div class="relative">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-semibold text-white group-hover:text-amber-400 transition-colors">Tarefas</h3>
-                            <div class="bg-amber-500/20 p-3 rounded-xl group-hover:scale-110 transition-transform">
-                                <i class="lucide lucide-check-square text-amber-500 h-6 w-6"></i>
-                            </div>
-                        </div>
-                        
-                        <p class="text-gray-400 mb-6">Organize suas tarefas e acompanhe seu progresso diário</p>
-                        
-                        <div class="flex items-center justify-between">
-                            <a href="{{ url_for('calendar_tasks.tasks') }}" 
-                               class="inline-flex items-center space-x-2 text-amber-400 hover:text-amber-300 transition-colors">
-                                <span>Ver tarefas</span>
-                                <i class="lucide lucide-arrow-right h-4 w-4"></i>
-                            </a>
-                            
-                            <div class="flex items-center space-x-2">
-                                <span class="text-xs px-2 py-1 rounded-full bg-amber-500/10 text-amber-400" id="tasks-card-count">5 pendentes</span>
+                                <span class="text-xs px-2 py-1 rounded-full bg-cyan-500/10 text-cyan-400 group-hover:bg-cyan-500/20 transition-all duration-300">Hoje: 2 eventos</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Card Financeiro -->
-                <div class="group relative bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-green-500/50 transition-all overflow-hidden">
+                <div class="group relative bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm p-6 hover:border-green-500/50 transition-all duration-300 hover:shadow-green-500/10 overflow-hidden">
                     <!-- Efeito de gradiente no hover -->
-                    <div class="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     
                     <div class="relative">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-semibold text-white group-hover:text-green-400 transition-colors">Financeiro</h3>
-                            <div class="bg-green-500/20 p-3 rounded-xl group-hover:scale-110 transition-transform">
+                            <h3 class="text-lg font-semibold text-white group-hover:text-green-400 transition-colors duration-300">Financeiro</h3>
+                            <div class="bg-green-500/20 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
                                 <i class="lucide lucide-dollar-sign text-green-500 h-6 w-6"></i>
                             </div>
                         </div>
@@ -278,9 +291,9 @@
                         
                         <div class="flex items-center justify-between">
                             <a href="{{ url_for('financial.financial_dashboard') }}" 
-                               class="inline-flex items-center space-x-2 text-green-400 hover:text-green-300 transition-colors">
+                               class="inline-flex items-center space-x-2 text-green-400 hover:text-green-300 transition-colors duration-300 group-hover:translate-x-1 transform">
                                 <span>Ver relatórios</span>
-                                <i class="lucide lucide-arrow-right h-4 w-4"></i>
+                                <i class="lucide lucide-arrow-right h-4 w-4 group-hover:translate-x-1 transition-transform duration-300"></i>
                             </a>
                             
                             <div class="flex items-center space-x-2">
@@ -295,11 +308,11 @@
             <!-- Atividade Recente e Estatísticas -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
                 <!-- Atividade Recente -->
-                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm overflow-hidden">
+                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm overflow-hidden hover:shadow-purple-500/5 transition-all duration-300">
                     <div class="p-6 border-b border-gray-700/50">
                         <div class="flex items-center justify-between">
                             <h2 class="text-lg font-semibold text-white">Atividade Recente</h2>
-                            <button class="text-gray-400 hover:text-white transition-colors">
+                            <button class="text-gray-400 hover:text-white transition-colors duration-300 hover:rotate-90 transform">
                                 <i class="lucide lucide-more-horizontal h-5 w-5"></i>
                             </button>
                         </div>
@@ -307,7 +320,7 @@
 
                     <div class="divide-y divide-gray-700/50">
                         <!-- Atividade - IA -->
-                        <div class="p-4 hover:bg-gray-700/20 transition-colors">
+                        <div class="p-4 hover:bg-gray-700/20 transition-colors duration-300">
                             <div class="flex items-center space-x-4">
                                 <div class="bg-purple-500/20 p-2 rounded-lg">
                                     <i class="lucide lucide-brain text-purple-500 h-5 w-5"></i>
@@ -319,14 +332,14 @@
                                     </p>
                                     <p class="text-xs text-gray-500 mt-1">2 minutos atrás</p>
                                 </div>
-                                <button class="text-gray-400 hover:text-white transition-colors">
+                                <button class="text-gray-400 hover:text-white transition-colors duration-300 hover:translate-x-1 transform">
                                     <i class="lucide lucide-chevron-right h-5 w-5"></i>
                                 </button>
                             </div>
                         </div>
 
                         <!-- Atividade - Agenda -->
-                        <div class="p-4 hover:bg-gray-700/20 transition-colors">
+                        <div class="p-4 hover:bg-gray-700/20 transition-colors duration-300">
                             <div class="flex items-center space-x-4">
                                 <div class="bg-cyan-500/20 p-2 rounded-lg">
                                     <i class="lucide lucide-calendar text-cyan-500 h-5 w-5"></i>
@@ -338,14 +351,14 @@
                                     </p>
                                     <p class="text-xs text-gray-500 mt-1">1 hora atrás</p>
                                 </div>
-                                <button class="text-gray-400 hover:text-white transition-colors">
+                                <button class="text-gray-400 hover:text-white transition-colors duration-300 hover:translate-x-1 transform">
                                     <i class="lucide lucide-chevron-right h-5 w-5"></i>
                                 </button>
                             </div>
                         </div>
 
                         <!-- Atividade - Tarefa -->
-                        <div class="p-4 hover:bg-gray-700/20 transition-colors">
+                        <div class="p-4 hover:bg-gray-700/20 transition-colors duration-300">
                             <div class="flex items-center space-x-4">
                                 <div class="bg-green-500/20 p-2 rounded-lg">
                                     <i class="lucide lucide-check-circle text-green-500 h-5 w-5"></i>
@@ -357,7 +370,7 @@
                                     </p>
                                     <p class="text-xs text-gray-500 mt-1">3 horas atrás</p>
                                 </div>
-                                <button class="text-gray-400 hover:text-white transition-colors">
+                                <button class="text-gray-400 hover:text-white transition-colors duration-300 hover:translate-x-1 transform">
                                     <i class="lucide lucide-chevron-right h-5 w-5"></i>
                                 </button>
                             </div>
@@ -365,15 +378,15 @@
                     </div>
 
                     <div class="p-4 border-t border-gray-700/50">
-                        <a href="#" class="text-sm text-gray-400 hover:text-white transition-colors flex items-center justify-center space-x-2">
+                        <a href="#" class="text-sm text-gray-400 hover:text-white transition-colors duration-300 flex items-center justify-center space-x-2 hover:bg-gray-700/20 p-2 rounded-lg">
                             <span>Ver todas as atividades</span>
-                            <i class="lucide lucide-arrow-right h-4 w-4"></i>
+                            <i class="lucide lucide-arrow-right h-4 w-4 group-hover:translate-x-1 transition-transform duration-300"></i>
                         </a>
                     </div>
                 </div>
 
                 <!-- Estatísticas Detalhadas -->
-                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm overflow-hidden">
+                <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-700/50 shadow-lg backdrop-blur-sm overflow-hidden hover:shadow-cyan-500/5 transition-all duration-300">
                     <div class="p-6 border-b border-gray-700/50">
                         <div class="flex items-center justify-between">
                             <h2 class="text-lg font-semibold text-white">Detalhes da Conta</h2>
@@ -435,20 +448,36 @@
 <!-- Scripts separados do HTML -->
 <script>
     // Carregar tarefas pendentes
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         fetch('/api/tasks')
             .then(response => response.json())
             .then(tasks => {
-                const pendingTasks = tasks.filter(task => task.status === 'pending');
-                const overdueTasks = pendingTasks.filter(task => {
-                    if (!task.due_date) return false;
-                    const dueDate = new Date(task.due_date);
-                    const today = new Date();
-                    return dueDate < today;
+                let pending = 0;
+                let inProgress = 0;
+                let completed = 0;
+                let overdue = 0;
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); // Zera hora para comparar só a data
+
+                tasks.forEach(task => {
+                    const status = task.status?.toLowerCase() || 'pending';
+                    const dueDate = task.due_date ? new Date(task.due_date) : null;
+
+                    if (status === 'pending') pending++;
+                    else if (status === 'in progress' || status === 'in_progress') inProgress++;
+                    else if (status === 'completed') completed++;
+
+                    if (dueDate && dueDate < today && status !== 'completed') {
+                        overdue++;
+                    }
                 });
-                
-                document.getElementById('pending-tasks-count').textContent = pendingTasks.length;
-                document.getElementById('overdue-tasks-count').textContent = overdueTasks.length;
+
+                // Atualiza os valores nos cards
+                document.getElementById('pending-tasks-count').textContent = pending;
+                document.getElementById('in-progress-tasks-count').textContent = inProgress;
+                document.getElementById('completed-tasks-count').textContent = completed;
+                document.getElementById('overdue-tasks-count').textContent = overdue;
             })
             .catch(error => console.error('Erro ao carregar tarefas:', error));
     });

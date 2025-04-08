@@ -309,7 +309,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center space-x-4">
-                    <a href="{{ url_for('main.index') }}" class="nav-brand flex items-center space-x-2">
+                    <a href="{% if session.get('user_id') %}{{ url_for('main.dashboard') }}{% else %}{{ url_for('main.index') }}{% endif %}" class="nav-brand flex items-center space-x-2">
                         <i class="lucide lucide-brain-circuit h-6 w-6 sm:h-8 sm:w-8"></i>
                         <span>NexusAI</span>
                     </a>
@@ -321,12 +321,11 @@
                         <div class="user-info hidden md:flex items-center space-x-3">
                             <div class="text-right">
                                 <p class="text-sm font-semibold">{{ session.get('user_name', 'LaisVilla') }}</p>
-                                <p class="text-xs text-gray-400">2025-02-13 20:29:42</p>
                             </div>
                             <div class="relative">
                                 <button class="rounded-full p-1 hover:bg-white/5 transition-colors">
                                     <img class="h-10 w-10 rounded-full object-cover avatar"
-                                        src="https://ui-avatars.com/api/?name=&background=random"
+                                        src="{% if session.get('profile_image') %}{{ session.get('profile_image') }}{% else %}https://ui-avatars.com/api/?name={{ session.get('user_name', '')|urlencode }}&background=random{% endif %}"
                                         alt="Profile">
                                     <span
                                         class="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-400 border-2 border-bg-dark-2"></span>
@@ -354,7 +353,7 @@
                         <div class="md:hidden relative">
                             <button class="rounded-full p-1 hover:bg-white/5 transition-colors">
                                 <img class="h-8 w-8 rounded-full object-cover avatar"
-                                    src="https://ui-avatars.com/api/?name=LaisVilla&background=random" alt="Profile">
+                                    src="{% if session.get('profile_image') %}{{ session.get('profile_image') }}{% else %}https://ui-avatars.com/api/?name={{ session.get('user_name', '')|urlencode }}&background=random{% endif %}" alt="Profile">
                                 <span
                                     class="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-400 border-2 border-bg-dark-2"></span>
                             </button>
@@ -363,24 +362,19 @@
                                 <div class="profile-header">
                                     <div class="flex items-center space-x-3">
                                         <img class="h-10 w-10 rounded-full object-cover avatar"
-                                            src="https://ui-avatars.com/api/?name=LaisVilla&background=random"
+                                            src="{% if session.get('profile_image') %}{{ session.get('profile_image') }}{% else %}https://ui-avatars.com/api/?name={{ session.get('user_name', '')|urlencode }}&background=random{% endif %}"
                                             alt="Profile">
                                         <div>
-                                            <p class="font-medium">LaisVilla</p>
-                                            <p class="text-sm text-gray-400">Premium Member</p>
+                                            <p class="font-medium">{{ session.get('user_name', 'LaisVilla') }}</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <a href="#" class="dropdown-item">
-                                    <i class="lucide lucide-user-cog h-5 w-5"></i>
-                                    <span>Perfil</span>
-                                </a>
-                                <a href="#" class="dropdown-item">
+                                <a href="{{ url_for('main.profile_settings') }}" class="dropdown-item">
                                     <i class="lucide lucide-settings h-5 w-5"></i>
                                     <span>Configurações</span>
                                 </a>
-                                <a href="#" class="dropdown-item">
+                                <a href="{{ url_for('main.help') }}" class="dropdown-item">
                                     <i class="lucide lucide-help-circle h-5 w-5"></i>
                                     <span>Ajuda</span>
                                 </a>
