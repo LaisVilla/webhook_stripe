@@ -962,5 +962,5 @@ def help():
 @main.route('/logout')
 def logout():
     session.clear()
-    flash('Logged out successfully.', 'success')
+    flash('Deslogado com sucesso.', 'success')
     return redirect(url_for('main.index'))
